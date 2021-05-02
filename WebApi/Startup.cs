@@ -26,6 +26,7 @@
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ServerService, ServerService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
