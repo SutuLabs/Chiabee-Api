@@ -10,45 +10,56 @@
     using WebApi.Helpers;
     using static OutputParser;
 
-    public class ServerService
+    public class ServerService : IDisposable
     {
+        SshClient plotterClient;
+        SshClient farmerClient;
+        private bool disposedValue;
+
+        public ServerService()
+        {
+            this.plotterClient = new SshClient("10.177.0.133", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
+            this.farmerClient = new SshClient("10.177.0.148", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
+        }
+
         public async Task<PlotterServerStatus> GetPlotterInfo()
         {
-            var connectionInfo = new ConnectionInfo(
-                "10.177.0.133", "sutu", new PrivateKeyAuthenticationMethod("sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM")));
-            using var client = new SshClient(connectionInfo);
+            var jobs = this.plotterClient.GetPlotStatus();
+            var ss = this.plotterClient.GetServerStatus();
 
-            client.Connect();
-            var topCmd = client.RunCommand(@"top -b1n1 -E G |grep ""Cpu\|Mem \|Tasks""");
-            var topOutput = topCmd.Result;
-
-            var pmCmd = client.RunCommand(@". ~/chia-blockchain/activate && plotman status");
-            var plotmanOutput = pmCmd.Result;
-
-            client.Disconnect();
-
-            return new PlotterServerStatus(plotmanOutput, topOutput);
+            return new PlotterServerStatus(ss, jobs);
         }
 
         public async Task<FarmServerStatus> GetFarmInfo()
         {
-            var connectionInfo = new ConnectionInfo(
-                "10.177.0.148", "sutu", new PrivateKeyAuthenticationMethod("sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM")));
-            using var client = new SshClient(connectionInfo);
+            var ss = this.farmerClient.GetServerStatus();
+            var farm = this.farmerClient.GetFarmStatus();
+            var node = this.farmerClient.GetNodeStatus();
 
-            client.Connect();
-            var topCmd = client.RunCommand(@"top -b1n1 -E G |grep ""Cpu\|Mem \|Tasks""");
-            var topOutput = topCmd.Result;
+            return new FarmServerStatus(ss, node, farm);
+        }
 
-            var farmCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia farm summary");
-            var farmOutput = farmCmd.Result;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (this.farmerClient.IsConnected) this.farmerClient.Disconnect();
+                    this.farmerClient.Dispose();
+                    if (this.plotterClient.IsConnected) this.plotterClient.Disconnect();
+                    this.plotterClient.Dispose();
+                }
 
-            var nodeCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia show -s");
-            var nodeOutput = nodeCmd.Result;
+                disposedValue = true;
+            }
+        }
 
-            client.Disconnect();
-
-            return new FarmServerStatus(farmOutput, nodeOutput, topOutput);
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 
@@ -63,12 +74,12 @@
 
     public record PlotterServerStatus : ServerStatus
     {
-        public PlotterServerStatus(string plotmanOutput, string topOutput)
+        public PlotterServerStatus(ServerStatus serverStatus, PlotJob[] jobs)
         {
-            this.Jobs = ParsePlotStatusOutput(plotmanOutput).ToArray();
-            this.Cpus = ParseCpuState(topOutput).ToArray();
-            this.Memory = ParseMemoryState(topOutput);
-            this.Process = ParseProcessState(topOutput);
+            this.Jobs = jobs;
+            this.Cpus = serverStatus.Cpus;
+            this.Memory = serverStatus.Memory;
+            this.Process = serverStatus.Process;
         }
 
         public PlotJob[] Jobs { get; init; }
@@ -76,13 +87,13 @@
 
     public record FarmServerStatus : ServerStatus
     {
-        public FarmServerStatus(string farmOutput, string nodeOutput, string topOutput)
+        public FarmServerStatus(ServerStatus serverStatus, NodeStatus node, FarmStatus farm)
         {
-            this.Farm = ParseFarmStatus(farmOutput);
-            this.Node = ParseNodeStatus(nodeOutput);
-            this.Cpus = ParseCpuState(topOutput).ToArray();
-            this.Memory = ParseMemoryState(topOutput);
-            this.Process = ParseProcessState(topOutput);
+            this.Farm = farm;
+            this.Node = node;
+            this.Cpus = serverStatus.Cpus;
+            this.Memory = serverStatus.Memory;
+            this.Process = serverStatus.Process;
         }
 
         public NodeStatus Node { get; init; }
