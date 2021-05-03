@@ -203,7 +203,7 @@
         public static DiskStatus[] GetDiskStatus(this SshClient client)
         {
             client.EnsureConnected();
-            var cmd = client.RunCommand(@"df |grep ""/dev/sd\|/$""");
+            var cmd = client.RunCommand(@"df |grep ""/dev/sd\|/dev/md\|/$""");
             return ParseDiskStatus(cmd.Result).ToArray();
 
             static IEnumerable<DiskStatus> ParseDiskStatus(string output)
