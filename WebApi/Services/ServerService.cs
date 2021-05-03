@@ -77,6 +77,7 @@
         public ProcessState Process { get; init; }
         public MemoryState Memory { get; init; }
         public decimal[] Cpus { get; init; }
+        public DiskStatus[] Disks { get; init; }
 
     }
 
@@ -108,6 +109,7 @@
         public FarmStatus Farm { get; init; }
     }
 
+    public record DiskStatus(string Device, long Size, long Used, long Available, string Path);
     public record MemoryState(decimal Total, decimal Free, decimal Used);
     public record CpuState(int Index, decimal Idle);
     public record ProcessState(int Total, int Running, int Sleeping, int Stopped, int Zombie);
