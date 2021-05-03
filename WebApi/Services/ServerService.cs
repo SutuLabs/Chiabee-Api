@@ -25,22 +25,22 @@
         public async Task<ServerStatus[]> GetServersInfo()
         {
             return new[] {
-                this.farmerClient.GetServerStatus(),
-                this.plotterClient.GetServerStatus(),
+                this.farmerClient.GetServerStatus() with { Name = "Farmer" },
+                this.plotterClient.GetServerStatus() with { Name = "Plotter" },
             };
         }
 
         public async Task<PlotterServerStatus> GetPlotterInfo()
         {
             var jobs = this.plotterClient.GetPlotStatus();
-            var ss = this.plotterClient.GetServerStatus();
+            var ss = this.plotterClient.GetServerStatus() with { Name = "Plotter" };
 
             return new PlotterServerStatus(ss, jobs);
         }
 
         public async Task<FarmServerStatus> GetFarmerInfo()
         {
-            var ss = this.farmerClient.GetServerStatus();
+            var ss = this.farmerClient.GetServerStatus() with { Name = "Farmer" };
             var farm = this.farmerClient.GetFarmStatus();
             var node = this.farmerClient.GetNodeStatus();
 
@@ -74,6 +74,7 @@
     public record ServerStatus
     {
         // cpu/disk/network
+        public string Name { get; init; }
         public ProcessState Process { get; init; }
         public MemoryState Memory { get; init; }
         public decimal[] Cpus { get; init; }
@@ -89,6 +90,8 @@
             this.Cpus = serverStatus.Cpus;
             this.Memory = serverStatus.Memory;
             this.Process = serverStatus.Process;
+            this.Name = serverStatus.Name;
+            this.Disks = serverStatus.Disks;
         }
 
         public PlotJob[] Jobs { get; init; }
@@ -103,6 +106,8 @@
             this.Cpus = serverStatus.Cpus;
             this.Memory = serverStatus.Memory;
             this.Process = serverStatus.Process;
+            this.Name = serverStatus.Name;
+            this.Disks = serverStatus.Disks;
         }
 
         public NodeStatus Node { get; init; }
