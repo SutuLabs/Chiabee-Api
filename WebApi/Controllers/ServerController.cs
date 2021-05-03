@@ -18,12 +18,25 @@
             this.serverService = serverService;
         }
 
-        [HttpGet("info")]
-        public async Task<IActionResult> GetInfo()
+        [HttpGet("servers")]
+        public async Task<IActionResult> GetServersInfo()
+        {
+            var info = await serverService.GetServersInfo();
+            return Ok(info);
+        }
+
+        [HttpGet("plotter")]
+        public async Task<IActionResult> GetPlotterInfo()
         {
             var info = await serverService.GetPlotterInfo();
-            var info2 = await serverService.GetFarmInfo();
-            return Ok(new { plot = info, farm = info2 });
+            return Ok(info);
+        }
+
+        [HttpGet("farmer")]
+        public async Task<IActionResult> GetFarmerInfo()
+        {
+            var info = await serverService.GetFarmerInfo();
+            return Ok(info);
         }
     }
 }

@@ -46,7 +46,7 @@
             {
                 Process = ParseProcessState(output),
                 Memory = ParseMemoryState(output),
-                Cpus = ParseCpuState(output).ToArray(),
+                Cpus = ParseCpuState(output).OrderBy(_ => _.Index).Select(_ => _.Idle).ToArray(),
             };
 
             static ProcessState ParseProcessState(string output)

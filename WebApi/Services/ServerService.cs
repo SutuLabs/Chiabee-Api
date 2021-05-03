@@ -22,6 +22,14 @@
             this.farmerClient = new SshClient("10.177.0.148", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
         }
 
+        public async Task<ServerStatus[]> GetServersInfo()
+        {
+            return new[] {
+                this.farmerClient.GetServerStatus(),
+                this.plotterClient.GetServerStatus(),
+            };
+        }
+
         public async Task<PlotterServerStatus> GetPlotterInfo()
         {
             var jobs = this.plotterClient.GetPlotStatus();
@@ -30,7 +38,7 @@
             return new PlotterServerStatus(ss, jobs);
         }
 
-        public async Task<FarmServerStatus> GetFarmInfo()
+        public async Task<FarmServerStatus> GetFarmerInfo()
         {
             var ss = this.farmerClient.GetServerStatus();
             var farm = this.farmerClient.GetFarmStatus();
@@ -68,7 +76,7 @@
         // cpu/disk/network
         public ProcessState Process { get; init; }
         public MemoryState Memory { get; init; }
-        public CpuState[] Cpus { get; init; }
+        public decimal[] Cpus { get; init; }
 
     }
 
