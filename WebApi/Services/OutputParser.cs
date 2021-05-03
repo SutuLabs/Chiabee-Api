@@ -118,8 +118,8 @@
 
             static NodeStatus ParseNodeStatus(string output)
             {
-                //(venv) sutu@farmer7700:/farm/01$ chia show -s
                 //Current Blockchain Status: Full Node Synced
+                //Current Blockchain Status: Not Synced. Peak height: 224235
 
                 //Peak: Hash: 17c16f3b3e6052d9376697496eeb30741ea49be6f918de8ef74da40c1b402ab7
                 //      Time: Sun May 02 2021 03:36:02 UTC Height:     217718
@@ -144,7 +144,7 @@
                     )
                     .ToDictionary(_ => _.Key, _ => _.Value);
                 return new NodeStatus(
-                    pairs[nameof(NodeStatus.Status)],
+                    pairs.ContainsKey(nameof(NodeStatus.Status)) ? pairs[nameof(NodeStatus.Status)] : "Special",
                     time,
                     height,
                     pairs[nameof(NodeStatus.Space)],
