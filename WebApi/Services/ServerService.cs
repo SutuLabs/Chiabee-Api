@@ -2,24 +2,43 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Renci.SshNet;
-    using WebApi.Entities;
     using WebApi.Helpers;
-    using static OutputParser;
+    using WebApi.Services.ServerCommands;
 
     public class ServerService : IDisposable
     {
-        SshClient plotterClient;
-        SshClient farmerClient;
+        private SshClient plotterClient;
+        private SshClient farmerLogClient;
+        private SshClient farmerClient;
         private bool disposedValue;
+
+        internal FixedSizedQueue<EligibleFarmerEvent> eventList = new();
+        internal Dictionary<string, ErrorEvent> errorList = new();
 
         public ServerService()
         {
             this.plotterClient = new SshClient("10.177.0.133", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
+            this.farmerLogClient = new SshClient("10.177.0.148", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
             this.farmerClient = new SshClient("10.177.0.148", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
+
+            this.farmerLogClient.StartTailChiaLog((err) =>
+            {
+                if (this.errorList.ContainsKey(err.Error))
+                {
+                    this.errorList.Remove(err.Error);
+                }
+
+                this.errorList.Add(err.Error, new ErrorEvent(err.Time, err.Level, err.Error));
+            }, (evt) =>
+            {
+                this.eventList.Enqueue(evt);
+            });
         }
 
         public async Task<ServerStatus[]> GetServersInfo()
@@ -57,6 +76,8 @@
                     this.farmerClient.Dispose();
                     if (this.plotterClient.IsConnected) this.plotterClient.Disconnect();
                     this.plotterClient.Dispose();
+                    if (this.farmerLogClient.IsConnected) this.farmerLogClient.Disconnect();
+                    this.farmerLogClient.Dispose();
                 }
 
                 disposedValue = true;
@@ -70,56 +91,4 @@
             GC.SuppressFinalize(this);
         }
     }
-
-    public record ServerStatus
-    {
-        // cpu/disk/network
-        public string Name { get; init; }
-        public ProcessState Process { get; init; }
-        public MemoryState Memory { get; init; }
-        public decimal[] Cpus { get; init; }
-        public DiskStatus[] Disks { get; init; }
-
-    }
-
-    public record PlotterServerStatus : ServerStatus
-    {
-        public PlotterServerStatus(ServerStatus serverStatus, PlotJob[] jobs)
-        {
-            this.Jobs = jobs;
-            this.Cpus = serverStatus.Cpus;
-            this.Memory = serverStatus.Memory;
-            this.Process = serverStatus.Process;
-            this.Name = serverStatus.Name;
-            this.Disks = serverStatus.Disks;
-        }
-
-        public PlotJob[] Jobs { get; init; }
-    }
-
-    public record FarmServerStatus : ServerStatus
-    {
-        public FarmServerStatus(ServerStatus serverStatus, NodeStatus node, FarmStatus farm)
-        {
-            this.Farm = farm;
-            this.Node = node;
-            this.Cpus = serverStatus.Cpus;
-            this.Memory = serverStatus.Memory;
-            this.Process = serverStatus.Process;
-            this.Name = serverStatus.Name;
-            this.Disks = serverStatus.Disks;
-        }
-
-        public NodeStatus Node { get; init; }
-        public FarmStatus Farm { get; init; }
-    }
-
-    public record DiskStatus(string Device, long Size, long Used, long Available, string Path);
-    public record MemoryState(decimal Total, decimal Free, decimal Used);
-    public record CpuState(int Index, decimal Idle);
-    public record ProcessState(int Total, int Running, int Sleeping, int Stopped, int Zombie);
-    public record PlotJob(int Index, string Id, string K, string TempDir, string DestDir, string WallTime,
-        string Phase, string TempSize, int Pid, string MemorySize, string IoTime);
-    public record NodeStatus(string Status, DateTime Time, int Height, string Space, string Difficulty, string Iterations, string TotalIterations);
-    public record FarmStatus(string Status, decimal TotalFarmed, decimal TxFees, decimal Rewards, int LastFarmedHeight, int PlotCount, string TotalSize, string Space, string ExpectedToWin);
 }

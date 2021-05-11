@@ -5,6 +5,7 @@
     using WebApi.Services;
     using System.Threading.Tasks;
     using WebApi.Models;
+    using System.Linq;
 
     [Authorize]
     [ApiController]
@@ -36,6 +37,20 @@
         public async Task<IActionResult> GetFarmerInfo()
         {
             var info = await serverService.GetFarmerInfo();
+            return Ok(info);
+        }
+
+        [HttpGet("errors")]
+        public async Task<IActionResult> GetFarmerErrorInfo()
+        {
+            var info = serverService.errorList.Select(_ => _.Value).ToArray();
+            return Ok(info);
+        }
+
+        [HttpGet("events")]
+        public async Task<IActionResult> GetFarmerEventInfo()
+        {
+            var info = serverService.eventList.ToArray();
             return Ok(info);
         }
     }
