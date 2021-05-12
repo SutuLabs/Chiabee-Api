@@ -7,6 +7,8 @@
     using WebApi.Helpers;
     using WebApi.Services;
     using Microsoft.AspNetCore.Authentication;
+    using UChainDB.Sutu.Backend.Services;
+    using WebApi.Models;
 
     public class Startup
     {
@@ -19,6 +21,7 @@
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.AddCors();
             services.AddControllers();
 
@@ -27,6 +30,7 @@
 
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<ServerService, ServerService>();
+            services.AddHostedService<DataRefreshService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
