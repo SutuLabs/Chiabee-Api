@@ -1,24 +1,25 @@
 ﻿namespace UChainDB.Sutu.Backend.Services
 {
+    using System;
+    using System.Text.Json;
+    using System.Threading.Tasks;
+    using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
-    using MongoDB.Bson;
-    using MongoDB.Driver;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
+    using WebApi.Entities;
     using WebApi.Models;
     using WebApi.Services;
-    using WebApi.Services.ServerCommands;
 
     internal class DataRefreshService : BaseRefreshService
     {
+        private const string LatestStateTableName = "LatestState";
+        private const string LatestStateKeyName = "Latest";
+        private const string StateLogTableName = "StateLog";
         private DateTime lastPlotterUpdate = DateTime.MinValue;
         private readonly ServerService server;
         private readonly AppSettings appSettings;
-        private readonly MongoClient client;
+        private CloudTable latestStateTable;
+        private CloudTable stateLogTable;
 
         public DataRefreshService(
             ILogger<DataRefreshService> logger,
@@ -29,32 +30,61 @@
         {
             this.server = server;
             this.appSettings = appSettings.Value;
-            this.client = new MongoClient(this.appSettings.ConnectionString);
+            this.Init();
+        }
+
+        public void Init()
+        {
+            var storageAccount = CloudStorageAccount.Parse(this.appSettings.ConnectionString);
+            var tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            this.latestStateTable = GetTable(tableClient, this.appSettings.LogTablePrefix + LatestStateTableName);
+            this.stateLogTable = GetTable(tableClient, this.appSettings.LogTablePrefix + StateLogTableName);
         }
 
         protected override string ServiceName => "DataRefresh";
         protected override int DefaultIntervalSeconds => 120;
         protected override int DelayStartSeconds => 3;
+
         protected override int GetIntervalSeconds() => 5;
 
         protected override async Task DoWorkAsync()
         {
-            var db = this.client.GetDatabase("firstdb");
-            var machineCol = db.GetCollection<BsonDocument>("firstcontainer");
-            var plotterCol = db.GetCollection<BsonDocument>("plotter");
-
-            await machineCol.InsertOneAsync(new MachineDocRoot(await this.server.GetServersInfo()).ToBsonDocument());
+            var si = JsonSerializer.Serialize(await this.server.GetServersInfo());
+            await LogEntityAsync(new MachineStateEntity { MachinesJson = si });
 
             if ((DateTime.UtcNow - this.lastPlotterUpdate).TotalSeconds > 20)
             {
-                await machineCol.InsertOneAsync((await this.server.GetPlotterInfo()).ToBsonDocument());
-                //var info = await server.GetFarmerInfo();
+                var pi = JsonSerializer.Serialize(await this.server.GetPlotterInfo());
+                var fi = JsonSerializer.Serialize(await this.server.GetFarmerInfo());
+                await LogEntityAsync(new FarmStateEntity { PlotterJson = pi, FarmerJson = fi });
                 this.lastPlotterUpdate = DateTime.UtcNow;
             }
-
         }
 
-        private record MachineDocRoot(ServerStatus[] Servers);
+        private CloudTable GetTable(CloudTableClient tableClient, string tableName)
+        {
+            var table = tableClient.GetTableReference(tableName);
+            table.CreateIfNotExists();
+            return table;
+        }
 
+        private async Task LogEntityAsync<T>(T entity)
+            where T : class, ITableEntity
+        {
+            entity.RowKey = LatestStateKeyName;
+            await UpdateEntityAsync(this.latestStateTable, entity);
+            entity.RowKey = DateTime.UtcNow.ToString("s");
+            await UpdateEntityAsync(this.stateLogTable, entity);
+        }
+
+        private async Task<T> UpdateEntityAsync<T>(CloudTable table, T entity)
+            where T : class, ITableEntity
+        {
+            var insertOrMergeOperation = TableOperation.InsertOrMerge(entity);
+
+            var result = await table.ExecuteAsync(insertOrMergeOperation);
+            var inserted = result.Result as T;
+            return inserted;
+        }
     }
 }
