@@ -1,4 +1,4 @@
-﻿namespace UChainDB.Sutu.Backend.Services
+﻿namespace WebApi.Services
 {
     using System;
     using System.Text.Json;
@@ -8,13 +8,12 @@
     using Microsoft.Extensions.Options;
     using WebApi.Entities;
     using WebApi.Models;
-    using WebApi.Services;
 
     internal class DataRefreshService : BaseRefreshService
     {
-        private const string LatestStateTableName = "LatestState";
-        private const string LatestStateKeyName = "Latest";
-        private const string StateLogTableName = "StateLog";
+        internal const string LatestStateTableName = "LatestState";
+        internal const string LatestStateKeyName = "Latest";
+        internal const string StateLogTableName = "StateLog";
         private DateTime lastPlotterUpdate = DateTime.MinValue;
         private readonly ServerService server;
         private readonly AppSettings appSettings;

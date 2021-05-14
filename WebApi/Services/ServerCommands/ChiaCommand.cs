@@ -122,6 +122,10 @@
 
     public record FarmServerStatus : ServerStatus
     {
+        public FarmServerStatus()
+        {
+        }
+
         public FarmServerStatus(ServerStatus serverStatus, NodeStatus node, FarmStatus farm)
         {
             this.Farm = farm;

@@ -7,7 +7,6 @@
     using WebApi.Helpers;
     using WebApi.Services;
     using Microsoft.AspNetCore.Authentication;
-    using UChainDB.Sutu.Backend.Services;
     using WebApi.Models;
 
     public class Startup
