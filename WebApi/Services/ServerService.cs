@@ -7,8 +7,10 @@
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Options;
     using Renci.SshNet;
     using WebApi.Helpers;
+    using WebApi.Models;
     using WebApi.Services.ServerCommands;
 
     public class ServerService : IDisposable
@@ -20,12 +22,15 @@
 
         internal FixedSizedQueue<EligibleFarmerEvent> eventList = new();
         internal Dictionary<string, ErrorEvent> errorList = new();
+        private readonly AppSettings appSettings;
 
-        public ServerService()
+        public ServerService(IOptions<AppSettings> appSettings)
         {
+            this.appSettings = appSettings.Value;
+
             this.plotterClient = new SshClient("10.177.0.133", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
-            this.farmerLogClient = new SshClient("10.177.0.148", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
-            this.farmerClient = new SshClient("10.177.0.148", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
+            this.farmerLogClient = new SshClient("10.177.0.153", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
+            this.farmerClient = new SshClient("10.177.0.153", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
 
             this.farmerLogClient.StartTailChiaLog((err) =>
             {
