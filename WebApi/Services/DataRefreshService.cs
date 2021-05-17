@@ -72,7 +72,10 @@
         {
             entity.RowKey = LatestStateKeyName;
             await UpdateEntityAsync(this.latestStateTable, entity);
-            entity.RowKey = DateTime.UtcNow.ToString("s");
+
+            var date = DateTime.UtcNow;
+            entity.PartitionKey += date.ToShortDateString();
+            entity.RowKey = date.ToString("s");
             await UpdateEntityAsync(this.stateLogTable, entity);
         }
 
