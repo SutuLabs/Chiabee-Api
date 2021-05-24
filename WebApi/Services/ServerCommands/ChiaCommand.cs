@@ -89,16 +89,30 @@
                     .ToDictionary(_ => _.Key, _ => _.Value);
                 return new FarmStatus(
                     pairs[nameof(FarmStatus.Status)],
-                    decimal.Parse(pairs[nameof(FarmStatus.TotalFarmed)]),
-                    decimal.Parse(pairs[nameof(FarmStatus.TxFees)]),
-                    decimal.Parse(pairs[nameof(FarmStatus.Rewards)]),
-                    int.Parse(pairs[nameof(FarmStatus.LastFarmedHeight)]),
-                    int.Parse(pairs[nameof(FarmStatus.PlotCount)]),
+                    GetDecimal(pairs[nameof(FarmStatus.TotalFarmed)]),
+                    GetDecimal(pairs[nameof(FarmStatus.TxFees)]),
+                    GetDecimal(pairs[nameof(FarmStatus.Rewards)]),
+                    GetInt(pairs[nameof(FarmStatus.LastFarmedHeight)]),
+                    GetInt(pairs[nameof(FarmStatus.PlotCount)]),
                     pairs[nameof(FarmStatus.TotalSize)],
                     pairs[nameof(FarmStatus.Space)],
                     pairs[nameof(FarmStatus.ExpectedToWin)]
                     );
             }
+        }
+
+        private static int? GetInt(string input )
+        {
+            if (input == "Unknown") return null;
+            if (!int.TryParse(input, out var result)) return null;
+            return result;
+        }
+
+        private static decimal? GetDecimal(string input )
+        {
+            if (input == "Unknown") return null;
+            if (!decimal.TryParse(input, out var result)) return null;
+            return result;
         }
 
         private static IEnumerable<StatusPair> ParsePairs(string output, params StatusDefinition[] defs)
@@ -142,5 +156,5 @@
     }
 
     public record NodeStatus(string Status, DateTime Time, int Height, string Space, string Difficulty, string Iterations, string TotalIterations);
-    public record FarmStatus(string Status, decimal TotalFarmed, decimal TxFees, decimal Rewards, int LastFarmedHeight, int PlotCount, string TotalSize, string Space, string ExpectedToWin);
+    public record FarmStatus(string Status, decimal? TotalFarmed, decimal? TxFees, decimal? Rewards, int? LastFarmedHeight, int? PlotCount, string TotalSize, string Space, string ExpectedToWin);
 }
