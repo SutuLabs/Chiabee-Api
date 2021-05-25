@@ -6,37 +6,64 @@
     using System.Threading.Tasks;
     using WebApi.Models;
     using System.Linq;
+    using Microsoft.Extensions.Options;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Azure.Cosmos.Table;
+    using WebApi.Entities;
+    using WebApi.Services.ServerCommands;
+    using Newtonsoft.Json;
 
     [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class ServerController : ControllerBase
     {
-        private ServerService serverService;
+        private readonly ILogger<ServerController> logger;
+        private readonly ServerService serverService;
+        private readonly AppSettings appSettings;
+        private readonly CloudTable table;
 
-        public ServerController(ServerService serverService)
+        public ServerController(
+            ILogger<ServerController> logger,
+            ServerService serverService,
+            IOptions<AppSettings> appSettings)
         {
+            this.logger = logger;
             this.serverService = serverService;
+            this.appSettings = appSettings.Value;
+
+            var storageAccount = CloudStorageAccount.Parse(this.appSettings.ConnectionString);
+            var tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            this.table = tableClient.GetTableReference(this.appSettings.LogTablePrefix + DataRefreshService.LatestStateTableName);
         }
 
         [HttpGet("servers")]
         public async Task<IActionResult> GetServersInfo()
         {
-            var info = await serverService.GetServersInfo();
+            var entity = await RetrieveEntityAsync<MachineStateEntity>(
+                this.table, MachineStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
+            if (entity == null) return NoContent();
+            var info = JsonConvert.DeserializeObject<ServerStatus[]>(entity.MachinesJson);
             return Ok(info);
         }
 
         [HttpGet("plotter")]
         public async Task<IActionResult> GetPlotterInfo()
         {
-            var info = await serverService.GetPlotterInfo();
+            var entity = await RetrieveEntityAsync<FarmStateEntity>(
+                this.table, FarmStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
+            if (entity == null) return NoContent();
+            var info = JsonConvert.DeserializeObject<PlotterServerStatus>(entity.PlotterJson);
             return Ok(info);
         }
 
         [HttpGet("farmer")]
         public async Task<IActionResult> GetFarmerInfo()
         {
-            var info = await serverService.GetFarmerInfo();
+            var entity = await RetrieveEntityAsync<FarmStateEntity>(
+                this.table, FarmStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
+            if (entity == null) return NoContent();
+            var info = JsonConvert.DeserializeObject<FarmServerStatus>(entity.FarmerJson);
             return Ok(info);
         }
 
@@ -52,6 +79,14 @@
         {
             var info = serverService.eventList.ToArray();
             return Ok(info);
+        }
+
+        private async Task<T> RetrieveEntityAsync<T>(CloudTable table, string partitionKey, string rowKey)
+            where T : class, ITableEntity
+        {
+            TableOperation retrieve = TableOperation.Retrieve<T>(partitionKey, rowKey);
+            var result = await table.ExecuteAsync(retrieve);
+            return result.Result as T;
         }
     }
 }

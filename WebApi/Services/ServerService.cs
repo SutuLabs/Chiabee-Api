@@ -4,11 +4,14 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Options;
     using Renci.SshNet;
     using WebApi.Helpers;
+    using WebApi.Models;
     using WebApi.Services.ServerCommands;
 
     public class ServerService : IDisposable
@@ -20,12 +23,18 @@
 
         internal FixedSizedQueue<EligibleFarmerEvent> eventList = new();
         internal Dictionary<string, ErrorEvent> errorList = new();
+        private readonly AppSettings appSettings;
 
-        public ServerService()
+        public ServerService(IOptions<AppSettings> appSettings)
         {
-            this.plotterClient = new SshClient("10.177.0.133", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
-            this.farmerLogClient = new SshClient("10.177.0.148", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
-            this.farmerClient = new SshClient("10.177.0.148", "sutu", new PrivateKeyFile(@"P:\.ssh\id_rsa.PEM"));
+            this.appSettings = appSettings.Value;
+
+            var farmer = this.appSettings.GetFarmers().First();
+            var plotter = this.appSettings.GetPlotters().First();
+
+            this.plotterClient = plotter.ToSshClient();
+            this.farmerLogClient = farmer.ToSshClient();
+            this.farmerClient = farmer.ToSshClient();
 
             this.farmerLogClient.StartTailChiaLog((err) =>
             {

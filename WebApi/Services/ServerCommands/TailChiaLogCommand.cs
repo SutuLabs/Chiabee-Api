@@ -14,7 +14,7 @@
         {
             client.EnsureConnected();
 
-            var cmd = client.CreateCommand("tail -n 10000 -f ~/.chia/mainnet/log/debug.log");
+            var cmd = client.CreateCommand("tail -n 10000 -F ~/.chia/mainnet/log/debug.log");
 
             Task.Factory.StartNew(() => Ta(cmd, errorRaised, eventRaised), TaskCreationOptions.LongRunning);
         }
@@ -70,7 +70,7 @@
                     eventRaised?.Invoke(new EligibleFarmerEvent(time,
                         int.Parse(m.Groups["plots"].Value),
                         int.Parse(m.Groups["proofs"].Value),
-                        new TimeSpan((long)(decimal.Parse(m.Groups["duration"].Value) * TimeSpan.TicksPerSecond)),
+                        decimal.Parse(m.Groups["duration"].Value),
                         int.Parse(m.Groups["total"].Value)
                         ));
                 }
@@ -108,6 +108,6 @@
     }
 
     public record FarmerEvent(DateTime Time);
-    public record EligibleFarmerEvent(DateTime Time, int EligibleNumber, int Proofs, TimeSpan Duration, int Total) : FarmerEvent(Time);
+    public record EligibleFarmerEvent(DateTime Time, int EligibleNumber, int Proofs, decimal Duration, int Total) : FarmerEvent(Time);
     public record ErrorEvent(DateTime Time, string Level, string Error);
 }

@@ -38,6 +38,10 @@
 
     public record PlotterServerStatus : ServerStatus
     {
+        public PlotterServerStatus()
+        {
+        }
+
         public PlotterServerStatus(ServerStatus serverStatus, PlotJob[] jobs)
         {
             this.Jobs = jobs;
