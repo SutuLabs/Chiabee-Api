@@ -13,7 +13,9 @@
         {
             if (!client.EnsureConnected()) return null;
             var cmd = client.RunCommand(@"df |grep ""/dev/sd\|/dev/md\|/$""");
-            return ParseDiskStatus(cmd.Result).ToArray();
+            return ParseDiskStatus(cmd.Result)
+                .Where(_ => _.Size > 100_000_000) // size is larger than 100G, the number based on 1-k
+                .ToArray();
 
             static IEnumerable<DiskStatus> ParseDiskStatus(string output)
             {
