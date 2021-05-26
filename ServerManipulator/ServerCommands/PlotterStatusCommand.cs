@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Renci.SshNet;
     using WebApi.Models;
 
     public static class PlotterStatusCommand
@@ -14,7 +13,9 @@
 
             var pmCmd = client.RunCommand(@". ~/chia-blockchain/activate && plotman status");
 
-            return new PlotterStatus(client.Name, ParsePlotStatusOutput(pmCmd.Result).ToArray());
+            var fileCounts = client.GetDirectoryFileCountCommand(new[] { "/data/final" });
+            var jobs = ParsePlotStatusOutput(pmCmd.Result).ToArray();
+            return new PlotterStatus(client.Name, jobs, fileCounts);
 
             static IEnumerable<PlotJob> ParsePlotStatusOutput(string output)
             {
@@ -36,9 +37,24 @@
                 }
             }
         }
+
+        public static DirectoryFileCount[] GetDirectoryFileCountCommand(this TargetMachine client, params string[] pathes)
+        {
+            return pathes.Select(_ => client.GetDirectoryFileCountCommand(_)).ToArray();
+        }
+
+        public static DirectoryFileCount GetDirectoryFileCountCommand(this TargetMachine client, string path)
+        {
+            if (!client.EnsureConnected()) return null;
+            var cmd = client.RunCommand(@$"ls {path} | wc -l");
+            if (!int.TryParse(cmd.Result, out var count)) return null;
+            return new DirectoryFileCount(path, count);
+        }
     }
 
-    public record PlotterStatus(string Name, PlotJob[] Jobs);
+    public record DirectoryFileCount(string Path, int Count);
+
+    public record PlotterStatus(string Name, PlotJob[] Jobs, DirectoryFileCount[] FileCounts);
     public record PlotJob(int Index, string Id, string K, string TempDir, string DestDir, string WallTime,
         string Phase, string TempSize, int Pid, string MemorySize, string IoTime);
 }
