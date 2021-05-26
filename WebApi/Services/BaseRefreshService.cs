@@ -5,6 +5,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using System;
+    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -62,8 +63,11 @@
             try
             {
                 this.isRunning = true;
+                var sw = new Stopwatch();
+                sw.Start();
                 await DoWorkAsync();
-                logger.LogInformation($"{ServiceName} refreshed");
+                sw.Stop();
+                logger.LogInformation($"{ServiceName} refreshed, {sw.ElapsedMilliseconds}ms elapsed.");
             }
             catch (Exception ex)
             {
