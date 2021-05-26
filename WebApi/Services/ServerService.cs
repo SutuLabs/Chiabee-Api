@@ -17,6 +17,7 @@
     public class ServerService : IDisposable
     {
         private TargetMachine[] plotterClients;
+        private TargetMachine[] harvesterClients;
         private TargetMachine farmerLogClient;
         private TargetMachine[] farmerClients;
         private bool disposedValue;
@@ -31,8 +32,10 @@
 
             var farmer = this.appSettings.GetFarmers();
             var plotter = this.appSettings.GetPlotters();
+            var harvester = this.appSettings.GetHarvesters();
 
             this.plotterClients = plotter.ToMachineClients().ToArray();
+            this.harvesterClients = harvester.ToMachineClients().ToArray();
             this.farmerLogClient = farmer.First().ToMachineClient();
             this.farmerClients = farmer.ToMachineClients().ToArray();
 
@@ -51,7 +54,7 @@
         }
 
         public async Task<ServerStatus[]> GetServersInfo() =>
-            new[] { this.farmerClients, this.plotterClients }
+            new[] { this.farmerClients, this.plotterClients, this.harvesterClients }
                 .SelectMany(_ => _.Select(_ => _.GetServerStatus()))
                 .Where(_ => _ != null)
                 .ToArray();
@@ -74,7 +77,7 @@
             {
                 if (disposing)
                 {
-                    var cs = new[] { this.farmerClients, this.plotterClients, new[] { this.farmerLogClient } }
+                    var cs = new[] { this.farmerClients, this.plotterClients, this.harvesterClients, new[] { this.farmerLogClient } }
                         .SelectMany(_ => _);
                     foreach (var c in cs)
                     {
