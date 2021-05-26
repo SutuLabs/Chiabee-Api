@@ -7,7 +7,7 @@
     using WebApi.Models;
     using WebApi.Services;
 
-    public static class DistStatusCommand
+    public static class DiskStatusCommand
     {
         public static DiskStatus[] GetDiskStatus(this TargetMachine client)
         {
