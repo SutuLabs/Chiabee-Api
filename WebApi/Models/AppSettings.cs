@@ -13,17 +13,21 @@ namespace WebApi.Models
         public SshEntity[]? Plotters { get; set; }
         public SshEntity? FarmerDefault { get; set; }
         public SshEntity[]? Farmers { get; set; }
+        public SshEntity? HarvesterDefault { get; set; }
+        public SshEntity[]? Harvesters { get; set; }
 
         public class SshEntity
         {
             public string? Host { get; set; }
             public int? Port { get; set; }
             public string? Username { get; set; }
+            public string? Name { get; set; }
             public string? PrivateKeyFile { get; set; }
         }
 
         internal SshEntity[] GetPlotters() => InheritSshEntities(PlotterDefault, Plotters).ToArray();
         internal SshEntity[] GetFarmers() => InheritSshEntities(FarmerDefault, Farmers).ToArray();
+        internal SshEntity[] GetHarvesters() => InheritSshEntities(HarvesterDefault, Harvesters).ToArray();
 
         private IEnumerable<SshEntity> InheritSshEntities(SshEntity? baseEntity, SshEntity[]? entities)
         {
