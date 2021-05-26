@@ -13,6 +13,7 @@
     using WebApi.Helpers;
     using WebApi.Models;
     using WebApi.Services.ServerCommands;
+    using static WebApi.Services.ServerCommands.CommandHelper;
 
     public class ServerService : IDisposable
     {
@@ -55,19 +56,25 @@
 
         public async Task<ServerStatus[]> GetServersInfo() =>
             new[] { this.farmerClients, this.plotterClients, this.harvesterClients }
-                .SelectMany(_ => _.Select(_ => _.GetServerStatus()))
+                .AsParallel()
+                .SelectMany(_ => _.Select(_ => TryGet(() => _.GetServerStatus())))
                 .Where(_ => _ != null)
                 .ToArray();
 
         public async Task<PlotterStatus[]> GetPlotterInfo() =>
             this.plotterClients
-                .Select(_ => _.GetPlotterStatus())
+                .AsParallel()
+                .Select(_ => TryGet(() => _.GetPlotterStatus()))
                 .Where(_ => _ != null)
                 .ToArray();
 
         public async Task<FarmerNodeStatus[]> GetFarmerInfo() =>
             this.farmerClients
-                .Select(_ => new FarmerNodeStatus(_.Name, _.GetFarmerStatus(), _.GetNodeStatus()))
+                .AsParallel()
+                .Select(_ => new FarmerNodeStatus(
+                    _.Name,
+                    TryGet(() => _.GetFarmerStatus()),
+                    TryGet(() => _.GetNodeStatus())))
                 .Where(_ => _ != null)
                 .ToArray();
 

@@ -6,7 +6,7 @@
 
     public static class CommandHelper
     {
-        internal static bool EnsureConnected(this TargetMachine client)
+        public static bool EnsureConnected(this TargetMachine client)
         {
             try
             {
@@ -24,6 +24,22 @@
             catch (Exception ex)
             {
                 return false;
+            }
+        }
+
+        public static T TryGet<T>(Func<T> func)
+        {
+            try
+            {
+                return func();
+            }
+            catch (SshOperationTimeoutException)
+            {
+                return default;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
     }
