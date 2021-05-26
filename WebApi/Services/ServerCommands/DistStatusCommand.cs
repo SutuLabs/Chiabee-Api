@@ -4,11 +4,12 @@
     using System.Collections.Generic;
     using System.Linq;
     using Renci.SshNet;
+    using WebApi.Models;
     using WebApi.Services;
 
     public static class DistStatusCommand
     {
-        public static DiskStatus[] GetDiskStatus(this SshClient client)
+        public static DiskStatus[] GetDiskStatus(this TargetMachine client)
         {
             client.EnsureConnected();
             var cmd = client.RunCommand(@"df |grep ""/dev/sd\|/dev/md\|/$""");

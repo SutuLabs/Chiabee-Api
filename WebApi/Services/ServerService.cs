@@ -16,9 +16,9 @@
 
     public class ServerService : IDisposable
     {
-        private SshClient plotterClient;
-        private SshClient farmerLogClient;
-        private SshClient farmerClient;
+        private TargetMachine[] plotterClients;
+        private TargetMachine farmerLogClient;
+        private TargetMachine[] farmerClients;
         private bool disposedValue;
 
         internal FixedSizedQueue<EligibleFarmerEvent> eventList = new();
@@ -29,12 +29,12 @@
         {
             this.appSettings = appSettings.Value;
 
-            var farmer = this.appSettings.GetFarmers().First();
-            var plotter = this.appSettings.GetPlotters().First();
+            var farmer = this.appSettings.GetFarmers();
+            var plotter = this.appSettings.GetPlotters();
 
-            this.plotterClient = plotter.ToSshClient();
-            this.farmerLogClient = farmer.ToSshClient();
-            this.farmerClient = farmer.ToSshClient();
+            this.plotterClients = plotter.ToMachineClients().ToArray();
+            this.farmerLogClient = farmer.First().ToMachineClient();
+            this.farmerClients = farmer.ToMachineClients().ToArray();
 
             this.farmerLogClient.StartTailChiaLog((err) =>
             {
@@ -50,30 +50,20 @@
             });
         }
 
-        public async Task<ServerStatus[]> GetServersInfo()
-        {
-            return new[] {
-                this.farmerClient.GetServerStatus() with { Name = "Farmer" },
-                this.plotterClient.GetServerStatus() with { Name = "Plotter" },
-            };
-        }
+        public async Task<ServerStatus[]> GetServersInfo() =>
+            new[] { this.farmerClients, this.plotterClients }
+                .SelectMany(_ => _.Select(_ => _.GetServerStatus()))
+                .ToArray();
 
-        public async Task<PlotterServerStatus> GetPlotterInfo()
-        {
-            var jobs = this.plotterClient.GetPlotStatus();
-            var ss = this.plotterClient.GetServerStatus() with { Name = "Plotter" };
+        public async Task<PlotterStatus[]> GetPlotterInfo() =>
+            this.plotterClients
+                .Select(_ => _.GetPlotterStatus())
+                .ToArray();
 
-            return new PlotterServerStatus(ss, jobs);
-        }
-
-        public async Task<FarmServerStatus> GetFarmerInfo()
-        {
-            var ss = this.farmerClient.GetServerStatus() with { Name = "Farmer" };
-            var farm = this.farmerClient.GetFarmStatus();
-            var node = this.farmerClient.GetNodeStatus();
-
-            return new FarmServerStatus(ss, node, farm);
-        }
+        public async Task<FarmerNodeStatus[]> GetFarmerInfo() =>
+            this.farmerClients
+                .Select(_ => new FarmerNodeStatus(_.GetFarmerStatus(), _.GetNodeStatus()))
+                .ToArray();
 
         protected virtual void Dispose(bool disposing)
         {
@@ -81,12 +71,13 @@
             {
                 if (disposing)
                 {
-                    if (this.farmerClient.IsConnected) this.farmerClient.Disconnect();
-                    this.farmerClient.Dispose();
-                    if (this.plotterClient.IsConnected) this.plotterClient.Disconnect();
-                    this.plotterClient.Dispose();
-                    if (this.farmerLogClient.IsConnected) this.farmerLogClient.Disconnect();
-                    this.farmerLogClient.Dispose();
+                    var cs = new[] { this.farmerClients, this.plotterClients, new[] { this.farmerLogClient } }
+                        .SelectMany(_ => _);
+                    foreach (var c in cs)
+                    {
+                        if (c.IsConnected) c.Disconnect();
+                        c.Dispose();
+                    }
                 }
 
                 disposedValue = true;

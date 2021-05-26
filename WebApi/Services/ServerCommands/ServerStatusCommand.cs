@@ -4,10 +4,11 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using Renci.SshNet;
+    using WebApi.Models;
 
     public static class ServerStatusCommand
     {
-        public static ServerStatus GetServerStatus(this SshClient client)
+        public static ServerStatus GetServerStatus(this TargetMachine client)
         {
             client.EnsureConnected();
             var topCmd = client.RunCommand(@"top -b1n1 -E G |grep ""Cpu\|Mem \|Tasks""");
@@ -21,6 +22,7 @@
                 Memory = ParseMemoryState(output),
                 Cpus = ParseCpuState(output).OrderBy(_ => _.Index).Select(_ => _.Idle).ToArray(),
                 Disks = disks,
+                Name = client.Name,
             };
 
             static ProcessState ParseProcessState(string output)

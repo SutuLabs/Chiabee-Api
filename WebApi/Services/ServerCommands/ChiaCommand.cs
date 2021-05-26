@@ -5,10 +5,11 @@
     using System.Linq;
     using System.Text.RegularExpressions;
     using Renci.SshNet;
+    using WebApi.Models;
 
     public static class ChiaCommand
     {
-        public static NodeStatus GetNodeStatus(this SshClient client)
+        public static NodeStatus GetNodeStatus(this TargetMachine client)
         {
             client.EnsureConnected();
             var nodeCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia show -s");
@@ -56,13 +57,13 @@
             }
         }
 
-        public static FarmStatus GetFarmStatus(this SshClient client)
+        public static FarmerStatus GetFarmerStatus(this TargetMachine client)
         {
             client.EnsureConnected();
             var farmCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia farm summary");
             return ParseFarmStatus(farmCmd.Result);
 
-            static FarmStatus ParseFarmStatus(string output)
+            static FarmerStatus ParseFarmStatus(string output)
             {
                 //(venv) sutu @farmer7700:/farm/01$ chia farm summary
                 // Farming status: Farming
@@ -76,27 +77,27 @@
                 //Expected time to win: 9 months and 3 weeks
                 //Note: log into your key using 'chia wallet show' to see rewards for each key
                 var pairs = ParsePairs(output,
-                    new StatusDefinition(nameof(FarmStatus.Status), "Farming status"),
-                    new StatusDefinition(nameof(FarmStatus.TotalFarmed), "Total chia farmed"),
-                    new StatusDefinition(nameof(FarmStatus.TxFees), "User transaction fees"),
-                    new StatusDefinition(nameof(FarmStatus.Rewards), "Block rewards"),
-                    new StatusDefinition(nameof(FarmStatus.LastFarmedHeight), "Last height farmed"),
-                    new StatusDefinition(nameof(FarmStatus.PlotCount), "Plot count"),
-                    new StatusDefinition(nameof(FarmStatus.TotalSize), "Total size of plots"),
-                    new StatusDefinition(nameof(FarmStatus.Space), "Estimated network space"),
-                    new StatusDefinition(nameof(FarmStatus.ExpectedToWin), "Expected time to win")
+                    new StatusDefinition(nameof(FarmerStatus.Status), "Farming status"),
+                    new StatusDefinition(nameof(FarmerStatus.TotalFarmed), "Total chia farmed"),
+                    new StatusDefinition(nameof(FarmerStatus.TxFees), "User transaction fees"),
+                    new StatusDefinition(nameof(FarmerStatus.Rewards), "Block rewards"),
+                    new StatusDefinition(nameof(FarmerStatus.LastFarmedHeight), "Last height farmed"),
+                    new StatusDefinition(nameof(FarmerStatus.PlotCount), "Plot count"),
+                    new StatusDefinition(nameof(FarmerStatus.TotalSize), "Total size of plots"),
+                    new StatusDefinition(nameof(FarmerStatus.Space), "Estimated network space"),
+                    new StatusDefinition(nameof(FarmerStatus.ExpectedToWin), "Expected time to win")
                     )
                     .ToDictionary(_ => _.Key, _ => _.Value);
-                return new FarmStatus(
-                    pairs[nameof(FarmStatus.Status)],
-                    GetDecimal(pairs[nameof(FarmStatus.TotalFarmed)]),
-                    GetDecimal(pairs[nameof(FarmStatus.TxFees)]),
-                    GetDecimal(pairs[nameof(FarmStatus.Rewards)]),
-                    GetInt(pairs[nameof(FarmStatus.LastFarmedHeight)]),
-                    GetInt(pairs[nameof(FarmStatus.PlotCount)]),
-                    pairs[nameof(FarmStatus.TotalSize)],
-                    pairs[nameof(FarmStatus.Space)],
-                    pairs[nameof(FarmStatus.ExpectedToWin)]
+                return new FarmerStatus(
+                    pairs[nameof(FarmerStatus.Status)],
+                    GetDecimal(pairs[nameof(FarmerStatus.TotalFarmed)]),
+                    GetDecimal(pairs[nameof(FarmerStatus.TxFees)]),
+                    GetDecimal(pairs[nameof(FarmerStatus.Rewards)]),
+                    GetInt(pairs[nameof(FarmerStatus.LastFarmedHeight)]),
+                    GetInt(pairs[nameof(FarmerStatus.PlotCount)]),
+                    pairs[nameof(FarmerStatus.TotalSize)],
+                    pairs[nameof(FarmerStatus.Space)],
+                    pairs[nameof(FarmerStatus.ExpectedToWin)]
                     );
             }
         }
@@ -134,27 +135,7 @@
         public record StatusDefinition(string Key, string Text);
     }
 
-    public record FarmServerStatus : ServerStatus
-    {
-        public FarmServerStatus()
-        {
-        }
-
-        public FarmServerStatus(ServerStatus serverStatus, NodeStatus node, FarmStatus farm)
-        {
-            this.Farm = farm;
-            this.Node = node;
-            this.Cpus = serverStatus.Cpus;
-            this.Memory = serverStatus.Memory;
-            this.Process = serverStatus.Process;
-            this.Name = serverStatus.Name;
-            this.Disks = serverStatus.Disks;
-        }
-
-        public NodeStatus Node { get; init; }
-        public FarmStatus Farm { get; init; }
-    }
-
+    public record FarmerNodeStatus(FarmerStatus FarmerStatus, NodeStatus NodeStatus);
     public record NodeStatus(string Status, DateTime Time, int Height, string Space, string Difficulty, string Iterations, string TotalIterations);
-    public record FarmStatus(string Status, decimal? TotalFarmed, decimal? TxFees, decimal? Rewards, int? LastFarmedHeight, int? PlotCount, string TotalSize, string Space, string ExpectedToWin);
+    public record FarmerStatus(string Status, decimal? TotalFarmed, decimal? TxFees, decimal? Rewards, int? LastFarmedHeight, int? PlotCount, string TotalSize, string Space, string ExpectedToWin);
 }

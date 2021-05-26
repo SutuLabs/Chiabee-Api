@@ -7,10 +7,11 @@
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Renci.SshNet;
+    using WebApi.Models;
 
     public static class TailChiaLogCommand
     {
-        public static void StartTailChiaLog(this SshClient client, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
+        public static void StartTailChiaLog(this TargetMachine client, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
         {
             client.EnsureConnected();
 

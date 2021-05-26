@@ -4,6 +4,7 @@ namespace WebApi.Helpers
     using System.Linq;
     using Renci.SshNet;
     using WebApi.Entities;
+    using WebApi.Models;
     using static WebApi.Models.AppSettings;
 
     public static class ExtensionMethods
@@ -19,12 +20,19 @@ namespace WebApi.Helpers
             return user;
         }
 
-        public static SshClient ToSshClient(this SshEntity entity)
+        public static TargetMachine ToMachineClient(this SshEntity entity)
         {
             if (entity.Port is int port)
-                return new SshClient(entity.Host, port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
+                return new TargetMachine(
+                    entity.Name, entity.Host, port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
 
-            return new SshClient(entity.Host, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
+            return new TargetMachine(
+                entity.Name, entity.Host, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
+        }
+
+        public static IEnumerable<TargetMachine> ToMachineClients(this IEnumerable<SshEntity> entity)
+        {
+            return entity.Select(_ => _.ToMachineClient());
         }
     }
 }

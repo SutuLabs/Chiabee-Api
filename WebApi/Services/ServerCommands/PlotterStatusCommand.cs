@@ -4,15 +4,16 @@
     using System.Collections.Generic;
     using System.Linq;
     using Renci.SshNet;
+    using WebApi.Models;
 
-    public static class PlotStatusCommand
+    public static class PlotterStatusCommand
     {
-        public static PlotJob[] GetPlotStatus(this SshClient client)
+        public static PlotterStatus GetPlotterStatus(this TargetMachine client)
         {
             client.EnsureConnected();
             var pmCmd = client.RunCommand(@". ~/chia-blockchain/activate && plotman status");
 
-            return ParsePlotStatusOutput(pmCmd.Result).ToArray();
+            return new PlotterStatus( ParsePlotStatusOutput(pmCmd.Result).ToArray());
 
             static IEnumerable<PlotJob> ParsePlotStatusOutput(string output)
             {
@@ -36,24 +37,7 @@
         }
     }
 
-    public record PlotterServerStatus : ServerStatus
-    {
-        public PlotterServerStatus()
-        {
-        }
-
-        public PlotterServerStatus(ServerStatus serverStatus, PlotJob[] jobs)
-        {
-            this.Jobs = jobs;
-            this.Cpus = serverStatus.Cpus;
-            this.Memory = serverStatus.Memory;
-            this.Process = serverStatus.Process;
-            this.Name = serverStatus.Name;
-            this.Disks = serverStatus.Disks;
-        }
-
-        public PlotJob[] Jobs { get; init; }
-    }
+    public record PlotterStatus(PlotJob[] Jobs);
     public record PlotJob(int Index, string Id, string K, string TempDir, string DestDir, string WallTime,
         string Phase, string TempSize, int Pid, string MemorySize, string IoTime);
 }
