@@ -53,16 +53,19 @@
         public async Task<ServerStatus[]> GetServersInfo() =>
             new[] { this.farmerClients, this.plotterClients }
                 .SelectMany(_ => _.Select(_ => _.GetServerStatus()))
+                .Where(_ => _ != null)
                 .ToArray();
 
         public async Task<PlotterStatus[]> GetPlotterInfo() =>
             this.plotterClients
                 .Select(_ => _.GetPlotterStatus())
+                .Where(_ => _ != null)
                 .ToArray();
 
         public async Task<FarmerNodeStatus[]> GetFarmerInfo() =>
             this.farmerClients
-                .Select(_ => new FarmerNodeStatus(_.GetFarmerStatus(), _.GetNodeStatus()))
+                .Select(_ => new FarmerNodeStatus(_.Name, _.GetFarmerStatus(), _.GetNodeStatus()))
+                .Where(_ => _ != null)
                 .ToArray();
 
         protected virtual void Dispose(bool disposing)

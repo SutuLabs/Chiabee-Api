@@ -41,6 +41,7 @@ namespace WebApi.Models
                     Port = ent.Port ?? baseEntity.Port,
                     PrivateKeyFile = ent.PrivateKeyFile ?? baseEntity.PrivateKeyFile,
                     Username = ent.Username ?? baseEntity.Username,
+                    Name = ent.Name ?? baseEntity.Name,
                 };
             }
         }

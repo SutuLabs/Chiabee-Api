@@ -13,7 +13,7 @@
     {
         public static void StartTailChiaLog(this TargetMachine client, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
         {
-            client.EnsureConnected();
+            if (!client.EnsureConnected()) return;// cannot connect, ignore
 
             var cmd = client.CreateCommand("tail -n 10000 -F ~/.chia/mainnet/log/debug.log");
 

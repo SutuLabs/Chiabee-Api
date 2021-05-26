@@ -53,7 +53,7 @@
             var entity = await RetrieveEntityAsync<FarmStateEntity>(
                 this.table, FarmStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
             if (entity == null) return NoContent();
-            var info = JsonConvert.DeserializeObject<PlotterStatus>(entity.PlotterJson);
+            var info = JsonConvert.DeserializeObject<PlotterStatus[]>(entity.PlotterJson);
             return Ok(info);
         }
 
@@ -63,7 +63,7 @@
             var entity = await RetrieveEntityAsync<FarmStateEntity>(
                 this.table, FarmStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
             if (entity == null) return NoContent();
-            var info = JsonConvert.DeserializeObject<FarmerStatus>(entity.FarmerJson);
+            var info = JsonConvert.DeserializeObject<FarmerStatus[]>(entity.FarmerJson);
             return Ok(info);
         }
 

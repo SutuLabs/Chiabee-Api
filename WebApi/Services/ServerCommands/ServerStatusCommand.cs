@@ -10,7 +10,7 @@
     {
         public static ServerStatus GetServerStatus(this TargetMachine client)
         {
-            client.EnsureConnected();
+            if (!client.EnsureConnected()) return null;
             var topCmd = client.RunCommand(@"top -b1n1 -E G |grep ""Cpu\|Mem \|Tasks""");
             var output = topCmd.Result;
 

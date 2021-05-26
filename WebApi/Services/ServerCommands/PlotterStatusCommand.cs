@@ -10,10 +10,11 @@
     {
         public static PlotterStatus GetPlotterStatus(this TargetMachine client)
         {
-            client.EnsureConnected();
+            if (!client.EnsureConnected()) return null;
+
             var pmCmd = client.RunCommand(@". ~/chia-blockchain/activate && plotman status");
 
-            return new PlotterStatus( ParsePlotStatusOutput(pmCmd.Result).ToArray());
+            return new PlotterStatus(client.Name, ParsePlotStatusOutput(pmCmd.Result).ToArray());
 
             static IEnumerable<PlotJob> ParsePlotStatusOutput(string output)
             {
@@ -37,7 +38,7 @@
         }
     }
 
-    public record PlotterStatus(PlotJob[] Jobs);
+    public record PlotterStatus(string Name, PlotJob[] Jobs);
     public record PlotJob(int Index, string Id, string K, string TempDir, string DestDir, string WallTime,
         string Phase, string TempSize, int Pid, string MemorySize, string IoTime);
 }

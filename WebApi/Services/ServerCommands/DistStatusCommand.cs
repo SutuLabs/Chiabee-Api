@@ -11,7 +11,7 @@
     {
         public static DiskStatus[] GetDiskStatus(this TargetMachine client)
         {
-            client.EnsureConnected();
+            if (!client.EnsureConnected()) return null;
             var cmd = client.RunCommand(@"df |grep ""/dev/sd\|/dev/md\|/$""");
             return ParseDiskStatus(cmd.Result).ToArray();
 

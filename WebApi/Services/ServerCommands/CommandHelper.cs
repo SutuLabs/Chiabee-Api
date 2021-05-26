@@ -1,15 +1,29 @@
 ﻿namespace WebApi.Services.ServerCommands
 {
-    using Renci.SshNet;
+    using System;
+    using Renci.SshNet.Common;
     using WebApi.Models;
 
     public static class CommandHelper
     {
-        internal static void EnsureConnected(this TargetMachine client)
+        internal static bool EnsureConnected(this TargetMachine client)
         {
-            if (!client.IsConnected)
+            try
             {
-                client.Connect();
+                if (!client.IsConnected)
+                {
+                    client.Connect();
+                }
+
+                return true;
+            }
+            catch (SshOperationTimeoutException)
+            {
+                return false;
+            }
+            catch (Exception ex)
+            {
+                return false;
             }
         }
     }

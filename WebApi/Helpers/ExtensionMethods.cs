@@ -1,5 +1,6 @@
 namespace WebApi.Helpers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Renci.SshNet;
@@ -22,12 +23,16 @@ namespace WebApi.Helpers
 
         public static TargetMachine ToMachineClient(this SshEntity entity)
         {
-            if (entity.Port is int port)
-                return new TargetMachine(
-                    entity.Name, entity.Host, port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
+            var machine = entity.Port is int port
+                ? new TargetMachine(
+                    entity.Name, entity.Host, port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile))
+                : new TargetMachine(
+                    entity.Name, entity.Host, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
 
-            return new TargetMachine(
-                entity.Name, entity.Host, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
+            machine.ConnectionInfo.Timeout = new TimeSpan(0, 0, 5);
+            machine.ConnectionInfo.RetryAttempts = 1;
+
+            return machine;
         }
 
         public static IEnumerable<TargetMachine> ToMachineClients(this IEnumerable<SshEntity> entity)
