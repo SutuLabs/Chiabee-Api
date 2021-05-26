@@ -12,4 +12,7 @@
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
     <PackageReference Include="SSH.NET" Version="2020.0.1" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ServerManipulator\ServerManipulator.csproj" />
+  </ItemGroup>
 </Project>

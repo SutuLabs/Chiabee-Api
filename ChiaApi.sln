@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "WebApi\WebApi.csproj", "{E5ACCC5C-607A-46A9-99AF-17F6C59B3406}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerManipulator", "ServerManipulator\ServerManipulator.csproj", "{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{E5ACCC5C-607A-46A9-99AF-17F6C59B3406}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E5ACCC5C-607A-46A9-99AF-17F6C59B3406}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E5ACCC5C-607A-46A9-99AF-17F6C59B3406}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
