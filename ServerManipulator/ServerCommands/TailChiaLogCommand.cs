@@ -6,22 +6,20 @@
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
-    using Renci.SshNet;
     using WebApi.Models;
 
     public static class TailChiaLogCommand
     {
         public static void StartTailChiaLog(this TargetMachine client, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
         {
-            if (!client.EnsureConnected()) return;// cannot connect, ignore
-
-            var cmd = client.CreateCommand("tail -n 1000 -F ~/.chia/mainnet/log/debug.log");
-
-            Task.Factory.StartNew(() => Ta(cmd, errorRaised, eventRaised), TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(() => Ta(client, errorRaised, eventRaised), TaskCreationOptions.LongRunning);
         }
 
-        private static void Ta(SshCommand cmd, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
+        private static void Ta(TargetMachine client, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
         {
+            client.EnsureConnected();
+
+            var cmd = client.CreateCommand("tail -n 10000 -F ~/.chia/mainnet/log/debug.log");
             var result = cmd.BeginExecute();
 
             using var reader = new StreamReader(cmd.OutputStream, Encoding.UTF8, true, 1024, true);
