@@ -15,7 +15,7 @@
         {
             if (!client.EnsureConnected()) return;// cannot connect, ignore
 
-            var cmd = client.CreateCommand("tail -n 10000 -F ~/.chia/mainnet/log/debug.log");
+            var cmd = client.CreateCommand("tail -n 1000 -F ~/.chia/mainnet/log/debug.log");
 
             Task.Factory.StartNew(() => Ta(cmd, errorRaised, eventRaised), TaskCreationOptions.LongRunning);
         }

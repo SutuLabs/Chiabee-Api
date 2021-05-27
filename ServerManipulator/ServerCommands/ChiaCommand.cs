@@ -135,7 +135,7 @@
         public record StatusDefinition(string Key, string Text);
     }
 
-    public record FarmerNodeStatus(string Name, FarmerStatus FarmerStatus, NodeStatus NodeStatus);
+    public record FarmerNodeStatus(string Name, FarmerStatus Farmer, NodeStatus Node);
     public record NodeStatus(string Status, DateTime Time, int Height, string Space, string Difficulty, string Iterations, string TotalIterations);
     public record FarmerStatus(string Status, decimal? TotalFarmed, decimal? TxFees, decimal? Rewards, int? LastFarmedHeight, int? PlotCount, string TotalSize, string Space, string ExpectedToWin);
 }
