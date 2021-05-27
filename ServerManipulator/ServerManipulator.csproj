@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="SSH.NET" Version="2020.0.1" />
+    <PackageReference Include="YamlDotNet" Version="11.1.1" />
   </ItemGroup>
 
 </Project>
