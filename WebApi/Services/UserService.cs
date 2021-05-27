@@ -16,7 +16,8 @@ namespace WebApi.Services
     {
         private List<User> _users = new List<User>
         {
-            new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test" }
+            new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test", Role = UserRole.Guest, },
+            new User { Id = 2, FirstName = "Admin", LastName = "User", Username = "admin", Password = "admin", Role = UserRole.Admin, },
         };
 
         public async Task<User> Authenticate(string username, string password)

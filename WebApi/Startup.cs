@@ -8,6 +8,7 @@
     using WebApi.Services;
     using Microsoft.AspNetCore.Authentication;
     using WebApi.Models;
+    using WebApi.Entities;
 
     public class Startup
     {
@@ -26,6 +27,13 @@
 
             services.AddAuthentication("BasicAuthentication")
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy(nameof(UserRole.Admin), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Admin)));
+                options.AddPolicy(nameof(UserRole.Guest), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Guest)));
+                options.AddPolicy(nameof(UserRole.Vip), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Vip)));
+            });
 
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<ServerService, ServerService>();

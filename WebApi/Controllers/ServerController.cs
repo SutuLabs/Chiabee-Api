@@ -58,6 +58,7 @@
         }
 
         [HttpDelete("plot")]
+        [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> StopPlot(string name, string id)
         {
             var result = await this.serverService.StopPlot(name, id);
