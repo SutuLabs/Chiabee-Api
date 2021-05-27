@@ -15,7 +15,8 @@
 
             var fileCounts = client.GetDirectoryFileCountCommand(new[] { "/data/final" });
             var jobs = ParsePlotStatusOutput(pmCmd.Result).ToArray();
-            return new PlotterStatus(client.Name, jobs, fileCounts);
+            var cfg = client.ReadPlotManConfiguration();
+            return new PlotterStatus(client.Name, jobs, fileCounts, cfg);
 
             static IEnumerable<PlotJob> ParsePlotStatusOutput(string output)
             {
@@ -54,7 +55,7 @@
 
     public record DirectoryFileCount(string Path, int Count);
 
-    public record PlotterStatus(string Name, PlotJob[] Jobs, DirectoryFileCount[] FileCounts);
+    public record PlotterStatus(string Name, PlotJob[] Jobs, DirectoryFileCount[] FileCounts, PlotManConfiguration Configuration);
     public record PlotJob(int Index, string Id, string K, string TempDir, string DestDir, string WallTime,
         string Phase, string TempSize, int Pid, string MemorySize, string IoTime);
 }
