@@ -54,6 +54,14 @@
             });
         }
 
+        public async Task<bool> StopPlot(string machineName, string plotId)
+        {
+            var machine = this.plotterClients.FirstOrDefault(_ => _.Name == machineName);
+            if (machine == null) return false;
+
+            return machine.StopPlot(plotId);
+        }
+
         public async Task<ServerStatus[]> GetServersInfo() =>
             new[] { this.farmerClients, this.plotterClients, this.harvesterClients }
                 .AsParallel()

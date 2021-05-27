@@ -57,6 +57,16 @@
             return Ok(info);
         }
 
+        [HttpDelete("plot")]
+        public async Task<IActionResult> StopPlot(string name, string id)
+        {
+            var result = await this.serverService.StopPlot(name, id);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpGet("farmer")]
         public async Task<IActionResult> GetFarmerInfo()
         {
