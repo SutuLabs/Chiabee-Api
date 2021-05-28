@@ -1,6 +1,7 @@
 ﻿namespace WebApi.Services.ServerCommands
 {
     using System;
+    using System.Net.Sockets;
     using Renci.SshNet.Common;
     using WebApi.Models;
 
@@ -18,6 +19,10 @@
                 return true;
             }
             catch (SshOperationTimeoutException)
+            {
+                return false;
+            }
+            catch (SocketException)// remote cannot connect
             {
                 return false;
             }
