@@ -97,8 +97,8 @@
                 var finalNum = p.FileCounts.FirstOrDefault()?.Count ?? 0;
                 var (jobNum, stagger) = model switch
                 {
-                    "r720" => (8, 30),
-                    "r420" => (4, 45),
+                    "r720" => (12, 30),
+                    "r420" => (6, 45),
                     _ => (0, 120),
                 };
 
