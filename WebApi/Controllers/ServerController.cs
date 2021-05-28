@@ -78,6 +78,27 @@
             return Ok(info);
         }
 
+        [HttpGet("plotplan")]
+        public async Task<IActionResult> GetPlotManPlan()
+        {
+            var entity = await RetrieveEntityAsync<FarmStateEntity>(
+                this.table, FarmStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
+            if (entity == null) return NoContent();
+            var info = JsonConvert.DeserializeObject<PlotterStatus[]>(entity.PlotterJson);
+            var plan = serverService.GetOptimizePlotManPlan(info);
+            return Ok(plan);
+        }
+
+        [HttpPost("plotplan")]
+        public async Task<IActionResult> SetPlotManPlan([FromBody] OptimizedPlotManPlan[] plans)
+        {
+            var result = serverService.SetOptimizePlotManPlan(plans);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpGet("errors")]
         public async Task<IActionResult> GetFarmerErrorInfo()
         {

@@ -2,11 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Linq;
-    using System.Text;
-    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Options;
     using Renci.SshNet;
@@ -86,6 +83,65 @@
                 .Where(_ => _ != null)
                 .ToArray();
 
+        public IEnumerable<OptimizedPlotManPlan> GetOptimizePlotManPlan(PlotterStatus[] plotters)
+        {
+            var targets = this.appSettings.GetHarvesters().Select(_ => _.Host).Reverse().ToArray();
+            var plotterFinalOrder = plotters
+                .Select(_ => (count: _.FileCounts.FirstOrDefault()?.Count ?? 0, _.Name))
+                .OrderByDescending(_ => _.count)
+                .Select((_, i) => (_.Name, Target: targets[i % targets.Length], Index: i / targets.Length))
+                .ToDictionary(_ => _.Name, _ => _);
+            foreach (var p in plotters)
+            {
+                var model = p.Name.Substring(0, 4).ToLower();
+                var finalNum = p.FileCounts.FirstOrDefault()?.Count ?? 0;
+                var (jobNum, stagger) = model switch
+                {
+                    "r720" => (8, 30),
+                    "r420" => (4, 45),
+                    _ => (0, 120),
+                };
+
+                var order = plotterFinalOrder[p.Name];
+                yield return new OptimizedPlotManPlan(p.Name, new PlotManConfiguration(order.Target, order.Index, jobNum, stagger));
+            }
+        }
+
+        public bool SetOptimizePlotManPlan(OptimizedPlotManPlan[] plans)
+        {
+            var machines = this.plotterClients;
+            var successFlag = true;
+            foreach (var plan in plans)
+            {
+                var m = machines.FirstOrDefault(_ => _.Name == plan.Name);
+                if (m == null) continue;
+
+                var host = m.ConnectionInfo.Host;
+
+                using var scp = new ScpClient(m.ConnectionInfo);
+                scp.Connect();
+                scp.Upload(new FileInfo("Assets/plotman.yaml"), "/home/sutu/.config/plotman/plotman.yaml");
+                scp.Disconnect();
+
+                // always execute these replace, return just the result
+                var replaceFlag = true;
+                replaceFlag &= Replace("rsyncd_host", "rsyncd_host", plan.Plan.RsyncdHost);
+                replaceFlag &= Replace("tmpdir_max_jobs", "TEMP_JOB", plan.Plan.JobNumber);
+                replaceFlag &= Replace("global_stagger_m", "STAGGER_MIN", plan.Plan.StaggerMinute);
+                replaceFlag &= Replace("index", "rsyncd_index", plan.Plan.RsyncdIndex);
+
+                successFlag &= replaceFlag;
+
+                bool Replace(string leading, string placeholder, object value)
+                {
+                    var cresult = m.RunCommand($"sed -i 's/{leading}: {placeholder}/{leading}: {value}/g' ~/.config/plotman/plotman.yaml");
+                    return cresult.ExitStatus == 0;
+                }
+            }
+
+            return successFlag;
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -112,4 +168,6 @@
             GC.SuppressFinalize(this);
         }
     }
+
+    public record OptimizedPlotManPlan(string Name, PlotManConfiguration Plan);
 }
