@@ -6,7 +6,7 @@ user_interface:
         # relying on what is reported by the curses library.   In some cases,
         # the curses library fails to update on SIGWINCH signals.  If the
         # `plotman interactive` curses interface does not properly adjust when
-        # you resize the terminal window, you can try setting this to True. 
+        # you resize the terminal window, you can try setting this to True.
         use_stty_size: True
 
 # Where to plot and log.
@@ -60,7 +60,7 @@ directories:
         archive:
                 rsyncd_module: plots
                 rsyncd_path: /farm
-                rsyncd_bwlimit: 1200000  # Bandwidth limit in KB/s
+                rsyncd_bwlimit: 3000000  # Bandwidth limit in KB/s
                 rsyncd_host: rsyncd_host
                 rsyncd_user: sutu
                 # Optional index.  If omitted or set to 0, plotman will archive
