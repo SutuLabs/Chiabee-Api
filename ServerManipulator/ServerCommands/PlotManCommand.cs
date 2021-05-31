@@ -25,13 +25,21 @@
             var cmd = client.RunCommand($@"cat ~/.config/plotman/plotman.yaml");
             var yaml = cmd.Result;
             var deserializer = new DeserializerBuilder().Build();
-            dynamic yamlObj = deserializer.Deserialize<ExpandoObject>(yaml);
-            var idx = yamlObj.directories["archive"]["index"];
-            var host = yamlObj.directories["archive"]["rsyncd_host"];
-            var jobs = yamlObj.scheduling["tmpdir_max_jobs"];
-            var stagger = yamlObj.scheduling["global_stagger_m"];
+            if (string.IsNullOrEmpty(yaml)) return null;
+            try
+            {
+                dynamic yamlObj = deserializer.Deserialize<ExpandoObject>(yaml);
+                var idx = yamlObj.directories["archive"]["index"];
+                var host = yamlObj.directories["archive"]["rsyncd_host"];
+                var jobs = yamlObj.scheduling["tmpdir_max_jobs"];
+                var stagger = yamlObj.scheduling["global_stagger_m"];
 
-            return new PlotManConfiguration(host, ParseInt(idx), ParseInt(jobs), ParseInt(stagger));
+                return new PlotManConfiguration(host, ParseInt(idx), ParseInt(jobs), ParseInt(stagger));
+            }
+            catch (KeyNotFoundException)
+            {
+                return null;
+            }
         }
 
         public static int? ParseInt(string str)
