@@ -38,7 +38,8 @@
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<ServerService, ServerService>();
             services.AddSingleton<PersistentService, PersistentService>();
-            services.AddHostedService<DataRefreshService>();
+            services.AddHostedService<RefreshServerInfoService>();
+            services.AddHostedService<RefreshFarmInfoService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
