@@ -66,6 +66,13 @@
                 .Where(_ => _ != null)
                 .ToArray();
 
+        public async Task<PlotInfo[]> GetPlotsInfo() =>
+            new[] { this.farmerClients, this.harvesterClients }
+                .AsParallel()
+                .SelectMany(_ => _.SelectMany(_ => TryGet(() => _.GetPlotFarmInfo())))
+                .Where(_ => _ != null)
+                .ToArray();
+
         public async Task<PlotterStatus[]> GetPlotterInfo() =>
             this.plotterClients
                 .AsParallel()
