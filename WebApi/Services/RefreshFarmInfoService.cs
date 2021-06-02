@@ -1,6 +1,5 @@
 ﻿namespace WebApi.Services
 {
-    using System;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
@@ -16,22 +15,15 @@
 
         public RefreshFarmInfoService(
             ILogger<RefreshFarmInfoService> logger,
-            IServiceProvider serviceProvider,
             PersistentService persistentService,
             ServerService server,
             IOptions<AppSettings> appSettings)
-            : base(logger, serviceProvider)
+            : base(logger, nameof(RefreshFarmInfoService), 5, 20)
         {
             this.persistentService = persistentService;
             this.server = server;
             this.appSettings = appSettings.Value;
         }
-
-        protected override string ServiceName => nameof(RefreshFarmInfoService);
-        protected override int DefaultIntervalSeconds => 120;
-        protected override int DelayStartSeconds => 5;
-
-        protected override int GetIntervalSeconds() => 20;
 
         protected override async Task DoWorkAsync()
         {

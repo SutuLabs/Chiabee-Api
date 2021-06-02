@@ -1,37 +1,36 @@
 ﻿namespace WebApi.Services
 {
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
     using System;
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Hosting;
+    using Microsoft.Extensions.Logging;
 
     public abstract class BaseRefreshService : IHostedService, IDisposable
     {
         private readonly ILogger logger;
-        private readonly IServiceProvider serviceProvider;
         private Timer timer;
         private bool isRunning;
 
-        public BaseRefreshService(ILogger<BaseRefreshService> logger, IServiceProvider serviceProvider)
+        public BaseRefreshService(ILogger<BaseRefreshService> logger, string serviceName, int delayStartSeconds, int intervalSeconds)
         {
             this.logger = logger;
-            this.serviceProvider = serviceProvider;
+            this.ServiceName = serviceName;
+            this.DelayStartSeconds = delayStartSeconds;
+            this.IntervalSeconds = intervalSeconds;
         }
 
-        protected abstract string ServiceName { get; }
-        protected abstract int DefaultIntervalSeconds { get; }
-        protected abstract int DelayStartSeconds { get; }
+        public string ServiceName { get; }
+        public int DelayStartSeconds { get; }
+        public int IntervalSeconds { get; }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            var seconds = GetIntervalSeconds();
+            var seconds = this.IntervalSeconds;
             if (seconds == 0) return Task.CompletedTask;
 
-            seconds = seconds < 0 ? this.DefaultIntervalSeconds : seconds;
+            if (seconds < 0) throw new ArgumentOutOfRangeException(nameof(IntervalSeconds), "must > 0");
 
             logger.LogInformation($"{ServiceName} refresh Service is starting, set to refresh per [{seconds}]s");
 
@@ -54,8 +53,6 @@
         }
 
         protected abstract Task DoWorkAsync();
-
-        protected abstract int GetIntervalSeconds();
 
         private async void LoopDoWork(object state)
         {
