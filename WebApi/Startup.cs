@@ -37,6 +37,7 @@
 
             services.AddScoped<IUserService, UserService>();
             services.AddSingleton<ServerService, ServerService>();
+            services.AddSingleton<PersistentService, PersistentService>();
             services.AddHostedService<DataRefreshService>();
         }
 

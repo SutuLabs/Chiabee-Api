@@ -20,28 +20,26 @@
     {
         private readonly ILogger<ServerController> logger;
         private readonly ServerService serverService;
+        private readonly PersistentService persistentService;
         private readonly AppSettings appSettings;
-        private readonly CloudTable table;
 
         public ServerController(
             ILogger<ServerController> logger,
             ServerService serverService,
+            PersistentService persistentService,
             IOptions<AppSettings> appSettings)
         {
             this.logger = logger;
             this.serverService = serverService;
+            this.persistentService = persistentService;
             this.appSettings = appSettings.Value;
 
-            var storageAccount = CloudStorageAccount.Parse(this.appSettings.ConnectionString);
-            var tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            this.table = tableClient.GetTableReference(this.appSettings.LogTablePrefix + DataRefreshService.LatestStateTableName);
         }
 
         [HttpGet("servers")]
         public async Task<IActionResult> GetServersInfo()
         {
-            var entity = await RetrieveEntityAsync<MachineStateEntity>(
-                this.table, MachineStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
+            var entity = await this.persistentService.RetrieveEntityAsync<MachineStateEntity>();
             if (entity == null) return NoContent();
             var info = JsonConvert.DeserializeObject<ServerStatus[]>(entity.MachinesJson);
             return Ok(info);
@@ -50,8 +48,7 @@
         [HttpGet("plotter")]
         public async Task<IActionResult> GetPlotterInfo()
         {
-            var entity = await RetrieveEntityAsync<FarmStateEntity>(
-                this.table, FarmStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
+            var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
             if (entity == null) return NoContent();
             var info = JsonConvert.DeserializeObject<PlotterStatus[]>(entity.PlotterJson);
             return Ok(info);
@@ -71,8 +68,7 @@
         [HttpGet("farmer")]
         public async Task<IActionResult> GetFarmerInfo()
         {
-            var entity = await RetrieveEntityAsync<FarmStateEntity>(
-                this.table, FarmStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
+            var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
             if (entity == null) return NoContent();
             var info = JsonConvert.DeserializeObject<FarmerNodeStatus[]>(entity.FarmerJson);
             return Ok(info);
@@ -81,8 +77,7 @@
         [HttpGet("plotplan")]
         public async Task<IActionResult> GetPlotManPlan()
         {
-            var entity = await RetrieveEntityAsync<FarmStateEntity>(
-                this.table, FarmStateEntity.DefaultPartitionKey, DataRefreshService.LatestStateKeyName);
+            var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
             if (entity == null) return NoContent();
             var info = JsonConvert.DeserializeObject<PlotterStatus[]>(entity.PlotterJson);
             var plan = serverService.GetOptimizePlotManPlan(info);
@@ -111,14 +106,6 @@
         {
             var info = serverService.eventList.ToArray();
             return Ok(info);
-        }
-
-        private async Task<T> RetrieveEntityAsync<T>(CloudTable table, string partitionKey, string rowKey)
-            where T : class, ITableEntity
-        {
-            TableOperation retrieve = TableOperation.Retrieve<T>(partitionKey, rowKey);
-            var result = await table.ExecuteAsync(retrieve);
-            return result.Result as T;
         }
     }
 }
