@@ -8,6 +8,7 @@ namespace WebApi.Models
     {
         public string? ConnectionString { get; set; }
         public string? LogTablePrefix { get; set; }
+        public SshEntity? MachineDefault { get; set; }
         public SshEntity? PlotterDefault { get; set; }
         public SshEntity[]? Plotters { get; set; }
         public SshEntity? FarmerDefault { get; set; }
@@ -15,10 +16,10 @@ namespace WebApi.Models
         public SshEntity? HarvesterDefault { get; set; }
         public SshEntity[]? Harvesters { get; set; }
 
-        internal SshEntity[] GetPlotters() => SshEntity.InheritSshEntities(PlotterDefault, Plotters).ToArray();
+        internal SshEntity[] GetPlotters() => Plotters.BasedOn(PlotterDefault).BasedOn(MachineDefault).ToArray();
 
-        internal SshEntity[] GetFarmers() => SshEntity.InheritSshEntities(FarmerDefault, Farmers).ToArray();
+        internal SshEntity[] GetFarmers() => Farmers.BasedOn(FarmerDefault).BasedOn(MachineDefault).ToArray();
 
-        internal SshEntity[] GetHarvesters() => SshEntity.InheritSshEntities(HarvesterDefault, Harvesters).ToArray();
+        internal SshEntity[] GetHarvesters() => Harvesters.BasedOn(HarvesterDefault).BasedOn(MachineDefault).ToArray();
     }
 }

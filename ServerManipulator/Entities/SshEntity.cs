@@ -11,21 +11,33 @@ namespace WebApi.Models
         public string? Username { get; set; }
         public string? Name { get; set; }
         public string? PrivateKeyFile { get; set; }
+    }
 
-        public static IEnumerable<SshEntity> InheritSshEntities(SshEntity? baseEntity, SshEntity[]? entities)
+    public static class SshEntityExtensions
+    {
+        public static SshEntity? BasedOn(this SshEntity? entity, SshEntity? baseEntity)
+        {
+            if (entity == null) return default;
+            if (baseEntity == null) baseEntity = new SshEntity();
+
+            return new SshEntity
+            {
+                Host = entity.Host ?? baseEntity.Host,
+                Port = entity.Port ?? baseEntity.Port,
+                PrivateKeyFile = entity.PrivateKeyFile ?? baseEntity.PrivateKeyFile,
+                Username = entity.Username ?? baseEntity.Username,
+                Name = entity.Name ?? baseEntity.Name,
+            };
+        }
+
+        public static IEnumerable<SshEntity> BasedOn(this IEnumerable<SshEntity>? entities, SshEntity? baseEntity)
         {
             if (entities == null) yield break;
             if (baseEntity == null) baseEntity = new SshEntity();
             foreach (var ent in entities)
             {
-                yield return new SshEntity
-                {
-                    Host = ent.Host ?? baseEntity.Host,
-                    Port = ent.Port ?? baseEntity.Port,
-                    PrivateKeyFile = ent.PrivateKeyFile ?? baseEntity.PrivateKeyFile,
-                    Username = ent.Username ?? baseEntity.Username,
-                    Name = ent.Name ?? baseEntity.Name,
-                };
+                var nent = ent.BasedOn(baseEntity);
+                if (nent != null) yield return nent;
             }
         }
     }
