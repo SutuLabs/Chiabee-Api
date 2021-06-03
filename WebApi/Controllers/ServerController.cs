@@ -65,6 +65,14 @@
                 return BadRequest();
         }
 
+        [HttpGet("plots")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> GetAllPlots()
+        {
+            var result = await this.serverService.GetPlotsInfo();
+            return Ok(result);
+        }
+
         [HttpGet("farmer")]
         public async Task<IActionResult> GetFarmerInfo()
         {

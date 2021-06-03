@@ -21,22 +21,21 @@
 
             IEnumerable<PlotInfo> ParseListFile(string filelist)
             {
-                var dirs = filelist.Split("\n").Select(_ => _.Trim()).ToArray();
+                var dirs = filelist.ToArrayList();
                 foreach (var dir in dirs)
                 {
-                    var dircmd = client.RunCommand($@"ll {dir}");
-                    var list = dircmd.Result.Split("\n").Select(_ => _.Trim()).ToArray();
+                    var dircmd = client.RunCommand($@"ls -l {dir}");
+                    var list = dircmd.Result.ToArrayList();
 
-                    // ignore first one which is total
-                    for (int i = 1; i < list.Length; i++)
+                    for (int i = 0; i < list.Length; i++)
                     {
                         var item = list[i];
-                        // ignore directory
-                        if (item.StartsWith("d")) continue;
+                        // only process file, ignore directory/`total`/empty-line
+                        if (!item.StartsWith("-")) continue;
 
                         // -rw-r--r--  1 sutu sutu 108808198171 May 31 18:28 plot-k32-2021-05-31-04-48-1a44ef45da6c5a34a7aea936b28b9b9b951994fbc5d6fa87fcd3e4202caeaf4a.plot
-                        var segs = item.Split(" ");
-                        var size = int.Parse(segs[4]);
+                        var segs = item.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                        var size = long.Parse(segs[4]);
                         var filename = segs[8];
                         var idMatch = rePlotId.Match(filename);
                         var id = idMatch.Success ? idMatch.Groups["id"].Value : null;
@@ -46,7 +45,13 @@
                 }
             }
         }
+
+        private static string[] ToArrayList(this string filelist) => filelist
+            .Split("\n")
+            .Select(_ => _.Trim())
+            .Where(_ => !string.IsNullOrEmpty(_))
+            .ToArray();
     }
 
-    public record PlotInfo(string Filename, int Size, string PlotId, string Directory, string Host);
+    public record PlotInfo(string Filename, long Size, string PlotId, string Directory, string Host);
 }
