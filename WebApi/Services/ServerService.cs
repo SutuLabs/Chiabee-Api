@@ -87,7 +87,7 @@
                     _.Name,
                     TryGet(() => _.GetFarmerStatus()),
                     TryGet(() => _.GetNodeStatus())))
-                .Where(_ => _ != null)
+                .Where(_ => _ != null && _.Farmer != null && _.Node != null)
                 .ToArray();
 
         public IEnumerable<OptimizedPlotManPlan> GetOptimizePlotManPlan(PlotterStatus[] plotters)
