@@ -24,7 +24,7 @@
                 var dirs = filelist.ToArrayList();
                 foreach (var dir in dirs)
                 {
-                    var dircmd = client.RunCommand($@"ls -l {dir}");
+                    var dircmd = client.RunCommand($@"ls -al {dir}");
                     var list = dircmd.Result.ToArrayList();
 
                     for (int i = 0; i < list.Length; i++)
