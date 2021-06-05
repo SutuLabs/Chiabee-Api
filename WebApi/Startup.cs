@@ -40,6 +40,7 @@
             services.AddSingleton<PersistentService, PersistentService>();
             services.AddHostedService<RefreshServerInfoService>();
             services.AddHostedService<RefreshFarmInfoService>();
+            services.AddHostedService<RefreshPriceService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
