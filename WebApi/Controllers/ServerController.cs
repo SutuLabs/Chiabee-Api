@@ -12,6 +12,7 @@
     using WebApi.Entities;
     using WebApi.Services.ServerCommands;
     using Newtonsoft.Json;
+    using WebApi.Helpers;
 
     [Authorize]
     [ApiController]
@@ -41,7 +42,9 @@
         {
             var entity = await this.persistentService.RetrieveEntityAsync<MachineStateEntity>();
             if (entity == null) return NoContent();
-            var info = JsonConvert.DeserializeObject<ServerStatus[]>(entity.MachinesJson);
+            var json = entity.MachinesJsonGzip?.Decompress();
+            if (string.IsNullOrEmpty(json)) return NoContent();
+            var info = JsonConvert.DeserializeObject<ServerStatus[]>(json);
             return Ok(info);
         }
 
@@ -50,7 +53,9 @@
         {
             var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
             if (entity == null) return NoContent();
-            var info = JsonConvert.DeserializeObject<PlotterStatus[]>(entity.PlotterJson);
+            var json = entity.PlotterJsonGzip?.Decompress();
+            if (string.IsNullOrEmpty(json)) return NoContent();
+            var info = JsonConvert.DeserializeObject<PlotterStatus[]>(json);
             return Ok(info);
         }
 
@@ -78,7 +83,9 @@
         {
             var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
             if (entity == null) return NoContent();
-            var info = JsonConvert.DeserializeObject<FarmerNodeStatus[]>(entity.FarmerJson);
+            var json = entity.FarmerJsonGzip?.Decompress();
+            if (string.IsNullOrEmpty(json)) return NoContent();
+            var info = JsonConvert.DeserializeObject<FarmerNodeStatus[]>(json);
             return Ok(info);
         }
 
@@ -87,7 +94,9 @@
         {
             var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
             if (entity == null) return NoContent();
-            var info = JsonConvert.DeserializeObject<PlotterStatus[]>(entity.PlotterJson);
+            var json = entity.PlotterJsonGzip?.Decompress();
+            if (string.IsNullOrEmpty(json)) return NoContent();
+            var info = JsonConvert.DeserializeObject<PlotterStatus[]>(json);
             var plan = serverService.GetOptimizePlotManPlan(info);
             return Ok(plan);
         }

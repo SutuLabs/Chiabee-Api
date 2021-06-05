@@ -5,6 +5,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using WebApi.Entities;
+    using WebApi.Helpers;
     using WebApi.Models;
 
     internal class RefreshServerInfoService : BaseRefreshService
@@ -28,7 +29,7 @@
         protected override async Task DoWorkAsync()
         {
             var si = JsonSerializer.Serialize(await this.server.GetServersInfo());
-            await this.persistentService.LogEntityAsync(new MachineStateEntity { MachinesJson = si });
+            await this.persistentService.LogEntityAsync(new MachineStateEntity { MachinesJsonGzip = si.Compress() });
         }
     }
 }

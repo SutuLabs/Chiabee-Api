@@ -16,7 +16,7 @@
             this.Key = key;
         }
 
-        public string MachinesJson { get; set; }
+        public string MachinesJsonGzip { get; set; }
 
         [IgnoreProperty]
         public string Key

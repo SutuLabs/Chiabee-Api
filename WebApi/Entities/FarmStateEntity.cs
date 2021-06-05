@@ -16,8 +16,8 @@
             this.Key = key;
         }
 
-        public string PlotterJson { get; set; }
-        public string FarmerJson { get; set; }
+        public string PlotterJsonGzip { get; set; }
+        public string FarmerJsonGzip { get; set; }
 
         [IgnoreProperty]
         public string Key

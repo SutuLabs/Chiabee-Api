@@ -5,6 +5,7 @@
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using WebApi.Entities;
+    using WebApi.Helpers;
     using WebApi.Models;
 
     internal class RefreshFarmInfoService : BaseRefreshService
@@ -29,7 +30,7 @@
         {
             var pi = JsonSerializer.Serialize(await this.server.GetPlotterInfo());
             var fi = JsonSerializer.Serialize(await this.server.GetFarmerInfo());
-            await this.persistentService.LogEntityAsync(new FarmStateEntity { PlotterJson = pi, FarmerJson = fi });
+            await this.persistentService.LogEntityAsync(new FarmStateEntity { PlotterJsonGzip = pi.Compress(), FarmerJsonGzip = fi.Compress() });
         }
     }
 }
