@@ -1,6 +1,7 @@
 ﻿namespace WebApi.Services.ServerCommands
 {
     using System;
+    using System.Linq;
     using System.Net.Sockets;
     using Renci.SshNet.Common;
     using WebApi.Models;
@@ -47,5 +48,10 @@
                 throw;
             }
         }
+
+        public static string[] CleanSplit(this string str, string separator = "\n") => str
+            .Split(separator, StringSplitOptions.RemoveEmptyEntries)
+            .Select(_ => _.Trim())
+            .ToArray();
     }
 }

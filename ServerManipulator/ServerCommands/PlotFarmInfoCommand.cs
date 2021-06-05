@@ -21,11 +21,11 @@
 
             IEnumerable<PlotInfo> ParseListFile(string filelist)
             {
-                var dirs = filelist.ToArrayList();
+                var dirs = filelist.CleanSplit();
                 foreach (var dir in dirs)
                 {
                     var dircmd = client.RunCommand($@"ls -al {dir}");
-                    var list = dircmd.Result.ToArrayList();
+                    var list = dircmd.Result.CleanSplit();
 
                     for (int i = 0; i < list.Length; i++)
                     {
@@ -45,12 +45,6 @@
                 }
             }
         }
-
-        private static string[] ToArrayList(this string filelist) => filelist
-            .Split("\n")
-            .Select(_ => _.Trim())
-            .Where(_ => !string.IsNullOrEmpty(_))
-            .ToArray();
     }
 
     public record PlotInfo(string Filename, long Size, string PlotId, string Directory, string Host);
