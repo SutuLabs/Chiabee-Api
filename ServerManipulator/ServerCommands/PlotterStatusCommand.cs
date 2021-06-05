@@ -47,7 +47,7 @@
         public static DirectoryFileCount GetDirectoryFileCountCommand(this TargetMachine client, string path)
         {
             if (!client.EnsureConnected()) return null;
-            var cmd = client.RunCommand(@$"ls {path} | wc -l");
+            var cmd = client.RunCommand(@$"ls {path}/*.plot | wc -l");
             if (!int.TryParse(cmd.Result, out var count)) return null;
             return new DirectoryFileCount(path, count);
         }
