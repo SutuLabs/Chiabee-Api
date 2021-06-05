@@ -13,6 +13,7 @@
             if (!client.EnsureConnected()) return null;
             var topCmd = client.RunCommand(@"top -b1n1 -E G |grep ""Cpu\|Mem \|Tasks""");
             var output = topCmd.Result;
+            if (string.IsNullOrEmpty(output)) return null;
 
             var disks = client.GetDiskStatus();
             var netSpeed = client.GetNetworkIoSpeed();

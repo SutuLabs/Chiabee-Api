@@ -69,7 +69,9 @@
         public async Task<PlotInfo[]> GetPlotsInfo() =>
             new[] { this.farmerClients, this.harvesterClients }
                 .AsParallel()
-                .SelectMany(_ => _.SelectMany(_ => TryGet(() => _.GetPlotFarmInfo()) ?? new PlotInfo[] { }))
+                .SelectMany(_ => _
+                    .SelectMany(_ => TryGet(() => _.GetPlotFarmInfo()) ?? new PlotInfo[] { })
+                    .Where(_ => _ != null))
                 .Where(_ => _ != null)
                 .ToArray();
 
