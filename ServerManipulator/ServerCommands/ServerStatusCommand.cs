@@ -17,6 +17,7 @@
 
             var disks = client.GetDiskStatus();
             var netSpeed = client.GetNetworkIoSpeed();
+            var pwr = client.GetPowerConsumption();
 
             return new ServerStatus()
             {
@@ -25,7 +26,8 @@
                 Cpus = ParseCpuState(output).OrderBy(_ => _.Index).Select(_ => _.Idle).ToArray(),
                 Disks = disks,
                 Name = client.Name,
-                NetworkIoSpeed = netSpeed ?? 0,
+                NetworkIoSpeed = netSpeed,
+                Power = pwr,
             };
 
             static ProcessState ParseProcessState(string output)
@@ -76,7 +78,8 @@
         public MemoryState Memory { get; init; }
         public decimal[] Cpus { get; init; }
         public DiskStatus[] Disks { get; init; }
-        public int NetworkIoSpeed { get; init; }
+        public int? NetworkIoSpeed { get; init; }
+        public decimal? Power { get; init; }
     }
 
     public record DiskStatus(string Device, long Size, long Used, long Available, string Path);
