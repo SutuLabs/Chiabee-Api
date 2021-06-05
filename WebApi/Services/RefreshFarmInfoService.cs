@@ -30,7 +30,15 @@
         {
             var pi = JsonSerializer.Serialize(await this.server.GetPlotterInfo());
             var fi = JsonSerializer.Serialize(await this.server.GetFarmerInfo());
-            await this.persistentService.LogEntityAsync(new FarmStateEntity { PlotterJsonGzip = pi.Compress(), FarmerJsonGzip = fi.Compress() });
+            var entity = new FarmStateEntity { PlotterJsonGzip = pi.Compress(), FarmerJsonGzip = fi.Compress() };
+            try
+            {
+                await this.persistentService.LogEntityAsync(entity);
+            }
+            catch (Microsoft.Azure.Cosmos.Table.StorageException sex)
+            {
+                this.logger.LogWarning(sex, $"failed to store, PJ Length: {entity.PlotterJsonGzip.Length}, FJ Length: {entity.FarmerJsonGzip.Length}");
+            }
         }
     }
 }

@@ -9,9 +9,9 @@
 
     public abstract class BaseRefreshService : IHostedService, IDisposable
     {
-        private readonly ILogger logger;
         private Timer timer;
         private bool isRunning;
+        protected readonly ILogger logger;
 
         public BaseRefreshService(ILogger<BaseRefreshService> logger, string serviceName, int delayStartSeconds, int intervalSeconds)
         {
