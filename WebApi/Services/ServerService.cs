@@ -92,13 +92,17 @@
                 .Where(_ => _ != null && _.Farmer != null && _.Node != null)
                 .ToArray();
 
-        public IEnumerable<OptimizedPlotManPlan> GetOptimizePlotManPlan(PlotterStatus[] plotters)
+        public IEnumerable<OptimizedPlotManPlan> GetOptimizePlotManPlan(PlotterStatus[] plotters, ServerStatus[] harvesters)
         {
+            var hs = harvesters.ToDictionary(_ => _.Name, _ => _);
             var targets = this.appSettings.GetHarvesters()
+                .Where(h => hs.TryGetValue(h.Name, out var ss) && (ss.Disks.Sum(d => d.Available / 108_888_888 - 1) > 3)) // 1-K based
                 .Select(_ => _.Host)
                 .Reverse()
                 .Select(_ => new HarvestorPlan(_, Array.Empty<string>(), 0))
                 .ToDictionary(_ => _.Host, _ => _);
+            if (targets.Count == 0) yield break;
+
             var ps = plotters
                 .Select(_ =>
                 {

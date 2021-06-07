@@ -92,12 +92,29 @@
         [HttpGet("plotplan")]
         public async Task<IActionResult> GetPlotManPlan()
         {
-            var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
-            if (entity == null) return NoContent();
-            var json = entity.PlotterJsonGzip?.Decompress();
-            if (string.IsNullOrEmpty(json)) return NoContent();
-            var info = JsonConvert.DeserializeObject<PlotterStatus[]>(json);
-            var plan = serverService.GetOptimizePlotManPlan(info);
+            PlotterStatus[] plotters;
+            ServerStatus[] harvesters;
+
+            {
+                var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
+                if (entity == null) return NoContent();
+                var json = entity.PlotterJsonGzip?.Decompress();
+                if (string.IsNullOrEmpty(json)) return NoContent();
+                plotters = JsonConvert.DeserializeObject<PlotterStatus[]>(json);
+            }
+
+            {
+                var entity = await this.persistentService.RetrieveEntityAsync<MachineStateEntity>();
+                if (entity == null) return NoContent();
+                var json = entity.MachinesJsonGzip?.Decompress();
+                if (string.IsNullOrEmpty(json)) return NoContent();
+                harvesters = JsonConvert.DeserializeObject<ServerStatus[]>(json);
+                harvesters = harvesters
+                    .Where(_ => _.Name.StartsWith("harvester"))
+                    .ToArray();
+            }
+
+            var plan = serverService.GetOptimizePlotManPlan(plotters, harvesters);
             return Ok(plan);
         }
 
