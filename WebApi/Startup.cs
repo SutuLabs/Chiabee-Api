@@ -24,6 +24,7 @@
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.AddCors();
             services.AddControllers();
+            services.AddMemoryCache();
 
             services.AddAuthentication("BasicAuthentication")
                 .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);

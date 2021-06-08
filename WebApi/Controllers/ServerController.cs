@@ -13,6 +13,8 @@
     using WebApi.Services.ServerCommands;
     using Newtonsoft.Json;
     using WebApi.Helpers;
+    using Microsoft.Extensions.Caching.Memory;
+    using System;
 
     [Authorize]
     [ApiController]
@@ -22,17 +24,20 @@
         private readonly ILogger<ServerController> logger;
         private readonly ServerService serverService;
         private readonly PersistentService persistentService;
+        private readonly IMemoryCache memoryCache;
         private readonly AppSettings appSettings;
 
         public ServerController(
             ILogger<ServerController> logger,
             ServerService serverService,
             PersistentService persistentService,
+            IMemoryCache memoryCache,
             IOptions<AppSettings> appSettings)
         {
             this.logger = logger;
             this.serverService = serverService;
             this.persistentService = persistentService;
+            this.memoryCache = memoryCache;
             this.appSettings = appSettings.Value;
 
         }
@@ -80,10 +85,15 @@
 
         [HttpGet("disks")]
         [Authorize(nameof(UserRole.Admin))]
-        public async Task<IActionResult> GetAllHarvesterDisks()
+        public async Task<IActionResult> GetAllHarvesterDisks(bool force = false)
         {
-            var result = await this.serverService.GetHarvesterDisksInfo();
-            return Ok(result);
+            if (force || !memoryCache.TryGetValue(nameof(GetAllHarvesterDisks), out var disks))
+            {
+                disks = await this.serverService.GetHarvesterDisksInfo();
+                memoryCache.Set(nameof(GetAllHarvesterDisks), disks, TimeSpan.FromMinutes(30));
+            }
+
+            return Ok(disks);
         }
 
         [HttpGet("farmer")]
