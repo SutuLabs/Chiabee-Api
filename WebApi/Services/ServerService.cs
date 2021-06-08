@@ -103,7 +103,7 @@
         {
             var hs = harvesters.ToDictionary(_ => _.Name, _ => _);
             var targets = this.appSettings.GetHarvesters()
-                .Where(h => hs.TryGetValue(h.Name, out var ss) && (ss.Disks.Sum(d => d.Available / 108_888_888 - 1) > 3)) // 1-K based
+                .Where(h => hs.TryGetValue(h.Name, out var ss) && (ss.Disks.Sum(d => Math.Max(0, d.Available / 108_888_888 - 1)) > 3)) // 1-K based
                 .Select(_ => _.Host)
                 .Reverse()
                 .Select(_ => new HarvestorPlan(_, Array.Empty<string>(), 0))
