@@ -37,7 +37,7 @@
                 var match = reState.Match(output);
                 var time = DateTime.Parse(match.Groups["time"].Value.Replace(" UTC", "Z"));
                 var height = int.Parse(match.Groups["height"].Value);
-                var pairs = ParsePairs(output,
+                var pairs = CommandHelper.ParsePairs(output,
                     new StatusDefinition(nameof(NodeStatus.Status), "Current Blockchain Status"),
                     new StatusDefinition(nameof(NodeStatus.Space), "Estimated network space"),
                     new StatusDefinition(nameof(NodeStatus.Difficulty), "Current difficulty"),
@@ -76,7 +76,7 @@
                 //Estimated network space: 1528.527 PiB
                 //Expected time to win: 9 months and 3 weeks
                 //Note: log into your key using 'chia wallet show' to see rewards for each key
-                var pairs = ParsePairs(output,
+                var pairs = CommandHelper.ParsePairs(output,
                     new StatusDefinition(nameof(FarmerStatus.Status), "Farming status"),
                     new StatusDefinition(nameof(FarmerStatus.TotalFarmed), "Total chia farmed"),
                     new StatusDefinition(nameof(FarmerStatus.TxFees), "User transaction fees"),
@@ -102,37 +102,19 @@
             }
         }
 
-        private static int? GetInt(string input )
+        private static int? GetInt(string input)
         {
             if (input == "Unknown") return null;
             if (!int.TryParse(input, out var result)) return null;
             return result;
         }
 
-        private static decimal? GetDecimal(string input )
+        private static decimal? GetDecimal(string input)
         {
             if (input == "Unknown") return null;
             if (!decimal.TryParse(input, out var result)) return null;
             return result;
         }
-
-        private static IEnumerable<StatusPair> ParsePairs(string output, params StatusDefinition[] defs)
-        {
-            var lines = output.Split("\n", StringSplitOptions.RemoveEmptyEntries).Select(_ => _.Trim()).ToArray();
-            foreach (var line in lines)
-            {
-                var parts = line.Split(":", StringSplitOptions.RemoveEmptyEntries).Select(_ => _.Trim()).ToArray();
-                if (parts.Length == 2)
-                {
-                    var def = defs.FirstOrDefault(_ => _.Text == parts[0]);
-                    if (def != null)
-                        yield return new StatusPair(def.Key, parts[1]);
-                }
-            }
-        }
-
-        public record StatusPair(string Key, string Value);
-        public record StatusDefinition(string Key, string Text);
     }
 
     public record FarmerNodeStatus(string Name, FarmerStatus Farmer, NodeStatus Node);

@@ -1,6 +1,7 @@
 ﻿namespace WebApi.Services.ServerCommands
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net.Sockets;
     using Renci.SshNet.Common;
@@ -53,5 +54,24 @@
             .Split(separator, StringSplitOptions.RemoveEmptyEntries)
             .Select(_ => _.Trim())
             .ToArray();
+
+        public static IEnumerable<StatusPair> ParsePairs(string output, params StatusDefinition[] defs)
+        {
+            var lines = output.CleanSplit();
+            foreach (var line in lines)
+            {
+                var pos = line.IndexOf(":");
+                if (pos > -1)
+                {
+                    var key = line[..pos].Trim();
+                    var def = defs.FirstOrDefault(_ => _.Text == key);
+                    if (def != null)
+                        yield return new StatusPair(def.Key, line[(pos + 1)..]);
+                }
+            }
+        }
     }
+
+    public record StatusPair(string Key, string Value);
+    public record StatusDefinition(string Key, string Text);
 }
