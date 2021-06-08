@@ -48,31 +48,32 @@ sdm                                             3.7T disk
                 //└─sdm1                    /farm/zyc008 zyc008   3.7T part e6c6f3f3-55f9-4aa9-ac5b-ad12c78520f0
                 .Select(segs => new DevicePartInfo(segs[0], segs[3], segs[1], segs[2], segs[5]) { BlockDevice = segs[0].TrimEnd('1'), });
 
-            return ParseDiskSmart(diskNames, devs).ToArray();
+            var dd = devs.ToDictionary(_ => _.BlockDevice, _ => _);
+            return diskNames
+                .AsParallel()
+                .Select(_ => dd.TryGetValue(_, out var device)
+                    ? new { device, name = _ }
+                    : new { device = default(DevicePartInfo), name = _ })
+                .Select(_ => ParseDiskSmart(_.name, _.device))
+                .ToArray();
 
-            IEnumerable<HarvesterDiskInfo> ParseDiskSmart(string[] diskNames, DevicePartInfo[] devices)
+            HarvesterDiskInfo ParseDiskSmart(string disk, DevicePartInfo device)
             {
-                var dd = devices.ToDictionary(_ => _.BlockDevice, _ => _);
-                foreach (var disk in diskNames)
-                {
-                    dd.TryGetValue(disk, out var device);
-                    using var cmd = client.RunCommand(@$"echo sutu | sudo -S sudo smartctl -d sat -a /dev/{disk}");
-                    var smart = cmd.Result;
-                    var pairs = CommandHelper.ParsePairs(smart,
-                        new StatusDefinition(nameof(HarvesterDiskInfo.Sn), "Serial Number"),
-                        new StatusDefinition(nameof(HarvesterDiskInfo.Model), "Device Model")
-                        )
-                        .ToDictionary(_ => _.Key, _ => _.Value);
+                using var cmd = client.RunCommand(@$"echo sutu | sudo -S sudo smartctl -d sat -a /dev/{disk}");
+                var smart = cmd.Result;
+                var pairs = CommandHelper.ParsePairs(smart,
+                    new StatusDefinition(nameof(HarvesterDiskInfo.Sn), "Serial Number"),
+                    new StatusDefinition(nameof(HarvesterDiskInfo.Model), "Device Model")
+                    )
+                    .ToDictionary(_ => _.Key, _ => _.Value);
 
-                    yield return new HarvesterDiskInfo(
-                        pairs.TryGetValue(nameof(HarvesterDiskInfo.Sn), out var sn) ? sn : null,
-                        pairs.TryGetValue(nameof(HarvesterDiskInfo.Model), out var model) ? model : null,
-                        disk,
-                        device == null ? null : new[] { device with { BlockDevice = null } },
-                        null
-                        );
-                }
-
+                return new HarvesterDiskInfo(
+                    pairs.TryGetValue(nameof(HarvesterDiskInfo.Sn), out var sn) ? sn : null,
+                    pairs.TryGetValue(nameof(HarvesterDiskInfo.Model), out var model) ? model : null,
+                    disk,
+                    device == null ? null : new[] { device with { BlockDevice = null } },
+                    null
+                    );
             }
         }
     }
