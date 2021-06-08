@@ -78,6 +78,14 @@
             return Ok(result);
         }
 
+        [HttpGet("disks")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> GetAllHarvesterDisks()
+        {
+            var result = await this.serverService.GetHarvesterDisksInfo();
+            return Ok(result);
+        }
+
         [HttpGet("farmer")]
         public async Task<IActionResult> GetFarmerInfo()
         {

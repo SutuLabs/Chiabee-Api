@@ -75,6 +75,13 @@
                 .Where(_ => _ != null)
                 .ToArray();
 
+        public async Task<MachineWithDisks[]> GetHarvesterDisksInfo() =>
+            new[] { this.farmerClients, this.harvesterClients }
+                .AsParallel()
+                .SelectMany(_ => _)
+                .Select(_ => new MachineWithDisks(_.Name, TryGet(() => _.GetHarvesterDiskInfo())))
+                .ToArray();
+
         public async Task<PlotterStatus[]> GetPlotterInfo() =>
             this.plotterClients
                 .AsParallel()
@@ -205,4 +212,5 @@
     }
 
     public record OptimizedPlotManPlan(string Name, PlotManConfiguration Plan);
+    public record MachineWithDisks(string Name, HarvesterDiskInfo[] Disks);
 }

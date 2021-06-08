@@ -66,7 +66,7 @@
                     var key = line[..pos].Trim();
                     var def = defs.FirstOrDefault(_ => _.Text == key);
                     if (def != null)
-                        yield return new StatusPair(def.Key, line[(pos + 1)..]);
+                        yield return new StatusPair(def.Key, line[(pos + 1)..].Trim());
                 }
             }
         }
