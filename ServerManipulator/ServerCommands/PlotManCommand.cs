@@ -5,6 +5,7 @@
     using System.Dynamic;
     using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using Renci.SshNet;
     using WebApi.Models;
     using WebApi.Services;
@@ -68,6 +69,39 @@
             }
 
             return successFlag;
+        }
+
+        public static bool CleanLegacyTemporaryFiles(this TargetMachine client)
+        {
+            if (!client.EnsureConnected()) return default;
+
+            var ps = client.GetPlotterStatus();
+            var jobs = ps.Jobs.Select(_ => _.Id);
+
+            var cmd = client.RunCommand($@"ls /data/tmp/ |sort |grep -o '.*\.plot' |sort -u");
+            var output = cmd.Result;
+
+            //plot-k32-2021-06-08-16-20-80f5cf0ad7edb5daa869cce84ee1e5669a33ef5e6ffeba255f64c97642d3ae07.plot
+            var reId = new Regex(@"plot-k\d{2}-\d{4}-(\d{2}-){4}(?<id>[0-9a-f]{64}).plot");
+
+            // ids need to clean
+            var lstId = output.CleanSplit()
+                .Select(_ => reId.Match(_))
+                .Where(_ => _.Success)
+                .Select(_ => _.Groups["id"].Value)
+                .Select(_ => _[0..8])
+                .Except(jobs)
+                .ToArray();
+
+            var flag = true;
+
+            foreach (var id in lstId)
+            {
+                var cleanCmd = client.RunCommand($@"rm /data/tmp/*{id}*");
+                flag &= cmd.ExitStatus == 0;
+            }
+
+            return flag;
         }
 
         private static int? ParseInt(string str)

@@ -200,6 +200,17 @@ A032	Z1Z5ZAFH"
                 return BadRequest();
         }
 
+        [HttpDelete("temporary")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> CleanTemporary([FromBody] string[] names)
+        {
+            var result = await this.serverService.CleanLegacyTemporaryFile(names);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpGet("errors")]
         public async Task<IActionResult> GetFarmerErrorInfo()
         {

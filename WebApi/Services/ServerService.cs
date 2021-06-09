@@ -60,6 +60,21 @@
             return machine.StopPlot(plotId);
         }
 
+        public async Task<bool> CleanLegacyTemporaryFile(string[] machineNames)
+        {
+            var machines = this.plotterClients;
+            var successFlag = true;
+            foreach (var name in machineNames)
+            {
+                var m = machines.FirstOrDefault(_ => _.Name == name);
+                if (m == null) continue;
+
+                successFlag &= m.CleanLegacyTemporaryFiles();
+            }
+
+            return successFlag;
+        }
+
         public async Task<ServerStatus[]> GetServersInfo() =>
             new[] { this.farmerClients, this.plotterClients, this.harvesterClients }
                 .AsParallel()
