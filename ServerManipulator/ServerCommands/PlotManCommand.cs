@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Dynamic;
+    using System.IO;
     using System.Linq;
     using Renci.SshNet;
     using WebApi.Models;
@@ -42,7 +43,34 @@
             }
         }
 
-        public static int? ParseInt(string str)
+        public static bool SetPlotManConfiguration(this TargetMachine m, PlotManConfiguration config)
+        {
+            var successFlag = true;
+
+            using var scp = new ScpClient(m.ConnectionInfo);
+            scp.Connect();
+            scp.Upload(new FileInfo("Assets/plotman.yaml"), "/home/sutu/.config/plotman/plotman.yaml");
+            scp.Disconnect();
+
+            // always execute these replace, return just the result
+            var replaceFlag = true;
+            replaceFlag &= Replace("rsyncd_host", "rsyncd_host", config.RsyncdHost);
+            replaceFlag &= Replace("tmpdir_max_jobs", "TEMP_JOB", config.JobNumber);
+            replaceFlag &= Replace("global_stagger_m", "STAGGER_MIN", config.StaggerMinute);
+            replaceFlag &= Replace("index", "rsyncd_index", config.RsyncdIndex);
+
+            successFlag &= replaceFlag;
+
+            bool Replace(string leading, string placeholder, object value)
+            {
+                var cresult = m.RunCommand($"sed -i 's/{leading}: {placeholder}/{leading}: {value}/g' ~/.config/plotman/plotman.yaml");
+                return cresult.ExitStatus == 0;
+            }
+
+            return successFlag;
+        }
+
+        private static int? ParseInt(string str)
         {
             if (int.TryParse(str, out var num))
                 return num;
