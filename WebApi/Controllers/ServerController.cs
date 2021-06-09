@@ -96,6 +96,48 @@
             return Ok(disks);
         }
 
+        [HttpGet("serial-number")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> GetSerialNumber()
+        {
+            var s = @"A001	Z1Z1QWBG
+A002	Z1Z4A7RS
+A003	Z1Z2WHTW
+A004	Z1Z47BWQ
+A005	Z1Z2W424
+A006	Z1Z4AT2D
+A007	Z1Z35KPC
+A008	Z1Z1R2E7
+A009	Z1Z7Y1ZB
+A010	Z1Z60NGF
+A011	Z1Z604S7
+A012	Z1Z2Y0TR
+A013	Z1Z60EYM
+A014	Z1Z5Z9D5
+A015	Z1Z60JEA
+A016	Z1Z4DA5P
+A017	Z1Z799TD
+A018	Z1Z4CZTG
+A019	Z1Z6DTD3
+A020	Z1Z6MS1X
+A021	Z1Z6C8S8
+A022	Z1Z8VEPV
+A023	Z1Z4B739
+A024	Z1Z11VDW
+A025	Z1Z5Q98W
+A026	Z1Z60KGP
+A027	Z1Z5ZA7A
+A028	Z1Z4BEM3
+A029	Z1Z60LZ4
+A030	Z1Z5Z9LV
+A031	Z1Z5ZAGD
+A032	Z1Z5ZAFH"
+                .CleanSplit()
+                .Select(_ => _.CleanSplit("\t"))
+                .ToDictionary(_ => _[1], _ => _[0]);
+            return Ok(s);
+        }
+
         [HttpGet("farmer")]
         public async Task<IActionResult> GetFarmerInfo()
         {
@@ -140,6 +182,16 @@
         public async Task<IActionResult> SetPlotManPlan([FromBody] OptimizedPlotManPlan[] plans)
         {
             var result = serverService.SetOptimizePlotManPlan(plans);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
+        [HttpPost("create-part")]
+        public async Task<IActionResult> CreatePartition(string host, string block, string label)
+        {
+            var result = serverService.CreatePartition(host, block, label);
             if (result)
                 return Ok();
             else
