@@ -174,7 +174,9 @@ A032	Z1Z5ZAFH"
                     .ToArray();
             }
 
-            var plan = serverService.GetOptimizePlotManPlan(plotters, harvesters);
+            var plan1 = serverService.GetOptimizePlotManPlan(plotters.Where(_ => _.Name.StartsWith("r720")).ToArray(), harvesters.Where(_ => _.Name.StartsWith("harvester_s")).ToArray());
+            var plan2 = serverService.GetOptimizePlotManPlan(plotters.Where(_ => !_.Name.StartsWith("r720")).ToArray(), harvesters.Where(_ => !_.Name.StartsWith("harvester_s")).ToArray());
+            var plan = plan1.Concat(plan2);
             return Ok(plan);
         }
 
