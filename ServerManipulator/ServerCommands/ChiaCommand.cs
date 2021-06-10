@@ -35,8 +35,8 @@
                 //   217718 | 17c16f3b3e6052d9376697496eeb30741ea49be6f918de8ef74da40c1b402ab7
                 var reState = new Regex(@"Time: (?<time>.*? UTC) +Height: +(?<height>\d+)");
                 var match = reState.Match(output);
-                var time = DateTime.Parse(match.Groups["time"].Value.Replace(" UTC", "Z"));
-                var height = int.Parse(match.Groups["height"].Value);
+                var time = DateTime.TryParse(match.Groups["time"].Value.Replace(" UTC", "Z"), out var tt) ? tt : default;
+                var height = int.TryParse(match.Groups["height"].Value, out var hh) ? hh : -1;
                 var pairs = CommandHelper.ParsePairs(output,
                     new StatusDefinition(nameof(NodeStatus.Status), "Current Blockchain Status"),
                     new StatusDefinition(nameof(NodeStatus.Space), "Estimated network space"),
@@ -49,10 +49,10 @@
                     pairs.ContainsKey(nameof(NodeStatus.Status)) ? pairs[nameof(NodeStatus.Status)] : "Special",
                     time,
                     height,
-                    pairs[nameof(NodeStatus.Space)],
-                    pairs[nameof(NodeStatus.Difficulty)],
-                    pairs[nameof(NodeStatus.Iterations)],
-                    pairs[nameof(NodeStatus.TotalIterations)]
+                    pairs.TryGetValue(nameof(NodeStatus.Space), out var space) ? space : null,
+                    pairs.TryGetValue(nameof(NodeStatus.Difficulty), out var diff) ? diff : null,
+                    pairs.TryGetValue(nameof(NodeStatus.Iterations), out var iter) ? iter : null,
+                    pairs.TryGetValue(nameof(NodeStatus.TotalIterations), out var ti) ? ti : null
                     );
             }
         }
