@@ -64,6 +64,17 @@
             return Ok(info);
         }
 
+        [HttpGet("prices")]
+        public async Task<IActionResult> GetPrices()
+        {
+            var entity = await this.persistentService.RetrieveEntityAsync<PriceStateEntity>();
+            if (entity == null) return NoContent();
+            var json = entity.PricesJson;
+            if (string.IsNullOrEmpty(json)) return NoContent();
+            var info = JsonConvert.DeserializeObject<PriceEntity[]>(json);
+            return Ok(info);
+        }
+
         [HttpDelete("plot")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> StopPlot(string name, string id)
