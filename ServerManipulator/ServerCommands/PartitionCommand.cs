@@ -39,7 +39,7 @@ sudo mkdir -p /farm/$plabel
 sudo mount -a
 sudo chown sutu /farm/$plabel/
 ";
-            m.ExecuteScript(cmds);
+            m.ExecuteScript(cmds, true);
             using var cmd = m.RunCommand($"./chia-blockchain/activate && chia plots add -d /farm/{label}");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
