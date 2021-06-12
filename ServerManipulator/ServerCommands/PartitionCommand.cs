@@ -5,7 +5,7 @@
     using Renci.SshNet;
     using WebApi.Models;
 
-    public static class CreatePartitionCommand
+    public static class PartitionCommand
     {
         public static bool CreatePartition(this TargetMachine m, string dname, string label)
         {
