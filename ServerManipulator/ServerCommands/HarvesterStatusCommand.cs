@@ -21,8 +21,7 @@
 
         private static string[] GetAbnormalFarmlands(TargetMachine client)
         {
-            const string bdir = "/farm/";
-            using var cmd = client.RunCommand($"ls {bdir} | sort");
+            using var cmd = client.RunCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
             var lines = cmd.Result
                 .CleanSplit();
 
@@ -30,9 +29,8 @@
 
             static IEnumerable<string> GetAbnormals(TargetMachine client, string[] lines)
             {
-                foreach (var line in lines)
+                foreach (var dir in lines)
                 {
-                    var dir = bdir + line;
                     using var trycmd = client.RunCommand($"touch {dir}");
                     if (trycmd.ExitStatus != 0) yield return dir;
                 }
