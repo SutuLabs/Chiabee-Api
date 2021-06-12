@@ -16,7 +16,7 @@
             var el = GetEligibleInfo(client);
             var abs = GetAbnormalFarmlands(client);
 
-            return new HarvesterStatus(client.Name, el.Total, el.Time, abs);
+            return new HarvesterStatus(client.Name, el?.Total, el?.Time, abs);
         }
 
         private static string[] GetAbnormalFarmlands(TargetMachine client)
@@ -72,5 +72,5 @@
         }
     }
 
-    public record HarvesterStatus(string Name, int? TotalPlot, DateTime lastPlotTime, string[] AbnormalFarmlands);
+    public record HarvesterStatus(string Name, int? TotalPlot, DateTime? LastPlotTime, string[] AbnormalFarmlands);
 }
