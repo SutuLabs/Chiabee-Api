@@ -48,7 +48,8 @@ tmux send-keys 'nmon <<< dn.' 'C-m'
 tmux split-window -v
 tmux send-keys 'watch -n 5 ""df -h | grep /farm""' 'C-m'
 tmux split-window -v
-tmux send-keys 'chia && chia start harvester' 'C-m'
+tmux send-keys 'chia' 'C-m'
+tmux send-keys 'chia start harvester' 'C-m'
 tmux split-window -v -t 0
 tmux send-keys 'tail -n 10 -f {log}' 'C-m'
 tmux split-window -v -t 0
