@@ -12,7 +12,7 @@
         public static HarvesterDiskInfo[] GetHarvesterDiskInfo(this TargetMachine client)
         {
             if (!client.EnsureConnected()) return null;
-            using var cmd = client.RunCommand(@"lsblk -e7 -no name,mountpoint,label,size,type,uuid");
+            using var cmd = client.RunCommand(@"lsblk -r -e7 -no name,mountpoint,label,size,type,uuid");
             /*
 sda                                             3.7T disk
 └─sda1                    /farm/8      wy006    3.7T part 10f015c0-4b7d-4a47-850a-c75bfc441ea9
@@ -27,25 +27,26 @@ sde                                             3.7T disk
 sdm                                             3.7T disk
 └─sdm1                    /farm/zyc008 zyc008   3.7T part e6c6f3f3-55f9-4aa9-ac5b-ad12c78520f0
              */
-            var diskNames = ParseDiskName(cmd.Result).ToArray();
+            const string separator = "|";
+            var output = cmd.Result.Replace(" ", separator);
+            var diskNames = ParseDiskName(output).ToArray();
 
             static IEnumerable<string> ParseDiskName(string output) => output
                 .CleanSplit()
                 .Where(_ => _.Contains("disk"))
-                .Select(_ => _.CleanSplit(" "))
+                .Select(_ => _.CleanSplit(separator))
                 //sda                                             3.7T disk
                 .Select(segs => (segs.Length == 3 && segs[2] == "disk") ? segs[0] : default)
                 .Where(_ => _ != null);
 
-            var devs = ParseDiskInfo(cmd.Result)
+            var devs = ParseDiskInfo(output)
                 .ToArray();
 
             static IEnumerable<DevicePartInfo> ParseDiskInfo(string output) => output
                 .CleanSplit()
-                .Where(_ => _.StartsWith("└─"))
-                .Select(_ => _["└─".Length..].CleanSplit(" "))
+                .Select(_ => _.CleanSplit(separator))
                 .Where(segs => segs.Length == 6 && segs[0].Contains("1") && segs[4] == "part")
-                //└─sdm1                    /farm/zyc008 zyc008   3.7T part e6c6f3f3-55f9-4aa9-ac5b-ad12c78520f0
+                //sdm1 /farm/zyc008 zyc008 3.7T part e6c6f3f3-55f9-4aa9-ac5b-ad12c78520f0
                 .Select(segs => new DevicePartInfo(segs[0], segs[3], segs[1], segs[2], segs[5]) { BlockDevice = segs[0].TrimEnd('1'), });
 
             var dd = devs.ToDictionary(_ => _.BlockDevice, _ => _);
