@@ -76,6 +76,12 @@ sdm                                             3.7T disk
                     );
             }
         }
+
+        public static int MountAll(this TargetMachine m)
+        {
+            using var cmd = m.RunCommand($"echo sutu | sudo -S sudo mount -a");
+            return cmd.ExitStatus;
+        }
     }
 
     public record HarvesterDiskInfo(string Sn, string Model, string BlockDevice, DevicePartInfo[] Parts, DiskSmartInfo Smart);

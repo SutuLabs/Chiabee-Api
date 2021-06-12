@@ -247,6 +247,17 @@ A032	Z1Z5ZAFH"
             return Ok(info);
         }
 
+        [HttpPost("mount")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> MountAll([FromBody] string[] names)
+        {
+            var result = await this.serverService.MountAll(names);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpPost("daemons/plotters")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> PlotterDaemons([FromBody] string[] names)

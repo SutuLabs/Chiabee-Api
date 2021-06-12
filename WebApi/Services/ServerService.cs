@@ -211,6 +211,20 @@
             return m.CreatePartition(block, label);
         }
 
+        public async Task<bool> MountAll(string[] names)
+        {
+            var machines = new[] { this.harvesterClients, this.farmerClients }.SelectMany(_ => _).ToArray();
+            return names
+                .AsParallel()
+                .Select(name =>
+                {
+                    var m = machines.FirstOrDefault(_ => _.Name == name);
+                    if (m == null) return false;
+                    return m.MountAll() == 0;
+                })
+                .Aggregate(true, (c, l) => c & l);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
