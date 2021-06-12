@@ -115,6 +115,13 @@
                 .Where(_ => _ != null && _.Farmer != null && _.Node != null)
                 .ToArray();
 
+        public async Task<HarvesterStatus[]> GetHarvesterInfo() =>
+            this.harvesterClients
+                .AsParallel()
+                .Select(_ => TryGet(() => _.GetHarvesterStatus()))
+                .Where(_ => _ != null)
+                .ToArray();
+
         public async Task<bool> PlotterDaemons(string[] names) =>
             this.plotterClients
                 .Where(_ => (names == null || names.Length == 0) || names.Contains(_.Name))

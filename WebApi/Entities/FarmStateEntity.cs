@@ -18,6 +18,7 @@
 
         public string PlotterJsonGzip { get; set; }
         public string FarmerJsonGzip { get; set; }
+        public string HarvesterJsonGzip { get; set; }
 
         [IgnoreProperty]
         public string Key

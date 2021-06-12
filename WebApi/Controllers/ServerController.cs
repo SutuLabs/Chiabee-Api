@@ -64,6 +64,17 @@
             return Ok(info);
         }
 
+        [HttpGet("harvester")]
+        public async Task<IActionResult> GetHarvesterInfo()
+        {
+            var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
+            if (entity == null) return NoContent();
+            var json = entity.HarvesterJsonGzip?.Decompress();
+            if (string.IsNullOrEmpty(json)) return NoContent();
+            var info = JsonConvert.DeserializeObject<HarvesterStatus[]>(json);
+            return Ok(info);
+        }
+
         [HttpGet("prices")]
         public async Task<IActionResult> GetPrices()
         {
