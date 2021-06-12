@@ -123,6 +123,15 @@
             return Ok(disks);
         }
 
+        [HttpGet("disk/{name}")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> GetHarvesterDisk(string name)
+        {
+            var disk = await this.serverService.GetHarvesterDisksInfo(name);
+
+            return Ok(disk);
+        }
+
         [HttpGet("serial-number")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> GetSerialNumber()

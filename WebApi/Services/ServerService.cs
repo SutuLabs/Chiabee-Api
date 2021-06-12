@@ -98,6 +98,13 @@
                 .Select(_ => new MachineWithDisks(_.Name, TryGet(() => _.GetHarvesterDiskInfo())))
                 .ToArray();
 
+        public async Task<MachineWithDisks> GetHarvesterDisksInfo(string name) =>
+            new[] { this.farmerClients, this.harvesterClients }
+                .SelectMany(_ => _)
+                .Where(_ => _.Name == name)
+                .Select(_ => new MachineWithDisks(_.Name, TryGet(() => _.GetHarvesterDiskInfo())))
+                .FirstOrDefault();
+
         public async Task<PlotterStatus[]> GetPlotterInfo() =>
             this.plotterClients
                 .AsParallel()
