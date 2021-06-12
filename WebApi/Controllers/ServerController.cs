@@ -99,10 +99,15 @@
 
         [HttpGet("plots")]
         [Authorize(nameof(UserRole.Admin))]
-        public async Task<IActionResult> GetAllPlots()
+        public async Task<IActionResult> GetAllPlots(bool force = false)
         {
-            var result = await this.serverService.GetPlotsInfo();
-            return Ok(result);
+            if (force || !memoryCache.TryGetValue(nameof(GetAllPlots), out var plots))
+            {
+                plots = await this.serverService.GetPlotsInfo();
+                memoryCache.Set(nameof(GetAllPlots), plots, TimeSpan.FromMinutes(10));
+            }
+
+            return Ok(plots);
         }
 
         [HttpGet("disks")]
