@@ -224,5 +224,27 @@ A032	Z1Z5ZAFH"
             var info = serverService.eventList.ToArray();
             return Ok(info);
         }
+
+        [HttpPost("daemons/plotters")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> PlotterDaemons([FromBody] string[] names)
+        {
+            var result = await this.serverService.PlotterDaemons(names);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
+        [HttpPost("daemons/harvesters")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> HarvesterDaemons([FromBody] string[] names)
+        {
+            var result = await this.serverService.HarvesterDaemons(names);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
     }
 }

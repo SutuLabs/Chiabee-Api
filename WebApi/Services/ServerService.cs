@@ -115,6 +115,20 @@
                 .Where(_ => _ != null && _.Farmer != null && _.Node != null)
                 .ToArray();
 
+        public async Task<bool> PlotterDaemons(string[] names) =>
+            this.plotterClients
+                .Where(_ => (names == null || names.Length == 0) || names.Contains(_.Name))
+                .AsParallel()
+                .Select(_ => _.StartPlotterDaemon())
+                .Aggregate(true, (l, c) => l & c);
+
+        public async Task<bool> HarvesterDaemons(string[] names) =>
+            this.harvesterClients
+                .Where(_ => (names == null || names.Length == 0) || names.Contains(_.Name))
+                .AsParallel()
+                .Select(_ => _.StartHarvesterDaemon())
+                .Aggregate(true, (l, c) => l & c);
+
         public IEnumerable<OptimizedPlotManPlan> GetOptimizePlotManPlan(PlotterStatus[] plotters, ServerStatus[] harvesters)
         {
             var hs = harvesters.ToDictionary(_ => _.Name, _ => _);
@@ -175,12 +189,13 @@
                 if (m == null) continue;
 
                 successFlag &= m.SetPlotManConfiguration(plan.Plan);
+                successFlag &= m.StartPlotterDaemon();
             }
 
             return successFlag;
         }
 
-        internal bool CreatePartition(string host, string block, string label)
+        public bool CreatePartition(string host, string block, string label)
         {
             var machines = this.harvesterClients;
             var m = machines.FirstOrDefault(_ => _.Name == host);
