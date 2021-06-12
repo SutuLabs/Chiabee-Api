@@ -12,7 +12,7 @@
                 return null;
             }
 
-            var cmd = client.RunCommand(@$"echo sutu | sudo -S ipmitool sensor list | grep -i pwr");
+            using var cmd = client.RunCommand(@$"echo sutu | sudo -S ipmitool sensor list | grep -i pwr");
             //Pwr Consumption  | 154.000 | Watts | ok | na | na | na | 896.000 | 980.000 | na
 
             var items = cmd.Result.CleanSplit("|");

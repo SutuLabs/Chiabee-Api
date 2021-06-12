@@ -11,7 +11,7 @@
         {
             if (!client.EnsureConnected()) return null;
 
-            var pmCmd = client.RunCommand(@". ~/chia-blockchain/activate && plotman status");
+            using var pmCmd = client.RunCommand(@". ~/chia-blockchain/activate && plotman status");
 
             var fileCounts = client.GetDirectoryFileCountCommand(new[] { "/data/final" });
             var jobs = ParsePlotStatusOutput(pmCmd.Result).ToArray();
@@ -47,7 +47,7 @@
         public static DirectoryFileCount GetDirectoryFileCountCommand(this TargetMachine client, string path)
         {
             if (!client.EnsureConnected()) return null;
-            var cmd = client.RunCommand(@$"ls {path}/*.plot | wc -l");
+            using var cmd = client.RunCommand(@$"ls {path}/*.plot | wc -l");
             if (!int.TryParse(cmd.Result, out var count)) return null;
             return new DirectoryFileCount(path, count);
         }

@@ -15,7 +15,7 @@
             if (!client.EnsureConnected()) return null;
 
             var host = client.ConnectionInfo.Host;
-            var cmd = client.RunCommand(@$". ~/chia-blockchain/activate && chia plots show | grep ^/");
+            using var cmd = client.RunCommand(@$". ~/chia-blockchain/activate && chia plots show | grep ^/");
 
             return ParseListFile(cmd.Result).ToArray();
 
@@ -24,7 +24,7 @@
                 var dirs = filelist.CleanSplit();
                 foreach (var dir in dirs)
                 {
-                    var dircmd = client.RunCommand($@"ls -al {dir}");
+                    using var dircmd = client.RunCommand($@"ls -al {dir}");
                     var list = dircmd.Result.CleanSplit();
 
                     for (int i = 0; i < list.Length; i++)

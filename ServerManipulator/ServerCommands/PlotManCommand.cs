@@ -16,7 +16,7 @@
         public static bool StopPlot(this TargetMachine client, string plotId)
         {
             if (!client.EnsureConnected()) return default;
-            var cmd = client.RunCommand($@". ~/chia-blockchain/activate && yes | plotman kill {plotId}");
+            using var cmd = client.RunCommand($@". ~/chia-blockchain/activate && yes | plotman kill {plotId}");
             if (cmd.ExitStatus == 0) return true;
             return false;
         }
@@ -24,7 +24,7 @@
         public static PlotManConfiguration ReadPlotManConfiguration(this TargetMachine client)
         {
             if (!client.EnsureConnected()) return default;
-            var cmd = client.RunCommand($@"cat ~/.config/plotman/plotman.yaml");
+            using var cmd = client.RunCommand($@"cat ~/.config/plotman/plotman.yaml");
             var yaml = cmd.Result;
             var deserializer = new DeserializerBuilder().Build();
             if (string.IsNullOrEmpty(yaml)) return null;
@@ -64,7 +64,7 @@
 
             bool Replace(string leading, string placeholder, object value)
             {
-                var cresult = m.RunCommand($"sed -i 's/{leading}: {placeholder}/{leading}: {value}/g' ~/.config/plotman/plotman.yaml");
+                using var cresult = m.RunCommand($"sed -i 's/{leading}: {placeholder}/{leading}: {value}/g' ~/.config/plotman/plotman.yaml");
                 return cresult.ExitStatus == 0;
             }
 
@@ -78,7 +78,7 @@
             var ps = client.GetPlotterStatus();
             var jobs = ps.Jobs.Select(_ => _.Id);
 
-            var cmd = client.RunCommand($@"ls /data/tmp/ |sort |grep -o '.*\.plot' |sort -u");
+            using var cmd = client.RunCommand($@"ls /data/tmp/ |sort |grep -o '.*\.plot' |sort -u");
             var output = cmd.Result;
 
             //plot-k32-2021-06-08-16-20-80f5cf0ad7edb5daa869cce84ee1e5669a33ef5e6ffeba255f64c97642d3ae07.plot
@@ -97,7 +97,7 @@
 
             foreach (var id in lstId)
             {
-                var cleanCmd = client.RunCommand($@"rm /data/tmp/*{id}*");
+                using var cleanCmd = client.RunCommand($@"rm /data/tmp/*{id}*");
                 flag &= cmd.ExitStatus == 0;
             }
 

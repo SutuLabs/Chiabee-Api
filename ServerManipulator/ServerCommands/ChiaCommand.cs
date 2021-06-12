@@ -12,7 +12,7 @@
         public static NodeStatus GetNodeStatus(this TargetMachine client)
         {
             if (!client.EnsureConnected()) return null;
-            var nodeCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia show -s");
+            using var nodeCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia show -s");
             return ParseNodeStatus(nodeCmd.Result);
 
             static NodeStatus ParseNodeStatus(string output)
@@ -60,7 +60,7 @@
         public static FarmerStatus GetFarmerStatus(this TargetMachine client)
         {
             if (!client.EnsureConnected()) return null;
-            var farmCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia farm summary");
+            using var farmCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia farm summary");
             return ParseFarmStatus(farmCmd.Result);
 
             static FarmerStatus ParseFarmStatus(string output)
