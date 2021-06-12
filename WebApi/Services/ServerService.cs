@@ -218,6 +218,15 @@
             return m.CreatePartition(block, label);
         }
 
+        public bool RenamePartition(string host, string block, string oldLabel, string newLabel)
+        {
+            var machines = this.harvesterClients;
+            var m = machines.FirstOrDefault(_ => _.Name == host);
+            if (m == null) return false;
+
+            return m.RenamePartition(block, oldLabel, newLabel);
+        }
+
         public async Task<bool> MountAll(string[] names)
         {
             var machines = new[] { this.harvesterClients, this.farmerClients }.SelectMany(_ => _).ToArray();

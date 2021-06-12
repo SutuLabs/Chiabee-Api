@@ -202,6 +202,16 @@
                 return BadRequest();
         }
 
+        [HttpPost("rename-part")]
+        public async Task<IActionResult> RenamePartition(string host, string block, string oldLabel, string newLabel)
+        {
+            var result = serverService.RenamePartition(host, block, oldLabel, newLabel);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpDelete("temporary")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> CleanTemporary([FromBody] string[] names)

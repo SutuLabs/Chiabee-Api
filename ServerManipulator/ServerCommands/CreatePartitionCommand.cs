@@ -7,10 +7,9 @@
 
     public static class CreatePartitionCommand
     {
-        public static bool CreatePartition(this TargetMachine m, string block, string label)
+        public static bool CreatePartition(this TargetMachine m, string dname, string label)
         {
-            var dname = block;
-            var cmds = @$"#!/bin/bash
+            var cmds = @$"
 plabel={label}
 disk=/dev/{dname}
 echo Working on $disk ...
@@ -39,19 +38,41 @@ echo /dev/disk/by-partuuid/$puuid /farm/$plabel ext4 defaults 0 0 | sudo tee -a 
 sudo mkdir -p /farm/$plabel
 sudo mount -a
 sudo chown sutu /farm/$plabel/
-
 ";
-            cmds = cmds.Replace("\r", "");
-            using var scp = new ScpClient(m.ConnectionInfo);
-            scp.Connect();
-            using var ms = new MemoryStream(Encoding.ASCII.GetBytes(cmds));
-            scp.Upload(ms, "/home/sutu/temp.sh");
-            scp.Disconnect();
-            cmds = $@"echo sutu | sudo -S sudo chmod +x temp.sh;
-echo sutu | sudo -S bash ./temp.sh;
-. ./chia-blockchain/activate && chia plots add -d /farm/{label};
-rm temp.sh;";
-            using var cmd = m.RunCommand(cmds);
+            m.ExecuteScript(cmds);
+            using var cmd = m.RunCommand($"./chia-blockchain/activate && chia plots add -d /farm/{label}");
+            var result = cmd.Result;
+            if (cmd.ExitStatus <= 1) return true;
+            return false;
+        }
+
+        public static bool RenamePartition(this TargetMachine m, string dname, string oldLabel, string newLabel)
+        {
+            var cmds = @$"
+oldLabel={oldLabel}
+newLabel={newLabel}
+disk=/dev/{dname}
+" +
+@"
+echo Working on $disk ...
+puuid=$(lsblk -no PARTUUID ${disk}1)
+echo Got PARTUUID $puuid from ${disk}1, Applying label: $oldLabel -> $newLabel
+
+sudo umount /farm/$oldLabel
+sudo rm -r /farm/$oldLabel
+
+sudo sed -i ""/\/dev\/disk\/by-partuuid\/$puuid/d"" /etc/fstab
+
+sudo e2label /dev/disk/by-partuuid/$puuid $newLabel
+echo /dev/disk/by-partuuid/$puuid /farm/$newLabel ext4 defaults 0 0 | sudo tee -a /etc/fstab
+sudo mkdir -p /farm/$newLabel
+sudo mount -a
+sudo chown sutu /farm/$newLabel/
+";
+            var (d, g) = m.ExecuteScript(cmds, true);
+            using var cmd = m.RunCommand($@". ./chia-blockchain/activate;
+chia plots remove -d /farm/{oldLabel};
+chia plots add -d /farm/{newLabel};");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
             return false;
