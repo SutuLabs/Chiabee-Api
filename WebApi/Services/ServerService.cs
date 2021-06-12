@@ -225,6 +225,11 @@
                 .Aggregate(true, (c, l) => c & l);
         }
 
+        public Dictionary<string, string> GetSerialNumbers()
+        {
+            return TemporarySerialNumbers.SerialNumbers;
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
