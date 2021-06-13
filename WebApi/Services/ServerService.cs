@@ -2,12 +2,17 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using CsvHelper;
+    using CsvHelper.Configuration.Attributes;
     using Microsoft.Extensions.Options;
     using Renci.SshNet;
+    using WebApi.Entities;
     using WebApi.Helpers;
     using WebApi.Models;
     using WebApi.Services.ServerCommands;
@@ -24,8 +29,11 @@
         internal FixedSizedQueue<EligibleFarmerEvent> eventList = new();
         internal Dictionary<string, ErrorEvent> errorList = new();
         private readonly AppSettings appSettings;
+        private readonly PersistentService persistentService;
 
-        public ServerService(IOptions<AppSettings> appSettings)
+        public ServerService(
+            IOptions<AppSettings> appSettings,
+            PersistentService persistentService)
         {
             this.appSettings = appSettings.Value;
 
@@ -50,6 +58,7 @@
             {
                 this.eventList.Enqueue(evt);
             });
+            this.persistentService = persistentService;
         }
 
         public async Task<bool> StopPlot(string machineName, string plotId)
@@ -241,10 +250,36 @@
                 .Aggregate(true, (c, l) => c & l);
         }
 
-        public Dictionary<string, string> GetSerialNumbers()
+        public async Task<Dictionary<string, string>> GetSerialNumbers()
         {
-            return TemporarySerialNumbers.SerialNumbers;
+            var s = await this.persistentService.RetrieveEntityAsync<DiskInfoEntity>();
+            var json = s.SnJson;
+            var sns = Newtonsoft.Json.JsonConvert.DeserializeObject<SerialNumberRecord[]>(json);
+            return sns.ToDictionary(_ => _.Sn, _ => _.Id);
         }
+
+        public async Task<bool> UploadSerialNumbers(Stream input)
+        {
+            var sns = GetRecords<SerialNumberRecord>(input);
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(sns);
+            await this.persistentService.LogEntityAsync(new DiskInfoEntity { SnJson = json });
+            return true;
+        }
+
+        private static T[] GetRecords<T>(Stream input)
+        {
+            using var reader = new StreamReader(input);
+            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
+
+            csv.Read();
+            csv.ReadHeader();
+
+            return csv.GetRecords<T>()
+                .ToArray();
+        }
+
+        [DebuggerDisplay("{Id}: {Sn} [{Host}]")]
+        public record SerialNumberRecord([Name("编号")] string Id, [Name("序列号")] string Sn, [Name("机器")] string Host, [Name("备注")] string Note);
 
         protected virtual void Dispose(bool disposing)
         {

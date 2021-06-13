@@ -15,6 +15,8 @@
     using WebApi.Helpers;
     using Microsoft.Extensions.Caching.Memory;
     using System;
+    using Microsoft.AspNetCore.Http;
+    using System.IO;
 
     [Authorize]
     [ApiController]
@@ -136,8 +138,26 @@
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> GetSerialNumber()
         {
-            var s = this.serverService.GetSerialNumbers();
+            if (!memoryCache.TryGetValue(nameof(GetSerialNumber), out var s))
+            {
+                s = this.serverService.GetSerialNumbers();
+                memoryCache.Set(nameof(GetSerialNumber), s, TimeSpan.FromSeconds(30));
+            }
+
             return Ok(s);
+        }
+
+        [HttpPut("serial-number")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> UploadSerialNumberFile(IFormFile file)
+        {
+            using var ms = new MemoryStream();
+            await file.CopyToAsync(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+
+            await this.serverService.UploadSerialNumbers(ms);
+
+            return Ok();
         }
 
         [HttpGet("farmer")]
