@@ -250,12 +250,12 @@
                 .Aggregate(true, (c, l) => c & l);
         }
 
-        public async Task<Dictionary<string, string>> GetSerialNumbers()
+        public async Task<SerialNumberRecord[]> GetSerialNumbers()
         {
             var s = await this.persistentService.RetrieveEntityAsync<DiskInfoEntity>();
             var json = s.SnJson;
             var sns = Newtonsoft.Json.JsonConvert.DeserializeObject<SerialNumberRecord[]>(json);
-            return sns.ToDictionary(_ => _.Sn, _ => _.Id);
+            return sns;
         }
 
         public async Task<bool> UploadSerialNumbers(Stream input)

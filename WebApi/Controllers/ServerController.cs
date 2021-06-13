@@ -140,7 +140,7 @@
         {
             if (!memoryCache.TryGetValue(nameof(GetSerialNumber), out var s))
             {
-                s = this.serverService.GetSerialNumbers();
+                s = await this.serverService.GetSerialNumbers();
                 memoryCache.Set(nameof(GetSerialNumber), s, TimeSpan.FromSeconds(30));
             }
 
