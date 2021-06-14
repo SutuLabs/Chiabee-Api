@@ -40,7 +40,7 @@ sudo mount -a
 sudo chown sutu /farm/$plabel/
 ";
             m.ExecuteScript(cmds, true);
-            using var cmd = m.RunCommand($"./chia-blockchain/activate && chia plots add -d /farm/{label}");
+            using var cmd = m.RunCommand($". ./chia-blockchain/activate && chia plots add -d /farm/{label}");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
             return false;
@@ -92,6 +92,7 @@ echo Got PARTUUID $puuid from ${disk}1, mounting: $plabel
 
 
 if ! grep -q $puuid ""/etc/fstab""; then
+    sudo sed -i ""/\/farm\/$plabel ext4/d"" /etc/fstab
     echo /dev/disk/by-partuuid/$puuid /farm/$plabel ext4 defaults 0 0 | sudo tee -a /etc/fstab
 fi
 
