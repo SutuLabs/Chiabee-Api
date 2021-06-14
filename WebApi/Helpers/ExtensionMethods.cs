@@ -24,13 +24,13 @@ namespace WebApi.Helpers
             return user;
         }
 
-        public static TargetMachine ToMachineClient(this SshEntity entity)
+        public static TargetMachine ToMachineClient(this SshEntity entity, ServerType type)
         {
             var machine = entity.Port is int port
                 ? new TargetMachine(
-                    entity.Name, entity.Host, port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile))
+                    entity.Name, type, entity.Host, port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile))
                 : new TargetMachine(
-                    entity.Name, entity.Host, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
+                    entity.Name, type, entity.Host, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
 
             machine.ConnectionInfo.Timeout = new TimeSpan(0, 0, 5);
             machine.ConnectionInfo.RetryAttempts = 1;
@@ -38,9 +38,9 @@ namespace WebApi.Helpers
             return machine;
         }
 
-        public static IEnumerable<TargetMachine> ToMachineClients(this IEnumerable<SshEntity> entity)
+        public static IEnumerable<TargetMachine> ToMachineClients(this IEnumerable<SshEntity> entity, ServerType type)
         {
-            return entity.Select(_ => _.ToMachineClient());
+            return entity.Select(_ => _.ToMachineClient(type));
         }
 
         public static string Compress(this string s)

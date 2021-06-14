@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json.Serialization;
     using System.Text.RegularExpressions;
     using Renci.SshNet;
     using WebApi.Models;
@@ -26,6 +27,7 @@
                 Cpus = ParseCpuState(output).OrderBy(_ => _.Index).Select(_ => _.Idle).ToArray(),
                 Disks = disks,
                 Name = client.Name,
+                Type = client.Type,
                 NetworkIoSpeed = netSpeed,
                 Power = pwr,
             };
@@ -74,6 +76,8 @@
     {
         // cpu/disk/network
         public string Name { get; init; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public ServerType Type { get; init; }
         public ProcessState Process { get; init; }
         public MemoryState Memory { get; init; }
         public decimal[] Cpus { get; init; }

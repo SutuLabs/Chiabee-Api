@@ -41,10 +41,10 @@
             var plotter = this.appSettings.GetPlotters();
             var harvester = this.appSettings.GetHarvesters();
 
-            this.plotterClients = plotter.ToMachineClients().ToArray();
-            this.harvesterClients = harvester.ToMachineClients().ToArray();
-            this.farmerLogClient = farmer.First().ToMachineClient();
-            this.farmerClients = farmer.ToMachineClients().ToArray();
+            this.plotterClients = plotter.ToMachineClients(ServerType.Plotter).ToArray();
+            this.harvesterClients = harvester.ToMachineClients(ServerType.Harvester).ToArray();
+            this.farmerLogClient = farmer.First().ToMachineClient(ServerType.Farmer);
+            this.farmerClients = farmer.ToMachineClients(ServerType.Farmer).ToArray();
 
             this.farmerLogClient.StartTailChiaLog((err) =>
             {
