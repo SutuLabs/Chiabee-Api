@@ -245,6 +245,15 @@
             return m.MountPartition(block, label);
         }
 
+        public bool RemovePlotDir(string host, string block, string label)
+        {
+            var machines = this.harvesterClients;
+            var m = machines.FirstOrDefault(_ => _.Name == host);
+            if (m == null) return false;
+
+            return m.RemovePlotDir(block, label);
+        }
+
         public async Task<bool> MountAll(string[] names)
         {
             var machines = new[] { this.harvesterClients, this.farmerClients }.SelectMany(_ => _).ToArray();

@@ -203,6 +203,7 @@
         }
 
         [HttpPost("plotplan")]
+        [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> SetPlotManPlan([FromBody] OptimizedPlotManPlan[] plans)
         {
             var result = serverService.SetOptimizePlotManPlan(plans);
@@ -213,6 +214,7 @@
         }
 
         [HttpPost("create-part")]
+        [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> CreatePartition(string host, string block, string label)
         {
             var result = serverService.CreatePartition(host, block, label);
@@ -223,6 +225,7 @@
         }
 
         [HttpPost("rename-part")]
+        [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> RenamePartition(string host, string block, string oldLabel, string newLabel)
         {
             var result = serverService.RenamePartition(host, block, oldLabel, newLabel);
@@ -233,9 +236,21 @@
         }
 
         [HttpPost("mount-part")]
+        [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> MountPartition(string host, string block, string label)
         {
             var result = serverService.MountPartition(host, block, label);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
+        [HttpDelete("plot-dir")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> RemovePlotDir(string host, string block, string label)
+        {
+            var result = serverService.RemovePlotDir(host, block, label);
             if (result)
                 return Ok();
             else

@@ -118,7 +118,6 @@ sudo umount /farm/$oldLabel
 sudo rm -r /farm/$oldLabel
 
 sudo sed -i ""/\/farm\/$plabel ext4/d"" /etc/fstab
-
 ";
             m.ExecuteScript(cmds, true);
             using var cmd = m.RunCommand($". ./chia-blockchain/activate && chia plots add -d /farm/{label}");
