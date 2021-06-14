@@ -88,7 +88,7 @@ disk=/dev/{dname}
 echo Mounting $disk ...
 
 puuid=$(lsblk -no PARTUUID ${disk}1)
-echo Got PARTUUID $puuid from ${disk}1, Applying label: $plabel
+echo Got PARTUUID $puuid from ${disk}1, mouting: $plabel
 
 echo /dev/disk/by-partuuid/$puuid /farm/$plabel ext4 defaults 0 0 | sudo tee -a /etc/fstab
 sudo mkdir -p /farm/$plabel
@@ -96,7 +96,7 @@ sudo mount -a
 sudo chown sutu /farm/$plabel/
 ";
             m.ExecuteScript(cmds, true);
-            using var cmd = m.RunCommand($"./chia-blockchain/activate && chia plots add -d /farm/{label}");
+            using var cmd = m.RunCommand($". ./chia-blockchain/activate && chia plots add -d /farm/{label}");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
             return false;
@@ -121,7 +121,7 @@ sudo sed -i ""/\/farm\/$plabel ext4/d"" /etc/fstab
 
 ";
             m.ExecuteScript(cmds, true);
-            using var cmd = m.RunCommand($"./chia-blockchain/activate && chia plots add -d /farm/{label}");
+            using var cmd = m.RunCommand($". ./chia-blockchain/activate && chia plots add -d /farm/{label}");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
             return false;

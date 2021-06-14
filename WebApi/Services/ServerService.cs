@@ -236,6 +236,15 @@
             return m.RenamePartition(block, oldLabel, newLabel);
         }
 
+        public bool MountPartition(string host, string block, string label)
+        {
+            var machines = this.harvesterClients;
+            var m = machines.FirstOrDefault(_ => _.Name == host);
+            if (m == null) return false;
+
+            return m.MountPartition(block, label);
+        }
+
         public async Task<bool> MountAll(string[] names)
         {
             var machines = new[] { this.harvesterClients, this.farmerClients }.SelectMany(_ => _).ToArray();

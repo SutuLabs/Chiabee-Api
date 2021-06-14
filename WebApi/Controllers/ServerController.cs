@@ -232,6 +232,16 @@
                 return BadRequest();
         }
 
+        [HttpPost("mount-part")]
+        public async Task<IActionResult> MountPartition(string host, string block, string label)
+        {
+            var result = serverService.MountPartition(host, block, label);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpDelete("temporary")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> CleanTemporary([FromBody] string[] names)
