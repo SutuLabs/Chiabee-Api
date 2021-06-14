@@ -84,7 +84,7 @@
             dictionary.Add(Key.NetSpace, farmer.Farmer.Space);
             dictionary.Add(Key.TotalPlotter, plotters.Length.ToString());
             dictionary.Add(Key.TotalHarvester, harvesters.Length.ToString());
-            dictionary.Add(Key.CoinPrice, prices.First().Price.ToString());
+            dictionary.Add(Key.CoinPrice, prices.First().Price.ToString("0.##"));
 
             var thisState = new ReportState(harvesters, farmer.Node.Time, dictionary);
             var state = await this.persistentService.RetrieveEntityAsync<StatisticsStateEntity>();
@@ -176,10 +176,17 @@
                 .Select(_ => $"- {texts.TryGetName(_.Key)}:"
                     + (_.isNumber ? "" : $" `{prev[_.Key]}` ->")
                     + $" `{_.str}`"
-                    + (!_.isNumber ? "" : $" ({(_.delta >= 0 ? "+" : "")}{_.delta})"))
+                    + (!_.isNumber ? "" : ShowDelta(_.delta)))
                 );
 
             return msg;
+
+            string ShowDelta(decimal number)
+            {
+                if (number == 0) return "";
+                var str = number == (int)number ? number.ToString() : number.ToString("0.##");
+                return $" ({(number > 0 ? "+" : "")}{str})";
+            }
         }
 
         private string GenerateAlert(ReportState lastState, ReportState thisState)
