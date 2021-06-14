@@ -246,6 +246,17 @@
                 return BadRequest();
         }
 
+        [HttpPost("unmount-part")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> UnmountPartition(string host, string label)
+        {
+            var result = serverService.UnmountPartition(host, label);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpDelete("plot-dir")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> RemovePlotDir(string host, string block, string label)

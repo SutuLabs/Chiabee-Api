@@ -245,6 +245,15 @@
             return m.MountPartition(block, label);
         }
 
+        public bool UnmountPartition(string host, string label)
+        {
+            var machines = this.harvesterClients;
+            var m = machines.FirstOrDefault(_ => _.Name == host);
+            if (m == null) return false;
+
+            return m.UnmountPartition(label);
+        }
+
         public bool RemovePlotDir(string host, string block, string label)
         {
             var machines = this.harvesterClients;

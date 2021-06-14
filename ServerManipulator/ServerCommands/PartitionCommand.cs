@@ -88,15 +88,29 @@ disk=/dev/{dname}
 echo Mounting $disk ...
 
 puuid=$(lsblk -no PARTUUID ${disk}1)
-echo Got PARTUUID $puuid from ${disk}1, mouting: $plabel
+echo Got PARTUUID $puuid from ${disk}1, mounting: $plabel
 
-echo /dev/disk/by-partuuid/$puuid /farm/$plabel ext4 defaults 0 0 | sudo tee -a /etc/fstab
+
+if ! grep -q $puuid ""/etc/fstab""; then
+    echo /dev/disk/by-partuuid/$puuid /farm/$plabel ext4 defaults 0 0 | sudo tee -a /etc/fstab
+fi
+
 sudo mkdir -p /farm/$plabel
 sudo mount -a
 sudo chown sutu /farm/$plabel/
 ";
             m.ExecuteScript(cmds, true);
             using var cmd = m.RunCommand($". ./chia-blockchain/activate && chia plots add -d /farm/{label}");
+            var result = cmd.Result;
+            if (cmd.ExitStatus <= 1) return true;
+            return false;
+        }
+
+        public static bool UnmountPartition(this TargetMachine m, string label)
+        {
+            var pass = "sutu";
+            using var cmd = m.RunCommand($"echo {pass} | sudo -S sudo umount /farm/{label};" +
+                $". ./chia-blockchain/activate && chia plots remove -d /farm/{label}");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
             return false;
