@@ -7,6 +7,7 @@
     using System.Text;
     using System.Text.Json;
     using System.Threading.Tasks;
+    using Humanizer;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
@@ -43,6 +44,7 @@
                 [Key.TotalPlotter] = "P图机数量",
                 [Key.TotalHarvester] = "收割机数量",
                 [Key.CoinPrice] = "币价",
+                [Key.EstimateWin] = "期望成功",
             };
         }
 
@@ -58,6 +60,7 @@
             public const string TotalPlotter = nameof(TotalPlotter);
             public const string TotalHarvester = nameof(TotalHarvester);
             public const string CoinPrice = nameof(CoinPrice);
+            public const string EstimateWin = nameof(EstimateWin);
         }
 
         protected override async Task DoWorkAsync()
@@ -80,11 +83,13 @@
             dictionary.Add(Key.NodeStatus, farmer.Node.Status);
             dictionary.Add(Key.FarmStatus, farmer.Farmer.Status);
             dictionary.Add(Key.TotalFarmed, farmer.Farmer.TotalFarmed?.ToString());
-            dictionary.Add(Key.TotalPlot, harvesters.Sum(_ => _.TotalPlot).ToString());
-            dictionary.Add(Key.NetSpace, farmer.Farmer.Space);
+            var totalPlot = harvesters.Sum(_ => _.TotalPlot) ?? -1;
+            dictionary.Add(Key.TotalPlot, totalPlot.ToString());
+            dictionary.Add(Key.NetSpace, farmer.Node.Space);
             dictionary.Add(Key.TotalPlotter, plotters.Length.ToString());
             dictionary.Add(Key.TotalHarvester, harvesters.Length.ToString());
             dictionary.Add(Key.CoinPrice, prices.First().Price.ToString("0.##"));
+            dictionary.Add(Key.EstimateWin, totalPlot <= 0 ? "None" : GetEstimateTime(totalPlot, farmer.Node.Space));
 
             var thisState = new ReportState(harvesters, farmer.Node.Time, dictionary);
             var state = await this.persistentService.RetrieveEntityAsync<StatisticsStateEntity>();
@@ -118,7 +123,7 @@
             {
                 if (!state.LastHourJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
                     lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
-                var msg = GenerateReport(lastReportState, thisState);
+                var msg = GenerateReport(lastReportState, thisState, "小时");
                 await this.SendMessageAsync(new MarkdownMessage(msg));
 
                 // update time
@@ -134,7 +139,7 @@
             {
                 if (!state.LastDayJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
                     lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
-                var msg = GenerateReport(lastReportState, thisState);
+                var msg = GenerateReport(lastReportState, thisState, "每日");
                 await this.SendMessageAsync(new MarkdownMessage(msg));
 
                 // update time
@@ -145,7 +150,7 @@
             await this.persistentService.LogEntityAsync(state);
         }
 
-        private string GenerateReport(ReportState prevState, ReportState nowState)
+        private string GenerateReport(ReportState prevState, ReportState nowState, string title)
         {
             var msg = "";
             var stats = new[] {
@@ -155,12 +160,13 @@
                 Key.TotalPlotter,
                 Key.TotalHarvester,
                 Key.CoinPrice,
+                Key.EstimateWin,
             };
 
             // 统计数据
             var prev = prevState.Items;
             var now = nowState.Items;
-            msg += $"\n\n**统计数据**\n---\n" +
+            msg += $"\n\n**{title}统计数据**\n---\n" +
                 string.Join("\n", now
                 .Where(_ => stats.Contains(_.Key))
                 .Select(_ => new { _.Key, str = _.Value, isNumber = decimal.TryParse(_.Value, out var number), number })
@@ -174,8 +180,8 @@
                         ? _.number - pnumber : 0
                 })
                 .Select(_ => $"- {texts.TryGetName(_.Key)}:"
-                    + (_.isNumber ? "" : $" `{prev[_.Key]}` ->")
-                    + $" `{_.str}`"
+                    + (_.isNumber ? "" : $" {Style("comment", prev[_.Key])} ->")
+                    + $" {Style("info", _.str)}"
                     + (!_.isNumber ? "" : ShowDelta(_.delta)))
                 );
 
@@ -185,8 +191,13 @@
             {
                 if (number == 0) return "";
                 var str = number == (int)number ? number.ToString() : number.ToString("0.##");
-                return $" ({(number > 0 ? "+" : "")}{str})";
+                return " " + Style("comment", $"({(number > 0 ? "+" : "")}{str})");
             }
+
+            string Style(string type, string content)
+                => Wrap("font", $@"color=""{type}""", content);
+            string Wrap(string tag, string attributes, string content)
+                => $@"<{tag} {attributes}>{content}</{tag}>";
         }
 
         private string GenerateAlert(ReportState lastState, ReportState thisState)
@@ -202,7 +213,7 @@
                 var appear = now.Except(prev).ToArray();
                 var disappear = prev.Except(now).ToArray();
                 if (appear.Any()) sb.AppendLine($"`[Harvester]`New arrival: ({string.Join(",", appear)})");
-                if (disappear.Any()) sb.AppendLine($"`[Harvester]`Disappeared: ({string.Join(",", appear)})");
+                if (disappear.Any()) sb.AppendLine($"`[Harvester]`Disappeared: ({string.Join(",", disappear)})");
             }
 
             foreach (var now in thisState.HarvesterStatuses)
@@ -244,6 +255,24 @@
             }
 
             return sb.ToString();
+        }
+
+        private string GetEstimateTime(int plot, string totalNetSpace)
+        {
+            // in seconds (last paragraph in https://docs.google.com/document/d/1tmRIb7lgi4QfKkNaxuKOBHRmwbVlGL4f7EsBDr_5xZE/edit#heading=h.z0v0b3hmk4fl)
+            const double averageBlockTime = 18.75;
+            const double plotSize = 101.4 / 1024;//tib
+
+            var totalNetSpaceTib = !totalNetSpace.EndsWith("EiB") ? throw new NotImplementedException()
+                : double.Parse(totalNetSpace[0..(totalNetSpace.Length - 4)]) * Math.Pow(2, 20);
+
+            var ourSize = plot * plotSize;
+            var proportion = ourSize / totalNetSpaceTib;
+
+            // in seconds (reference:https://github.com/Chia-Network/chia-blockchain/blob/95d6030876fb19f6836c6c6eeb41273cf7c30d93/chia/cmds/farm_funcs.py#L246-L247)
+            var expectTimeWin = averageBlockTime / proportion;
+            var estimatedTime = TimeSpan.FromSeconds((int)expectTimeWin).Humanize(2);
+            return estimatedTime;
         }
 
         private async Task SendMessageAsync(Message message)
