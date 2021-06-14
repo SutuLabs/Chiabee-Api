@@ -50,8 +50,8 @@
             }
         }
 
-        public static string[] CleanSplit(this string str, string separator = "\n") => str
-            .Split(separator, StringSplitOptions.RemoveEmptyEntries)
+        public static string[] CleanSplit(this string str, string separator = "\n", StringSplitOptions options = StringSplitOptions.RemoveEmptyEntries) => str
+            .Split(separator, options)
             .Select(_ => _.Trim())
             .ToArray();
 

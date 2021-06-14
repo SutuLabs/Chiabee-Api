@@ -44,7 +44,7 @@ sdm                                             3.7T disk
 
             static IEnumerable<DevicePartInfo> ParseDiskInfo(string output) => output
                 .CleanSplit()
-                .Select(_ => _.CleanSplit(separator))
+                .Select(_ => _.CleanSplit(separator, StringSplitOptions.None))
                 .Where(segs => segs.Length == 6 && segs[0].Contains("1") && segs[4] == "part")
                 //sdm1 /farm/zyc008 zyc008 3.7T part e6c6f3f3-55f9-4aa9-ac5b-ad12c78520f0
                 .Select(segs => new DevicePartInfo(segs[0], segs[3], segs[1], segs[2], segs[5]) { BlockDevice = segs[0].TrimEnd('1'), });
