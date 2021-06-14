@@ -28,9 +28,9 @@ namespace WebApi.Helpers
         {
             var machine = entity.Port is int port
                 ? new TargetMachine(
-                    entity.Name, type, entity.Host, port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile))
+                    entity.Name, type, entity.Location, entity.Host, port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile))
                 : new TargetMachine(
-                    entity.Name, type, entity.Host, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
+                    entity.Name, type, entity.Location, entity.Host, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
 
             machine.ConnectionInfo.Timeout = new TimeSpan(0, 0, 5);
             machine.ConnectionInfo.RetryAttempts = 1;

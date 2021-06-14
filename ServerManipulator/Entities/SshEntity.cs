@@ -7,6 +7,7 @@ namespace WebApi.Models
     public class SshEntity
     {
         public string? Host { get; set; }
+        public string? Location { get; set; }
         public int? Port { get; set; }
         public string? Username { get; set; }
         public string? Name { get; set; }
@@ -23,6 +24,7 @@ namespace WebApi.Models
             return new SshEntity
             {
                 Host = entity.Host ?? baseEntity.Host,
+                Location = entity.Location ?? baseEntity.Location,
                 Port = entity.Port ?? baseEntity.Port,
                 PrivateKeyFile = entity.PrivateKeyFile ?? baseEntity.PrivateKeyFile,
                 Username = entity.Username ?? baseEntity.Username,

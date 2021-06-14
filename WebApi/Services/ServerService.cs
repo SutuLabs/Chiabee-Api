@@ -154,46 +154,64 @@
 
         public IEnumerable<OptimizedPlotManPlan> GetOptimizePlotManPlan(PlotterStatus[] plotters, ServerStatus[] harvesters)
         {
-            var hs = harvesters.ToDictionary(_ => _.Name, _ => _);
-            var targets = this.appSettings.GetHarvesters()
-                .Where(h => hs.TryGetValue(h.Name, out var ss) && (ss.Disks.Sum(d => Math.Max(0, d.Available / 108_888_888 - 1)) > 3)) // 1-K based
-                .Select(_ => _.Host)
-                .Reverse()
-                .Select(_ => new HarvestorPlan(_, Array.Empty<string>(), 0))
-                .ToDictionary(_ => _.Host, _ => _);
-            if (targets.Count == 0) yield break;
+            var dicLoc = new[] { this.plotterClients, this.harvesterClients }
+                .SelectMany(_ => _)
+                .ToDictionary(_ => _.Name, _ => _.Location);
+            var locs = dicLoc
+                .Select(_ => _.Value)
+                .Distinct();
 
-            var ps = plotters
-                .Select(_ =>
+            return locs
+                .Select(loc => new
                 {
-                    var model = _.Name.Substring(0, 4).ToLower();
-                    var finalNum = _.FileCounts.FirstOrDefault()?.Count ?? 0;
-                    var (jobNum, stagger, popd) = model switch
-                    {
-                        "r720" => (14, 30, 24),
-                        "r420" => (7, 45, 12),
-                        _ => (0, 120, 0),
-                    };
-
-                    return new PlotterPlan(_.Name, model, finalNum, jobNum, stagger, popd);
+                    ps = plotters.Where(_ => dicLoc.TryGetValue(_.Name, out var dl) && dl == loc).ToArray(),
+                    hs = harvesters.Where(_ => dicLoc.TryGetValue(_.Name, out var dl) && dl == loc).ToArray()
                 })
-                .OrderByDescending(_ => _.FinalNum)
-                .ThenByDescending(_ => _.Popd)
-                .ToArray();
+                .SelectMany(_ => GetPlan(_.ps, _.hs));
 
-            foreach (var p in ps)
+            IEnumerable<OptimizedPlotManPlan> GetPlan(PlotterStatus[] plotters, ServerStatus[] harvesters)
             {
-                var t = targets.OrderBy(_ => _.Value.Weight).First().Value;
-                targets[t.Host] = t with { Jobs = t.Jobs.Concat(new[] { p.Name }).ToArray(), Weight = t.Weight + p.Popd + p.FinalNum };
-            }
+                var hs = harvesters.ToDictionary(_ => _.Name, _ => _);
+                var targets = this.appSettings.GetHarvesters()
+                    .Where(h => hs.TryGetValue(h.Name, out var ss) && (ss.Disks.Sum(d => Math.Max(0, d.Available / 108_888_888 - 1)) > 3)) // 1-K based
+                    .Select(_ => _.Host)
+                    .Reverse()
+                    .Select(_ => new HarvestorPlan(_, Array.Empty<string>(), 0))
+                    .ToDictionary(_ => _.Host, _ => _);
+                if (targets.Count == 0) yield break;
 
-            foreach (var t in targets.Select(_ => _.Value))
-            {
-                for (var i = 0; i < t.Jobs.Length; i++)
+                var ps = plotters
+                    .Select(_ =>
+                    {
+                        var model = _.Name.Substring(0, 4).ToLower();
+                        var finalNum = _.FileCounts.FirstOrDefault()?.Count ?? 0;
+                        var (jobNum, stagger, popd) = model switch
+                        {
+                            "r720" => (14, 30, 24),
+                            "r420" => (7, 45, 12),
+                            _ => (0, 120, 0),
+                        };
+
+                        return new PlotterPlan(_.Name, model, finalNum, jobNum, stagger, popd);
+                    })
+                    .OrderByDescending(_ => _.FinalNum)
+                    .ThenByDescending(_ => _.Popd)
+                    .ToArray();
+
+                foreach (var p in ps)
                 {
-                    var j = t.Jobs[i];
-                    var p = ps.First(_ => _.Name == j);
-                    yield return new OptimizedPlotManPlan(j, new PlotManConfiguration(t.Host, i, p.JobNum, p.Stagger));
+                    var t = targets.OrderBy(_ => _.Value.Weight).First().Value;
+                    targets[t.Host] = t with { Jobs = t.Jobs.Concat(new[] { p.Name }).ToArray(), Weight = t.Weight + p.Popd + p.FinalNum };
+                }
+
+                foreach (var t in targets.Select(_ => _.Value))
+                {
+                    for (var i = 0; i < t.Jobs.Length; i++)
+                    {
+                        var j = t.Jobs[i];
+                        var p = ps.First(_ => _.Name == j);
+                        yield return new OptimizedPlotManPlan(j, new PlotManConfiguration(t.Host, i, p.JobNum, p.Stagger));
+                    }
                 }
             }
         }
