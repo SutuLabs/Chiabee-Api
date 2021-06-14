@@ -272,13 +272,13 @@
             return m.UnmountPartition(label);
         }
 
-        public bool RemovePlotDir(string host, string block, string label)
+        public bool RemovePlotDir(string host, string path)
         {
             var machines = this.harvesterClients;
             var m = machines.FirstOrDefault(_ => _.Name == host);
             if (m == null) return false;
 
-            return m.RemovePlotDir(block, label);
+            return m.RemovePlotDir(path);
         }
 
         public async Task<bool> MountAll(string[] names)

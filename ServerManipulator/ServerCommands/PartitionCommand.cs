@@ -117,25 +117,16 @@ sudo chown sutu /farm/$plabel/
             return false;
         }
 
-        public static bool RemovePlotDir(this TargetMachine m, string dname, string label)
+        public static bool RemovePlotDir(this TargetMachine m, string path)
         {
             var cmds = @$"
-plabel={label}
-disk=/dev/{dname}
-" +
-@"
-echo Mounting $disk ...
+sudo umount {path}
+sudo rm -r {path}
 
-puuid=$(lsblk -no PARTUUID ${disk}1)
-echo Got PARTUUID $puuid from ${disk}1, unmount: $plabel
-
-sudo umount /farm/$oldLabel
-sudo rm -r /farm/$oldLabel
-
-sudo sed -i ""/\/farm\/$plabel ext4/d"" /etc/fstab
+sudo sed -i ""/{path.Replace("/", "\\/")} ext4/d"" /etc/fstab
 ";
             m.ExecuteScript(cmds, true);
-            using var cmd = m.RunCommand($". ./chia-blockchain/activate && chia plots add -d /farm/{label}");
+            using var cmd = m.RunCommand($". ./chia-blockchain/activate && chia plots remove -d {path}");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
             return false;

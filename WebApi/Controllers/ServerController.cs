@@ -257,9 +257,9 @@
 
         [HttpDelete("plot-dir")]
         [Authorize(nameof(UserRole.Admin))]
-        public async Task<IActionResult> RemovePlotDir(string host, string block, string label)
+        public async Task<IActionResult> RemovePlotDir(string host, string path)
         {
-            var result = serverService.RemovePlotDir(host, block, label);
+            var result = serverService.RemovePlotDir(host, path);
             if (result)
                 return Ok();
             else
