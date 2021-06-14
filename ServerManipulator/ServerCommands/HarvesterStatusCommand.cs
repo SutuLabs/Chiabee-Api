@@ -21,6 +21,7 @@
 
         private static string[] GetAbnormalFarmlands(TargetMachine client)
         {
+            const string tempfile = "onlyatestfileforiotest";
             using var cmd = client.RunCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
             var lines = cmd.Result
                 .CleanSplit();
@@ -31,7 +32,7 @@
             {
                 foreach (var dir in lines)
                 {
-                    using var trycmd = client.RunCommand($"touch {dir}");
+                    using var trycmd = client.RunCommand($"touch {dir}/{tempfile} && rm {dir}/{tempfile}");
                     if (trycmd.ExitStatus != 0) yield return dir;
                 }
             }
