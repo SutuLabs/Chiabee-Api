@@ -42,7 +42,7 @@ sleep 0.5
 tmux new-session -d -s {ses}
 tmux select-window -t {ses}:1
 tmux rename-window 'Monitor'
-tmux send-keys 'tail -n 10000 -f {log} | grep WARNING' 'C-m'
+tmux send-keys 'tail -n 10000 -F {log} | grep WARNING' 'C-m'
 tmux split-window -h
 tmux send-keys 'nmon <<< dn.' 'C-m'
 tmux split-window -v
@@ -51,7 +51,7 @@ tmux split-window -v
 tmux send-keys 'chia' 'C-m'
 tmux send-keys 'chia start harvester' 'C-m'
 tmux split-window -v -t 0
-tmux send-keys 'tail -n 10 -f {log}' 'C-m'
+tmux send-keys 'tail -n 10 -F {log}' 'C-m'
 tmux split-window -v -t 0
 tmux send-keys 'watch -n 5 ""tail -n 10000 {log} | grep -E -o \""Looking up qualities on /farm/.*\"" | sort -u""' 'C-m'
 tmux split-window -h
