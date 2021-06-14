@@ -56,7 +56,7 @@ disk=/dev/{dname}
 @"
 echo Working on $disk ...
 puuid=$(lsblk -no PARTUUID ${disk}1)
-echo Got PARTUUID $puuid from ${disk}1, Applying label: $oldLabel -> $newLabel
+echo Got PARTUUID $puuid from ${disk}1, Applying label: $oldLabel -\> $newLabel
 
 sudo umount /farm/$oldLabel
 sudo rm -r /farm/$oldLabel
