@@ -15,8 +15,14 @@
 
             var el = GetEligibleInfo(client);
             var abs = GetAbnormalFarmlands(client);
+            var (parts, _) = client.GetHarvesterBlockInfo();
+            var danglings = parts
+                .Where(_ => string.IsNullOrWhiteSpace(_.MountPoint) && !string.IsNullOrWhiteSpace(_.Label))
+                .Select(_ => _.Label)
+                .Where(_ => abs.All(fl => !fl.Contains(_)))
+                .ToArray();
 
-            return new HarvesterStatus(client.Name, el?.Total, el?.Time, abs);
+            return new HarvesterStatus(client.Name, el?.Total, el?.Time, abs, danglings);
         }
 
         private static string[] GetAbnormalFarmlands(TargetMachine client)
@@ -71,5 +77,5 @@
         }
     }
 
-    public record HarvesterStatus(string Name, int? TotalPlot, DateTime? LastPlotTime, string[] AbnormalFarmlands);
+    public record HarvesterStatus(string Name, int? TotalPlot, DateTime? LastPlotTime, string[] AbnormalFarmlands, string[] DanglingPartitions);
 }
