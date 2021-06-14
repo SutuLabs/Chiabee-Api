@@ -42,6 +42,7 @@
             services.AddHostedService<RefreshServerInfoService>();
             services.AddHostedService<RefreshFarmInfoService>();
             services.AddHostedService<RefreshPriceService>();
+            services.AddHostedService<StatisticsService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

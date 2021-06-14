@@ -8,6 +8,9 @@ namespace WebApi.Models
     {
         public string? ConnectionString { get; set; }
         public string? LogTablePrefix { get; set; }
+        public int DailyReportHour { get; set; }
+        public int HourlyReportMin { get; set; }
+        public string? WeixinReportUrl { get; set; }
         public SshEntity? MachineDefault { get; set; }
         public SshEntity? PlotterDefault { get; set; }
         public SshEntity[]? Plotters { get; set; }
