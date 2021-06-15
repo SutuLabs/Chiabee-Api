@@ -176,11 +176,12 @@
                     _.str,
                     _.number,
                     _.isNumber,
-                    delta = _.isNumber && prev.ContainsKey(_.Key) && decimal.TryParse(prev[_.Key], out var pnumber)
+                    prev = prev.TryGet(_.Key),
+                    delta = _.isNumber && decimal.TryParse(prev.TryGet(_.Key), out var pnumber)
                         ? _.number - pnumber : 0
                 })
                 .Select(_ => $"- {texts.TryGetName(_.Key)}:"
-                    + (_.isNumber ? "" : $" {Style("comment", prev[_.Key])} ->")
+                    + (_.isNumber || string.IsNullOrEmpty(_.prev) ? "" : $" {Style("comment", _.prev)} ->")
                     + $" {Style("info", _.str)}"
                     + (!_.isNumber ? "" : ShowDelta(_.delta)))
                 );
