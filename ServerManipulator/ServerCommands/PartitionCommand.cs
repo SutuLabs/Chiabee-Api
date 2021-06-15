@@ -59,7 +59,7 @@ puuid=$(lsblk -no PARTUUID ${disk}1)
 echo Got PARTUUID $puuid from ${disk}1, Applying label: $oldLabel -\> $newLabel
 
 sudo umount /farm/$oldLabel
-sudo rm -r /farm/$oldLabel
+sudo mv /farm/$oldLabel /farm/legacy-$oldLabel
 
 sudo sed -i ""/\/dev\/disk\/by-partuuid\/$puuid/d"" /etc/fstab
 
@@ -119,9 +119,12 @@ sudo chown sutu /farm/$plabel/
 
         public static bool RemovePlotDir(this TargetMachine m, string path)
         {
+            var prefix = "/farm/";
+            if (!path.StartsWith(prefix)) return false;
+            var legacyPath = $"{path[..prefix.Length]}legacy{path[prefix.Length..]}";
             var cmds = @$"
 sudo umount {path}
-sudo rm -r {path}
+sudo mv {path} {legacyPath}
 
 sudo sed -i ""/{path.Replace("/", "\\/")} ext4/d"" /etc/fstab
 ";
