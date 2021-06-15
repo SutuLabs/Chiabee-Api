@@ -65,6 +65,9 @@
 
         protected override async Task DoWorkAsync()
         {
+            var alertUrl = this.appSettings.WeixinAlertUrl;
+            var reportUrl = this.appSettings.WeixinReportUrl;
+
             // get all data for preparing this state data
             var farm = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
             var farmers = JsonConvert.DeserializeObject<FarmerNodeStatus[]>(farm.FarmerJsonGzip.Decompress());
@@ -111,7 +114,7 @@
             var alert = GenerateAlert(lastState, thisState);
             if (!string.IsNullOrEmpty(alert.Trim()))
             {
-                await SendMessageAsync(new MarkdownMessage(alert));
+                await SendMessageAsync(new MarkdownMessage(alert), alertUrl);
             }
             state.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
 
@@ -124,7 +127,7 @@
                 if (!state.LastHourJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
                     lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
                 var msg = GenerateReport(lastReportState, thisState, "小时");
-                await this.SendMessageAsync(new MarkdownMessage(msg));
+                await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
 
                 // update time
                 state.LastHour = DateTime.UtcNow;
@@ -140,7 +143,7 @@
                 if (!state.LastDayJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
                     lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
                 var msg = GenerateReport(lastReportState, thisState, "每日");
-                await this.SendMessageAsync(new MarkdownMessage(msg));
+                await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
 
                 // update time
                 state.LastDay = DateTime.UtcNow;
@@ -276,12 +279,12 @@
             return estimatedTime;
         }
 
-        private async Task SendMessageAsync(Message message)
+        private async Task SendMessageAsync(Message message, string url)
         {
             using var wc = new WebClient();
             wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
             var json = JsonConvert.SerializeObject(message);
-            await wc.UploadStringTaskAsync(this.appSettings.WeixinReportUrl, json);
+            await wc.UploadStringTaskAsync(url, json);
         }
 
         public record Message(string msgtype);

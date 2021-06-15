@@ -11,6 +11,7 @@ namespace WebApi.Models
         public int DailyReportHour { get; set; }
         public int HourlyReportMin { get; set; }
         public string? WeixinReportUrl { get; set; }
+        public string? WeixinAlertUrl { get; set; }
         public SshEntity? MachineDefault { get; set; }
         public SshEntity? PlotterDefault { get; set; }
         public SshEntity[]? Plotters { get; set; }
