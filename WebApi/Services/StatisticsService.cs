@@ -48,7 +48,7 @@
             };
         }
 
-        public record ReportState(HarvesterStatus[] HarvesterStatuses, DateTime NodeLastTime, Dictionary<string, string> Items);
+        public record ReportState(HarvesterStatus[] HarvesterStatuses, DateTime ReportTime, DateTime NodeLastTime, Dictionary<string, string> Items);
 
         public class Key
         {
@@ -97,7 +97,7 @@
                 dictionary.Add(Key.CoinPrice, prices.First().Price.ToString("0.##"));
                 dictionary.Add(Key.EstimateWin, totalPlot <= 0 ? "None" : GetEstimateTime(totalPlot, farmer.Node.Space));
 
-                var thisState = new ReportState(harvesters, farmer.Node.Time, dictionary);
+                var thisState = new ReportState(harvesters, farmer.Node.Time, DateTime.UtcNow, dictionary);
                 state = await this.persistentService.RetrieveEntityAsync<StatisticsStateEntity>();
                 if (state == null) state = new StatisticsStateEntity();
 
@@ -128,7 +128,7 @@
                     && this.appSettings.HourlyReportMin == DateTime.UtcNow.Minute)
                 {
                     if (!state.LastHourJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
-                        lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
+                        lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.UtcNow, DateTime.MinValue, new());
                     var msg = GenerateReport(lastReportState, thisState, "小时");
                     await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
 
@@ -144,7 +144,7 @@
                     && this.appSettings.DailyReportHour == DateTime.UtcNow.Hour)
                 {
                     if (!state.LastDayJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
-                        lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
+                        lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.UtcNow, DateTime.MinValue, new());
                     var msg = GenerateReport(lastReportState, thisState, "每日");
                     await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
 
@@ -194,19 +194,25 @@
                     delta = _.isNumber && decimal.TryParse(prev.TryGet(_.Key), out var pnumber)
                         ? _.number - pnumber : 0
                 })
-                .Select(_ => $"- {texts.TryGetName(_.Key)}:"
-                    + (_.isNumber || string.IsNullOrEmpty(_.prev) ? "" : $" {Style(WeixinFontType.comment, _.prev)} ->")
-                    + $" {Style(WeixinFontType.info, _.str)}"
-                    + (!_.isNumber ? "" : ShowDelta(_.delta)))
+                .Select(_ => $"- {texts.TryGetName(_.Key)}: "
+                    + (_.isNumber ? ShowNumber(_.number, _.delta) : ShowText(_.str, _.prev)))
                 );
 
             return msg;
 
-            string ShowDelta(decimal number)
+            string ShowText(string now, string prev)
             {
-                if (number == 0) return "";
-                var str = number == (int)number ? number.ToString() : number.ToString("0.##");
-                return " " + Style(WeixinFontType.comment, $"({(number > 0 ? "+" : "")}{str})");
+                if (prev == now) return Style(WeixinFontType.comment, now);
+                return (string.IsNullOrEmpty(prev) ? "" : $" {Style(WeixinFontType.comment, prev)} ->")
+                    + $" {Style(WeixinFontType.info, now)}";
+            }
+
+            string ShowNumber(decimal number, decimal delta)
+            {
+                if (delta == 0) return Style(WeixinFontType.comment, number.ToString("0.##"));
+                var str = delta == (int)delta ? delta.ToString() : delta.ToString("0.##");
+                return Style(WeixinFontType.info, number.ToString("0.##"))
+                    + Style(WeixinFontType.comment, $"({(delta > 0 ? "+" : "")}{str})");
             }
         }
 
@@ -241,7 +247,7 @@
                     tsb.AppendLine(Style(WeixinFontType.warning, $"[Harvester]{now.Name}: New dangling partition ({string.Join(",", appearDp)})"));
 
                 var seconds = (DateTime.UtcNow - (now.LastPlotTime ?? DateTime.MinValue)).TotalSeconds;
-                var prevSeconds = (DateTime.UtcNow - (prev.LastPlotTime ?? DateTime.MinValue)).TotalSeconds;
+                var prevSeconds = (lastState.ReportTime - (prev.LastPlotTime ?? DateTime.MinValue)).TotalSeconds;
                 if (seconds > 100 && prevSeconds <= 100)
                     tsb.AppendLine(Style(WeixinFontType.warning, $"[Harvester]{now.Name}: Plot verification generation time longer than {seconds}s"));
                 if (seconds <= 100 && prevSeconds > 100)
