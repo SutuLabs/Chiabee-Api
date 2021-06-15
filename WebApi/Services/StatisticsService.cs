@@ -232,7 +232,7 @@
                     tsb.AppendLine($"[Harvester]{now.Name}: New dangling partition ({string.Join(",", appearDp)})");
 
                 var seconds = (DateTime.UtcNow - (now.LastPlotTime ?? DateTime.MinValue)).TotalSeconds;
-                if (seconds > 100)
+                if (seconds > 100 && seconds < 1000)
                     tsb.AppendLine($"[Harvester]{now.Name}: Plot verification generation time longer than {seconds}s");
 
                 var plotMinus = prev.TotalPlot - now.TotalPlot;
