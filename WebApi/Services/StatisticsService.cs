@@ -67,90 +67,101 @@
         {
             var alertUrl = this.appSettings.WeixinAlertUrl;
             var reportUrl = this.appSettings.WeixinReportUrl;
+            StatisticsStateEntity state = null;
 
-            // get all data for preparing this state data
-            var farm = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
-            var farmers = JsonConvert.DeserializeObject<FarmerNodeStatus[]>(farm.FarmerJsonGzip.Decompress());
-            var farmer = farmers.First();
-            var plotters = JsonConvert.DeserializeObject<PlotterStatus[]>(farm.PlotterJsonGzip.Decompress());
-            var harvesters = JsonConvert.DeserializeObject<HarvesterStatus[]>(farm.HarvesterJsonGzip.Decompress());
-
-            var server = await this.persistentService.RetrieveEntityAsync<MachineStateEntity>();
-            var machines = JsonConvert.DeserializeObject<ServerStatus[]>(server.MachinesJsonGzip.Decompress());
-
-            var market = await this.persistentService.RetrieveEntityAsync<PriceStateEntity>();
-            var prices = JsonConvert.DeserializeObject<PriceEntity[]>(market.PricesJson);
-
-            // prepare this state data
-            var dictionary = new Dictionary<string, string>();
-            dictionary.Add(Key.NodeStatus, farmer.Node.Status);
-            dictionary.Add(Key.FarmStatus, farmer.Farmer.Status);
-            dictionary.Add(Key.TotalFarmed, farmer.Farmer.TotalFarmed?.ToString());
-            var totalPlot = harvesters.Sum(_ => _.TotalPlot) ?? -1;
-            dictionary.Add(Key.TotalPlot, totalPlot.ToString());
-            dictionary.Add(Key.NetSpace, farmer.Node.Space);
-            dictionary.Add(Key.TotalPlotter, plotters.Length.ToString());
-            dictionary.Add(Key.TotalHarvester, harvesters.Length.ToString());
-            dictionary.Add(Key.CoinPrice, prices.First().Price.ToString("0.##"));
-            dictionary.Add(Key.EstimateWin, totalPlot <= 0 ? "None" : GetEstimateTime(totalPlot, farmer.Node.Space));
-
-            var thisState = new ReportState(harvesters, farmer.Node.Time, dictionary);
-            var state = await this.persistentService.RetrieveEntityAsync<StatisticsStateEntity>();
-            if (state == null) state = new StatisticsStateEntity();
-
-            if (!state.LastCheckJsonGzip.Decompress().TryParseJson<ReportState>(out var lastState))
+            try
             {
+                // get all data for preparing this state data
+                var farm = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
+                var farmers = JsonConvert.DeserializeObject<FarmerNodeStatus[]>(farm.FarmerJsonGzip.Decompress());
+                var farmer = farmers.First();
+                var plotters = JsonConvert.DeserializeObject<PlotterStatus[]>(farm.PlotterJsonGzip.Decompress());
+                var harvesters = JsonConvert.DeserializeObject<HarvesterStatus[]>(farm.HarvesterJsonGzip.Decompress());
+
+                var server = await this.persistentService.RetrieveEntityAsync<MachineStateEntity>();
+                var machines = JsonConvert.DeserializeObject<ServerStatus[]>(server.MachinesJsonGzip.Decompress());
+
+                var market = await this.persistentService.RetrieveEntityAsync<PriceStateEntity>();
+                var prices = JsonConvert.DeserializeObject<PriceEntity[]>(market.PricesJson);
+
+                // prepare this state data
+                var dictionary = new Dictionary<string, string>();
+                dictionary.Add(Key.NodeStatus, farmer.Node.Status);
+                dictionary.Add(Key.FarmStatus, farmer.Farmer.Status);
+                dictionary.Add(Key.TotalFarmed, farmer.Farmer.TotalFarmed?.ToString());
+                var totalPlot = harvesters.Sum(_ => _.TotalPlot) ?? -1;
+                dictionary.Add(Key.TotalPlot, totalPlot.ToString());
+                dictionary.Add(Key.NetSpace, farmer.Node.Space);
+                dictionary.Add(Key.TotalPlotter, plotters.Length.ToString());
+                dictionary.Add(Key.TotalHarvester, harvesters.Length.ToString());
+                dictionary.Add(Key.CoinPrice, prices.First().Price.ToString("0.##"));
+                dictionary.Add(Key.EstimateWin, totalPlot <= 0 ? "None" : GetEstimateTime(totalPlot, farmer.Node.Space));
+
+                var thisState = new ReportState(harvesters, farmer.Node.Time, dictionary);
+                state = await this.persistentService.RetrieveEntityAsync<StatisticsStateEntity>();
+                if (state == null) state = new StatisticsStateEntity();
+
+                if (!state.LastCheckJsonGzip.Decompress().TryParseJson<ReportState>(out var lastState))
+                {
+                    state.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
+                    state.LastHour = DateTime.UtcNow.AddHours(-1);
+                    state.LastDay = DateTime.UtcNow.AddDays(-1);
+                    state.LastHourJsonGzip = state.LastCheckJsonGzip;
+                    state.LastDayJsonGzip = state.LastCheckJsonGzip;
+                    await this.persistentService.LogEntityAsync(state);
+                    lastState = thisState;
+                }
+
+
+                // send alert immediately
+                var alert = GenerateAlert(lastState, thisState);
+                if (!string.IsNullOrEmpty(alert.Trim()))
+                {
+                    await SendMessageAsync(new MarkdownMessage(alert), alertUrl);
+                }
                 state.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
-                state.LastHour = DateTime.UtcNow.AddHours(-1);
-                state.LastDay = DateTime.UtcNow.AddDays(-1);
-                state.LastHourJsonGzip = state.LastCheckJsonGzip;
-                state.LastDayJsonGzip = state.LastCheckJsonGzip;
-                await this.persistentService.LogEntityAsync(state);
-                lastState = thisState;
+
+
+                // send hour report
+                var lastSendHourReportTime = state.LastHour ?? DateTime.MinValue;
+                if ((DateTime.UtcNow - lastSendHourReportTime).TotalMinutes > 55
+                    && this.appSettings.HourlyReportMin == DateTime.UtcNow.Minute)
+                {
+                    if (!state.LastHourJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
+                        lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
+                    var msg = GenerateReport(lastReportState, thisState, "小时");
+                    await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
+
+                    // update time
+                    state.LastHour = DateTime.UtcNow;
+                    state.LastHourJsonGzip = state.LastCheckJsonGzip;
+                }
+
+
+                // send day report
+                var lastSendDayReportTime = state.LastDay ?? DateTime.MinValue;
+                if ((DateTime.UtcNow - lastSendDayReportTime).TotalHours > 22
+                    && this.appSettings.DailyReportHour == DateTime.UtcNow.Hour)
+                {
+                    if (!state.LastDayJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
+                        lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
+                    var msg = GenerateReport(lastReportState, thisState, "每日");
+                    await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
+
+                    // update time
+                    state.LastDay = DateTime.UtcNow;
+                    state.LastDayJsonGzip = state.LastCheckJsonGzip;
+                }
             }
-
-
-            // send alert immediately
-            var alert = GenerateAlert(lastState, thisState);
-            if (!string.IsNullOrEmpty(alert.Trim()))
+            catch (Exception ex)
             {
-                await SendMessageAsync(new MarkdownMessage(alert), alertUrl);
+                this.logger.LogWarning(ex, "error during generating report");
             }
-            state.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
-
-
-            // send hour report
-            var lastSendHourReportTime = state.LastHour ?? DateTime.MinValue;
-            if ((DateTime.UtcNow - lastSendHourReportTime).TotalMinutes > 55
-                && this.appSettings.HourlyReportMin == DateTime.UtcNow.Minute)
+            finally
             {
-                if (!state.LastHourJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
-                    lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
-                var msg = GenerateReport(lastReportState, thisState, "小时");
-                await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
-
-                // update time
-                state.LastHour = DateTime.UtcNow;
-                state.LastHourJsonGzip = state.LastCheckJsonGzip;
+                if (state != null)
+                    await this.persistentService.LogEntityAsync(state);
             }
-
-
-            // send day report
-            var lastSendDayReportTime = state.LastDay ?? DateTime.MinValue;
-            if ((DateTime.UtcNow - lastSendDayReportTime).TotalHours > 22
-                && this.appSettings.DailyReportHour == DateTime.UtcNow.Hour)
-            {
-                if (!state.LastDayJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
-                    lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.MinValue, new());
-                var msg = GenerateReport(lastReportState, thisState, "每日");
-                await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
-
-                // update time
-                state.LastDay = DateTime.UtcNow;
-                state.LastDayJsonGzip = state.LastCheckJsonGzip;
-            }
-
-            await this.persistentService.LogEntityAsync(state);
         }
 
         private string GenerateReport(ReportState prevState, ReportState nowState, string title)
@@ -184,8 +195,8 @@
                         ? _.number - pnumber : 0
                 })
                 .Select(_ => $"- {texts.TryGetName(_.Key)}:"
-                    + (_.isNumber || string.IsNullOrEmpty(_.prev) ? "" : $" {Style("comment", _.prev)} ->")
-                    + $" {Style("info", _.str)}"
+                    + (_.isNumber || string.IsNullOrEmpty(_.prev) ? "" : $" {Style(WeixinFontType.comment, _.prev)} ->")
+                    + $" {Style(WeixinFontType.info, _.str)}"
                     + (!_.isNumber ? "" : ShowDelta(_.delta)))
                 );
 
@@ -195,13 +206,8 @@
             {
                 if (number == 0) return "";
                 var str = number == (int)number ? number.ToString() : number.ToString("0.##");
-                return " " + Style("comment", $"({(number > 0 ? "+" : "")}{str})");
+                return " " + Style(WeixinFontType.comment, $"({(number > 0 ? "+" : "")}{str})");
             }
-
-            string Style(string type, string content)
-                => Wrap("font", $@"color=""{type}""", content);
-            string Wrap(string tag, string attributes, string content)
-                => $@"<{tag} {attributes}>{content}</{tag}>";
         }
 
         private string GenerateAlert(ReportState lastState, ReportState thisState)
@@ -216,8 +222,8 @@
                 var prev = lastState.HarvesterStatuses.Select(_ => _.Name).ToArray();
                 var appear = now.Except(prev).ToArray();
                 var disappear = prev.Except(now).ToArray();
-                if (appear.Any()) sb.AppendLine($"`[Harvester]`New arrival: ({string.Join(",", appear)})");
-                if (disappear.Any()) sb.AppendLine($"`[Harvester]`Disappeared: ({string.Join(",", disappear)})");
+                if (appear.Any()) sb.AppendLine(Style(WeixinFontType.info, $"`[Harvester]`New arrival: ({string.Join(",", appear)})"));
+                if (disappear.Any()) sb.AppendLine(Style(WeixinFontType.warning, $"`[Harvester]`Disappeared: ({string.Join(",", disappear)})"));
             }
 
             foreach (var now in thisState.HarvesterStatuses)
@@ -228,19 +234,22 @@
 
                 var appearFl = now.AbnormalFarmlands.All.Except(prev.AbnormalFarmlands.All).ToArray();
                 if (appearFl.Any())
-                    tsb.AppendLine($"[Harvester]{now.Name}: New abnormal farmlands ({string.Join(",", appearFl)})");
+                    tsb.AppendLine(Style(WeixinFontType.warning, $"[Harvester]{now.Name}: New abnormal farmlands ({string.Join(",", appearFl)})"));
 
                 var appearDp = now.DanglingPartitions.Except(prev.DanglingPartitions).ToArray();
                 if (appearDp.Any())
-                    tsb.AppendLine($"[Harvester]{now.Name}: New dangling partition ({string.Join(",", appearDp)})");
+                    tsb.AppendLine(Style(WeixinFontType.warning, $"[Harvester]{now.Name}: New dangling partition ({string.Join(",", appearDp)})"));
 
                 var seconds = (DateTime.UtcNow - (now.LastPlotTime ?? DateTime.MinValue)).TotalSeconds;
-                if (seconds > 100 && seconds < 1000)
-                    tsb.AppendLine($"[Harvester]{now.Name}: Plot verification generation time longer than {seconds}s");
+                var prevSeconds = (DateTime.UtcNow - (prev.LastPlotTime ?? DateTime.MinValue)).TotalSeconds;
+                if (seconds > 100 && prevSeconds <= 100)
+                    tsb.AppendLine(Style(WeixinFontType.warning, $"[Harvester]{now.Name}: Plot verification generation time longer than {seconds}s"));
+                if (seconds <= 100 && prevSeconds > 100)
+                    tsb.AppendLine(Style(WeixinFontType.info, $"[Harvester]{now.Name}: Plot verification generation time is {seconds}s, back to normal"));
 
                 var plotMinus = prev.TotalPlot - now.TotalPlot;
                 if (plotMinus > 10)
-                    tsb.AppendLine($"[Harvester]{now.Name}: Plot greatly reduced from {prev.TotalPlot} to {now.TotalPlot}");
+                    tsb.AppendLine(Style(WeixinFontType.warning, $"[Harvester]{now.Name}: Plot greatly reduced from {prev.TotalPlot} to {now.TotalPlot}"));
 
                 var tsbout = tsb.ToString().Trim();
                 if (!string.IsNullOrEmpty(tsbout)) sb.AppendLine(tsbout);
@@ -277,6 +286,18 @@
             var expectTimeWin = averageBlockTime / proportion;
             var estimatedTime = TimeSpan.FromSeconds((int)expectTimeWin).Humanize(2);
             return estimatedTime;
+        }
+
+        private string Style(WeixinFontType type, string content)
+            => Wrap("font", $@"color=""{type}""", content);
+        private string Wrap(string tag, string attributes, string content)
+            => $@"<{tag} {attributes}>{content}</{tag}>";
+
+        private enum WeixinFontType
+        {
+            comment,
+            info,
+            warning,
         }
 
         private async Task SendMessageAsync(Message message, string url)
