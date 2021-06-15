@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.Json.Serialization;
     using System.Text.RegularExpressions;
     using Renci.SshNet;
     using WebApi.Models;
@@ -14,25 +15,50 @@
             if (!client.EnsureConnected()) return null;
 
             var el = GetEligibleInfo(client);
-            var abs = GetAbnormalFarmlands(client);
-            var (parts, _) = client.GetHarvesterBlockInfo();
-            var danglings = parts
-                .Where(_ => string.IsNullOrWhiteSpace(_.MountPoint) && !string.IsNullOrWhiteSpace(_.Label))
-                .Select(_ => _.Label)
-                .Where(_ => abs.All(fl => !fl.Contains(_)))
-                .ToArray();
 
-            return new HarvesterStatus(client.Name, el?.Total, el?.Time, abs, danglings);
-        }
-
-        private static string[] GetAbnormalFarmlands(TargetMachine client)
-        {
-            const string tempfile = "onlyatestfileforiotest";
-            using var cmd = client.RunCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
-            var lines = cmd.Result
+            using var chiacmd = client.RunCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
+            var chiaFarms = chiacmd.Result
+                .CleanSplit();
+            using var dfcmd = client.RunCommand(@"df | grep -o ""/farm/.*""");
+            var dfFarms = dfcmd.Result
                 .CleanSplit();
 
-            return GetAbnormals(client, lines).AsParallel().ToArray();
+            var fls = GetAbnormalFarmlands(client, chiaFarms, dfFarms);
+            var (parts, _) = client.GetHarvesterBlockInfo();
+            var dparts = parts
+                .Where(_ => string.IsNullOrWhiteSpace(_.MountPoint) && !string.IsNullOrWhiteSpace(_.Label))
+                .Select(_ => _.Label)
+                .Except(fls.Select(_ => _.Name.Replace("/farm/", "")))
+                .ToArray();
+
+            var abs = new AbnormalFarmlandList(
+                fls.Where(_ => _.Type == FarmlandStatusType.IoError).Select(_ => _.Name).ToArray(),
+                fls.Where(_ => _.Type == FarmlandStatusType.Missing).Select(_ => _.Name).ToArray(),
+                fls.Where(_ => _.Type == FarmlandStatusType.Uninhabited).Select(_ => _.Name).ToArray()
+                );
+            return new HarvesterStatus(client.Name, el?.Total, el?.Time, abs, dparts);
+        }
+
+        private static FarmlandStatus[] GetAbnormalFarmlands(TargetMachine client, string[] chiaFarms, string[] dfFarms)
+        {
+            const string tempfile = "onlyatestfileforiotest";
+
+            var all = chiaFarms.Concat(dfFarms).Distinct().ToArray();
+            var missings = chiaFarms
+                .Except(dfFarms)
+                .Select(_ => new FarmlandStatus(_, FarmlandStatusType.Missing));
+            var uninhabiteds = dfFarms
+                .Except(chiaFarms)
+                .Select(_ => new FarmlandStatus(_, FarmlandStatusType.Uninhabited));
+            var errors = GetAbnormals(client, all)
+                .AsParallel()
+                .Select(_ => new FarmlandStatus(_, FarmlandStatusType.IoError))
+                .ToArray();
+
+            return missings
+                .Concat(uninhabiteds)
+                .Concat(errors)
+                .ToArray();
 
             static IEnumerable<string> GetAbnormals(TargetMachine client, string[] lines)
             {
@@ -77,5 +103,18 @@
         }
     }
 
-    public record HarvesterStatus(string Name, int? TotalPlot, DateTime? LastPlotTime, string[] AbnormalFarmlands, string[] DanglingPartitions);
+    public record HarvesterStatus(string Name, int? TotalPlot, DateTime? LastPlotTime, AbnormalFarmlandList AbnormalFarmlands, string[] DanglingPartitions);
+    public record AbnormalFarmlandList(string[] IoErrors, string[] Missings, string[] Uninhabiteds)
+    {
+        [JsonIgnore]
+        public string[] All => this.IoErrors.Concat(Missings).Concat(Uninhabiteds).ToArray();
+    }
+    public record FarmlandStatus(string Name, FarmlandStatusType Type);
+
+    public enum FarmlandStatusType
+    {
+        Missing,
+        IoError,
+        Uninhabited,
+    }
 }

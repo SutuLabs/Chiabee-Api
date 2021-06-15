@@ -223,7 +223,7 @@
                 var prev = lastState.HarvesterStatuses.FirstOrDefault(_ => _.Name == now.Name);
                 if (prev == null) continue;
 
-                var appearFl = now.AbnormalFarmlands.Except(prev.AbnormalFarmlands).ToArray();
+                var appearFl = now.AbnormalFarmlands.All.Except(prev.AbnormalFarmlands.All).ToArray();
                 if (appearFl.Any())
                     tsb.AppendLine($"[Harvester]{now.Name}: New abnormal farmlands ({string.Join(",", appearFl)})");
 
