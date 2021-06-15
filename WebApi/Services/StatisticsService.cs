@@ -67,7 +67,7 @@
         {
             var alertUrl = this.appSettings.WeixinAlertUrl;
             var reportUrl = this.appSettings.WeixinReportUrl;
-            StatisticsStateEntity state = null;
+            StatisticsStateEntity persistState = null;
 
             try
             {
@@ -97,18 +97,18 @@
                 dictionary.Add(Key.CoinPrice, prices.First().Price.ToString("0.##"));
                 dictionary.Add(Key.EstimateWin, totalPlot <= 0 ? "None" : GetEstimateTime(totalPlot, farmer.Node.Space));
 
-                var thisState = new ReportState(harvesters, farmer.Node.Time, DateTime.UtcNow, dictionary);
-                state = await this.persistentService.RetrieveEntityAsync<StatisticsStateEntity>();
-                if (state == null) state = new StatisticsStateEntity();
+                var thisState = new ReportState(harvesters, DateTime.UtcNow, farmer.Node.Time, dictionary);
+                persistState = await this.persistentService.RetrieveEntityAsync<StatisticsStateEntity>();
+                if (persistState == null) persistState = new StatisticsStateEntity();
 
-                if (!state.LastCheckJsonGzip.Decompress().TryParseJson<ReportState>(out var lastState))
+                if (!persistState.LastCheckJsonGzip.Decompress().TryParseJson<ReportState>(out var lastState))
                 {
-                    state.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
-                    state.LastHour = DateTime.UtcNow.AddHours(-1);
-                    state.LastDay = DateTime.UtcNow.AddDays(-1);
-                    state.LastHourJsonGzip = state.LastCheckJsonGzip;
-                    state.LastDayJsonGzip = state.LastCheckJsonGzip;
-                    await this.persistentService.LogEntityAsync(state);
+                    persistState.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
+                    persistState.LastHour = DateTime.UtcNow.AddHours(-1);
+                    persistState.LastDay = DateTime.UtcNow.AddDays(-1);
+                    persistState.LastHourJsonGzip = persistState.LastCheckJsonGzip;
+                    persistState.LastDayJsonGzip = persistState.LastCheckJsonGzip;
+                    await this.persistentService.LogEntityAsync(persistState);
                     lastState = thisState;
                 }
 
@@ -119,38 +119,38 @@
                 {
                     await SendMessageAsync(new MarkdownMessage(alert), alertUrl);
                 }
-                state.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
+                persistState.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
 
 
                 // send hour report
-                var lastSendHourReportTime = state.LastHour ?? DateTime.MinValue;
+                var lastSendHourReportTime = persistState.LastHour ?? DateTime.MinValue;
                 if ((DateTime.UtcNow - lastSendHourReportTime).TotalMinutes > 55
                     && this.appSettings.HourlyReportMin == DateTime.UtcNow.Minute)
                 {
-                    if (!state.LastHourJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
+                    if (!persistState.LastHourJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
                         lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.UtcNow, DateTime.MinValue, new());
                     var msg = GenerateReport(lastReportState, thisState, "小时");
                     await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
 
                     // update time
-                    state.LastHour = DateTime.UtcNow;
-                    state.LastHourJsonGzip = state.LastCheckJsonGzip;
+                    persistState.LastHour = DateTime.UtcNow;
+                    persistState.LastHourJsonGzip = persistState.LastCheckJsonGzip;
                 }
 
 
                 // send day report
-                var lastSendDayReportTime = state.LastDay ?? DateTime.MinValue;
+                var lastSendDayReportTime = persistState.LastDay ?? DateTime.MinValue;
                 if ((DateTime.UtcNow - lastSendDayReportTime).TotalHours > 22
                     && this.appSettings.DailyReportHour == DateTime.UtcNow.Hour)
                 {
-                    if (!state.LastDayJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
+                    if (!persistState.LastDayJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
                         lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.UtcNow, DateTime.MinValue, new());
                     var msg = GenerateReport(lastReportState, thisState, "每日");
                     await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
 
                     // update time
-                    state.LastDay = DateTime.UtcNow;
-                    state.LastDayJsonGzip = state.LastCheckJsonGzip;
+                    persistState.LastDay = DateTime.UtcNow;
+                    persistState.LastDayJsonGzip = persistState.LastCheckJsonGzip;
                 }
             }
             catch (Exception ex)
@@ -159,8 +159,8 @@
             }
             finally
             {
-                if (state != null)
-                    await this.persistentService.LogEntityAsync(state);
+                if (persistState != null)
+                    await this.persistentService.LogEntityAsync(persistState);
             }
         }
 
@@ -246,11 +246,12 @@
                 if (appearDp.Any())
                     tsb.AppendLine(Style(WeixinFontType.warning, $"[Harvester]{now.Name}: New dangling partition ({string.Join(",", appearDp)})"));
 
-                var seconds = (DateTime.UtcNow - (now.LastPlotTime ?? DateTime.MinValue)).TotalSeconds;
+                var seconds = (thisState.ReportTime - (now.LastPlotTime ?? DateTime.MinValue)).TotalSeconds;
                 var prevSeconds = (lastState.ReportTime - (prev.LastPlotTime ?? DateTime.MinValue)).TotalSeconds;
-                if (seconds > 100 && prevSeconds <= 100)
+                const int threshold = 300;
+                if (seconds > threshold && prevSeconds <= threshold)
                     tsb.AppendLine(Style(WeixinFontType.warning, $"[Harvester]{now.Name}: Plot verification generation time longer than {seconds}s"));
-                if (seconds <= 100 && prevSeconds > 100)
+                if (seconds <= threshold && prevSeconds > threshold)
                     tsb.AppendLine(Style(WeixinFontType.info, $"[Harvester]{now.Name}: Plot verification generation time is {seconds}s, back to normal"));
 
                 var plotMinus = prev.TotalPlot - now.TotalPlot;
