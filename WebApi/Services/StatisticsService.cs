@@ -112,6 +112,8 @@
                     persistState.LastDayJsonGzip = persistState.LastCheckJsonGzip;
                     await this.persistentService.LogEntityAsync(persistState);
                     lastState = thisState;
+                    // avoid process when cannot read last state
+                    return;
                 }
 
                 // send alert immediately
@@ -162,6 +164,7 @@
                 {
                     await this.SendMessageAsync(new MarkdownMessage("前次存储信息有误，本次报告暂不提供，待管理员处理。"), reportUrl);
                     logger.LogWarning($"failed to parse last {reportTitle} report, json: {json}");
+                    return;
                 }
 
                 var msg = GenerateReport(lastReportState, thisState, reportTitle);
