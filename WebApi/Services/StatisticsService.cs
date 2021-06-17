@@ -5,12 +5,12 @@
     using System.Linq;
     using System.Net;
     using System.Text;
-    using System.Text.Json;
     using System.Threading.Tasks;
     using Humanizer;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
     using WebApi.Entities;
     using WebApi.Helpers;
     using WebApi.Models;
@@ -101,8 +101,10 @@
                 persistState = await this.persistentService.RetrieveEntityAsync<StatisticsStateEntity>();
                 if (persistState == null) persistState = new StatisticsStateEntity();
 
-                if (!persistState.LastCheckJsonGzip.Decompress().TryParseJson<ReportState>(out var lastState))
+                var json = persistState.LastCheckJsonGzip.Decompress();
+                if (!json.TryParseJson<ReportState>(out var lastState, out var parseError))
                 {
+                    logger.LogWarning($"failed to parse last state, error: [{parseError}], json: {json}");
                     persistState.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
                     persistState.LastHour = DateTime.UtcNow.AddHours(-1);
                     persistState.LastDay = DateTime.UtcNow.AddDays(-1);
@@ -112,7 +114,6 @@
                     lastState = thisState;
                 }
 
-
                 // send alert immediately
                 var alert = GenerateAlert(lastState, thisState);
                 if (!string.IsNullOrEmpty(alert.Trim()))
@@ -121,32 +122,24 @@
                 }
                 persistState.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
 
-
                 // send hour report
                 var lastSendHourReportTime = persistState.LastHour ?? DateTime.MinValue;
                 if ((DateTime.UtcNow - lastSendHourReportTime).TotalMinutes > 55
                     && this.appSettings.HourlyReportMin == DateTime.UtcNow.Minute)
                 {
-                    if (!persistState.LastHourJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
-                        lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.UtcNow, DateTime.MinValue, new());
-                    var msg = GenerateReport(lastReportState, thisState, "小时");
-                    await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
+                    await SendReport(thisState, "小时", persistState.LastHourJsonGzip.Decompress());
 
                     // update time
                     persistState.LastHour = DateTime.UtcNow;
                     persistState.LastHourJsonGzip = persistState.LastCheckJsonGzip;
                 }
 
-
                 // send day report
                 var lastSendDayReportTime = persistState.LastDay ?? DateTime.MinValue;
                 if ((DateTime.UtcNow - lastSendDayReportTime).TotalHours > 22
                     && this.appSettings.DailyReportHour == DateTime.UtcNow.Hour)
                 {
-                    if (!persistState.LastDayJsonGzip.Decompress().TryParseJson<ReportState>(out var lastReportState))
-                        lastReportState = new ReportState(Array.Empty<HarvesterStatus>(), DateTime.UtcNow, DateTime.MinValue, new());
-                    var msg = GenerateReport(lastReportState, thisState, "每日");
-                    await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
+                    await SendReport(thisState, "每日", persistState.LastDayJsonGzip.Decompress());
 
                     // update time
                     persistState.LastDay = DateTime.UtcNow;
@@ -161,6 +154,18 @@
             {
                 if (persistState != null)
                     await this.persistentService.LogEntityAsync(persistState);
+            }
+
+            async Task SendReport(ReportState thisState, string reportTitle, string json)
+            {
+                if (!json.TryParseJson<ReportState>(out var lastReportState, out var error))
+                {
+                    await this.SendMessageAsync(new MarkdownMessage("前次存储信息有误，本次报告暂不提供，待管理员处理。"), reportUrl);
+                    logger.LogWarning($"failed to parse last {reportTitle} report, json: {json}");
+                }
+
+                var msg = GenerateReport(lastReportState, thisState, reportTitle);
+                await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
             }
         }
 
@@ -297,6 +302,7 @@
 
         private string Style(WeixinFontType type, string content)
             => Wrap("font", $@"color=""{type}""", content);
+
         private string Wrap(string tag, string attributes, string content)
             => $@"<{tag} {attributes}>{content}</{tag}>";
 
@@ -372,23 +378,27 @@
         //    await SendMessageAsync(ChatTarget.Information, null, msg);
         //}
     }
+
     public static class Helper
     {
-        public static bool TryParseJson<T>(this string @this, out T result)
+        public static bool TryParseJson<T>(this string @this, out T result, out ErrorContext outError)
         {
+            ErrorContext error = null;
             if (string.IsNullOrEmpty(@this))
             {
                 result = default;
+                outError = error;
                 return false;
             }
 
             bool success = true;
             var settings = new JsonSerializerSettings
             {
-                Error = (sender, args) => { success = false; args.ErrorContext.Handled = true; },
+                Error = (sender, args) => { success = false; args.ErrorContext.Handled = true; error = args.ErrorContext; },
                 MissingMemberHandling = MissingMemberHandling.Error
             };
             result = JsonConvert.DeserializeObject<T>(@this, settings);
+            outError = error;
             return success;
         }
 
