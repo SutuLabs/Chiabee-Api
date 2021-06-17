@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text.Json.Serialization;
     using System.Text.RegularExpressions;
     using Renci.SshNet;
     using WebApi.Models;
@@ -106,7 +105,8 @@
     public record HarvesterStatus(string Name, int? TotalPlot, DateTime? LastPlotTime, AbnormalFarmlandList AbnormalFarmlands, string[] DanglingPartitions);
     public record AbnormalFarmlandList(string[] IoErrors, string[] Missings, string[] Uninhabiteds)
     {
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public string[] All => this.IoErrors.Concat(Missings).Concat(Uninhabiteds).ToArray();
     }
     public record FarmlandStatus(string Name, FarmlandStatusType Type);
