@@ -23,7 +23,7 @@ tmux send-keys 'nmon <<< Cdn.' 'C-m'
 tmux split-window -h
 tmux send-keys 'watch -n 2 ""df -h | grep /data""' 'C-m'
 tmux split-window -v
-tmux send-keys 'chia && pm plot' 'C-m'
+# tmux send-keys 'chia && pm plot' 'C-m'
 tmux split-window -h
 tmux send-keys 'chia && pm archive' 'C-m'
 tmux select-pane -t 0";
