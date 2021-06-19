@@ -49,7 +49,12 @@ namespace WebApi.Services.ServerCommands
                 -1);
 
             using var logCmd = client.RunCommand(@"tail -n 100 ~/plotter/plot.log");
-            var job = new MadmaxPlotJob(ParseMadmaxOutput(logCmd.Result), -1, "Unknown");
+            var phase = ParseMadmaxOutput(logCmd.Result);
+
+            using var lastTimeCmd = client.RunCommand(@"stat -c '%y' ~/plotter/plot.log");
+            var lastTime = DateTime.TryParse(lastTimeCmd.Result, out var lt) ? (DateTime?)lt : null;
+
+            var job = new MadmaxPlotJob(phase, -1, lastTime, "Unknown");
 
             return new MadmaxPlotJobStatus(job, stats);
 
@@ -158,7 +163,7 @@ namespace WebApi.Services.ServerCommands
         string[] Processes // rsync/chia_plot
         );
     public record MadmaxPlotJobStatus(MadmaxPlotJob Job, MadmaxPlotStatistics Statistics);
-    public record MadmaxPlotJob(string Phase, int WallTime, string CopyingFile);
+    public record MadmaxPlotJob(string Phase, int WallTime, DateTime? LastUpdateTime, string CopyingFile);
     public record MadmaxPlotStatistics(int AverageTime, int MaxTime, int MinTime, int DailyProduction);
     public record PlotmanJob(int Index, string Id, string K, string TempDir, string DestDir, string WallTime,
         string Phase, string TempSize, int Pid, string MemorySize, string IoTime);
