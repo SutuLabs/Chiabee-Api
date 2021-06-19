@@ -54,6 +54,45 @@ namespace WebApi.Services.ServerCommands
             using var lastTimeCmd = client.RunCommand(@"stat -c '%y' ~/plotter/plot.log");
             var lastTime = DateTime.TryParse(lastTimeCmd.Result, out var lt) ? (DateTime?)lt : null;
 
+            using var rsyncCmd = client.RunCommand(@"tail -c 100 ~/plotter/rsync.log");
+            var (percent, speed) = ParseRsync(rsyncCmd.Result);
+
+            // 58,653,966,336  53%   11.00MB/s    1:14:15
+            static (int? percent, int? speed) ParseRsync(string output)
+            {
+                var s = output
+                    .CleanSplit("\r")
+                    .LastOrDefault()
+                    ?.CleanSplit(" ");
+                if (s == null) return (null, null);
+                var percent = int.TryParse(s[1].Replace("%", ""), out var pp) ? pp : -1;
+                var speed = TryParseByteSize(s[2].Replace("/s", ""), out var sp) ? sp : -1;
+                return (percent, speed);
+            }
+
+            static bool TryParseByteSize(string input, out int size)
+            {
+                size = -1;
+                var re = new Regex(@"(?<number>[.0-9]*)(?<unit>[kmg]b)");
+                var match = re.Match(input.ToLower());
+                if (!match.Success) return false;
+                var number = match.Groups["number"].Value;
+                var unit = match.Groups["unit"].Value;
+                var @base = unit switch
+                {
+                    "gb" => 1024 * 1024,
+                    "mb" => 1024 * 1024,
+                    "kb" => 1024,
+                    "b" => 1,
+                    _ => -1,
+                };
+                if (@base == -1) return false;
+
+                if (!decimal.TryParse(number, out var num)) return false;
+
+                size = (int)(num * @base);
+                return true;
+            }
 
             using var copyCmd = client.RunCommand(@"ps -eo cmd | grep '^rsync'");
             //rsync --bwlimit=3000000 --compress-level=0 --remove-source-files -P /data/final/plot-k32-2021-06-19-06-49-15bd2a88dbe669123ee8eb2515463c460f35e2c76eaa902876aa1abcfd9322fa.plot rsync://sutu@10.179.0.234:12000/plots/A118
@@ -62,7 +101,7 @@ namespace WebApi.Services.ServerCommands
             var filename = match.Success ? match.Groups["filename"].Value : null;
             var target = match.Success ? match.Groups["host"].Value : null;
 
-            var job = new MadmaxPlotJob(phase, -1, lastTime, filename, target);
+            var job = new MadmaxPlotJob(phase, -1, lastTime, filename, target, percent, speed);
 
             return new MadmaxPlotJobStatus(job, stats);
 
@@ -171,7 +210,7 @@ namespace WebApi.Services.ServerCommands
         string[] Processes // rsync/chia_plot
         );
     public record MadmaxPlotJobStatus(MadmaxPlotJob Job, MadmaxPlotStatistics Statistics);
-    public record MadmaxPlotJob(string Phase, int WallTime, DateTime? LastUpdateTime, string? CopyingFile, string? CopyingTarget);
+    public record MadmaxPlotJob(string Phase, int WallTime, DateTime? LastUpdateTime, string? CopyingFile, string? CopyingTarget, int? CopyingPercent, int? CopyingSpeed);
     public record MadmaxPlotStatistics(int AverageTime, int MaxTime, int MinTime, int DailyProduction);
     public record PlotmanJob(int Index, string Id, string K, string TempDir, string DestDir, string WallTime,
         string Phase, string TempSize, int Pid, string MemorySize, string IoTime);
