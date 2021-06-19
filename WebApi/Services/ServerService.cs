@@ -86,8 +86,9 @@
 
         public async Task<ServerStatus[]> GetServersInfo() =>
             new[] { this.farmerClients, this.plotterClients, this.harvesterClients }
+                .SelectMany(_ => _)
                 .AsParallel()
-                .SelectMany(_ => _.Select(_ => TryGet(() => _.GetServerStatus())))
+                .Select(_ => TryGet(() => _.GetServerStatus()))
                 .Where(_ => _ != null)
                 .ToArray();
 
