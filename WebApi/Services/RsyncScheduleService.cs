@@ -78,7 +78,7 @@
 
             bool ExecutePlan(ExecutionRsyncPlan plan)
             {
-                var msg = $"Plan to transfer [{plan.PlotFilePath}]: {plan.FromHost} -> {plan.ToHost}@{plan.DiskName}";
+                var msg = $"Plan to transfer: {plan.FromHost} -> {plan.ToHost}@{plan.DiskName}";
                 try
                 {
                     var p = this.plotterClients.FirstOrDefault(_ => _.Name == plan.FromHost);
@@ -87,7 +87,7 @@
                     var rsyncExist = chkCmd.Result.StartsWith("rsync");
                     if (rsyncExist)
                     {
-                        msg += ", however, rsync process already exists, abort.";
+                        msg += ", however, rsync process already exists, abort." + $"[{plan.PlotFilePath}]";
                     }
                     else
                     {
@@ -96,7 +96,7 @@
                             $" | tee ~/plotter/rsync.log &";
                         var rsyncCmd = p.CreateCommand(cmd);
                         rsyncCmd.BeginExecute();
-                        msg += $", rsync started.";
+                        msg += $", rsync started." + $"[{plan.PlotFilePath}]";
                     }
 
                     this.logger.LogInformation(msg);
@@ -108,7 +108,7 @@
                 }
                 catch (Exception ex)
                 {
-                    this.logger.LogWarning(msg + ", but failed to execute.", ex);
+                    this.logger.LogWarning(msg + ", but failed to execute." + $"[{plan.PlotFilePath}]", ex);
                     return false;
                 }
             }
@@ -161,9 +161,10 @@
                         //var popd = 24 * 3600 / _.MadmaxJob.Statistics.AverageTime;
                         var popd = 0;
                         var target = _.MadmaxJob?.Job?.CopyingTarget;
+                        var speed = _.MadmaxJob?.Job?.CopyingSpeed ?? 0;
                         var targetName = target == null ? null : allHarvesters.FirstOrDefault(_ => new[] { _.Host }.Concat(_.AlternativeHosts ?? new string[] { }).Contains(target)).Name;
 
-                        return new PlotterPlan(_.Name, model, finalNum, popd, filePath, targetName);
+                        return new PlotterPlan(_.Name, model, finalNum, popd, filePath, targetName, speed);
                     })
                     .OrderByDescending(_ => _.FinalNum)
                     .ThenByDescending(_ => _.Popd)
@@ -175,7 +176,7 @@
                     var t = targets.OrderBy(_ => _.Value.Weight).First().Value;
                     targets[t.Harvester.Name] = t with
                     {
-                        Weight = t.Weight + 1,
+                        Weight = t.Weight + p.CopyingSpeed,
                     };
                 }
 
@@ -185,7 +186,7 @@
                     targets[t.Harvester.Name] = t with
                     {
                         Jobs = t.Jobs.Concat(new[] { p.Name }).ToArray(),
-                        Weight = t.Weight + 1,
+                        Weight = t.Weight + p.CopyingSpeed,
                     };
                 }
 
@@ -205,7 +206,7 @@
 
 
         // POPD: Plot Output Per Day
-        private record PlotterPlan(string Name, string Model, int FinalNum, int Popd, string FilePath, string CopyingTarget);
+        private record PlotterPlan(string Name, string Model, int FinalNum, int Popd, string FilePath, string CopyingTarget, int CopyingSpeed);
         private record HarvesterTarget(string Name, string[] Hosts, string[] Disks);
         private record HarvesterPlan(HarvesterTarget Harvester, string[] Jobs, int Weight);
         private record OptimizedRsyncPlan(string Name, string RsyncdHost, int? RsyncdIndex);
