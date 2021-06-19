@@ -43,6 +43,7 @@
             services.AddHostedService<RefreshFarmInfoService>();
             services.AddHostedService<RefreshPriceService>();
             services.AddHostedService<StatisticsService>();
+            services.AddHostedService<RsyncScheduleService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -15,6 +15,7 @@ namespace WebApi.Models
         public string? Username { get; set; }
         public string? Name { get; set; }
         public string? PrivateKeyFile { get; set; }
+        public string[]? AlternativeHosts { get; set; }
     }
 
     public static class SshEntityExtensions
@@ -46,10 +47,12 @@ namespace WebApi.Models
                 Host = entity.Host ?? baseEntity.Host,
                 Location = entity.Location ?? baseEntity.Location,
                 Type = entity.Type ?? baseEntity.Type,
+                Program = entity.Program ?? baseEntity.Program,
                 Port = entity.Port ?? baseEntity.Port,
                 PrivateKeyFile = entity.PrivateKeyFile ?? baseEntity.PrivateKeyFile,
                 Username = entity.Username ?? baseEntity.Username,
                 Name = entity.Name ?? baseEntity.Name,
+                AlternativeHosts = entity.AlternativeHosts ?? baseEntity.AlternativeHosts,
             };
         }
 
