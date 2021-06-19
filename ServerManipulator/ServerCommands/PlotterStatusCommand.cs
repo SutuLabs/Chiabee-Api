@@ -1,4 +1,6 @@
-﻿namespace WebApi.Services.ServerCommands
+﻿#nullable enable
+
+namespace WebApi.Services.ServerCommands
 {
     using System;
     using System.Collections.Generic;
@@ -9,14 +11,22 @@
     {
         public static PlotterStatus GetPlotterStatus(this TargetMachine client)
         {
-            if (!client.EnsureConnected()) return null;
+            var files = client.GetDirectoryFileCountCommand(new[] { "/data/final" });
+            var jobs = client.GetPlotJobs();
+            var cfg = client.ReadPlotManConfiguration();
+            var fc = files
+                .Select(_ => new DirectoryFileCount(_.Path, _.Files.Length))
+                .ToArray();
+            return new PlotterStatus(client.Name, jobs, fc, files, cfg);
+        }
+
+        public static PlotJob[] GetPlotJobs(this TargetMachine client)
+        {
+            if (!client.EnsureConnected()) return Array.Empty<PlotJob>();
 
             using var pmCmd = client.RunCommand(@". ~/chia-blockchain/activate && plotman status");
 
-            var fileCounts = client.GetDirectoryFileCountCommand(new[] { "/data/final" });
-            var jobs = ParsePlotStatusOutput(pmCmd.Result).ToArray();
-            var cfg = client.ReadPlotManConfiguration();
-            return new PlotterStatus(client.Name, jobs, fileCounts, cfg);
+            return ParsePlotStatusOutput(pmCmd.Result).ToArray();
 
             static IEnumerable<PlotJob> ParsePlotStatusOutput(string output)
             {
@@ -39,23 +49,29 @@
             }
         }
 
-        public static DirectoryFileCount[] GetDirectoryFileCountCommand(this TargetMachine client, params string[] pathes)
+        public static DirectoryFiles[] GetDirectoryFileCountCommand(this TargetMachine client, params string[] pathes)
         {
-            return pathes.Select(_ => client.GetDirectoryFileCountCommand(_)).ToArray();
+            return pathes
+                .Select(_ => client.GetDirectoryFileCountCommand(_))
+                .NotNull()
+                .ToArray();
         }
 
-        public static DirectoryFileCount GetDirectoryFileCountCommand(this TargetMachine client, string path)
+        public static DirectoryFiles? GetDirectoryFileCountCommand(this TargetMachine client, string path)
         {
             if (!client.EnsureConnected()) return null;
-            using var cmd = client.RunCommand(@$"ls {path}/*.plot | wc -l");
-            if (!int.TryParse(cmd.Result, out var count)) return null;
-            return new DirectoryFileCount(path, count);
+            using var cmd = client.RunCommand(@$"ls {path}/*.plot | sort");
+            var files = cmd.Result
+                .CleanSplit()
+                .Select(_ => _.Replace($"{path}/", ""))
+                .ToArray();
+            return new DirectoryFiles(path, files);
         }
     }
 
+    public record DirectoryFiles(string Path, string[] Files);
     public record DirectoryFileCount(string Path, int Count);
-
-    public record PlotterStatus(string Name, PlotJob[] Jobs, DirectoryFileCount[] FileCounts, PlotManConfiguration Configuration);
+    public record PlotterStatus(string Name, PlotJob[] Jobs, DirectoryFileCount[] FileCounts, DirectoryFiles[] Files, PlotManConfiguration Configuration);
     public record PlotJob(int Index, string Id, string K, string TempDir, string DestDir, string WallTime,
         string Phase, string TempSize, int Pid, string MemorySize, string IoTime);
 }
