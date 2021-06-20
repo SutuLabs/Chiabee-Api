@@ -44,7 +44,8 @@
                 [Key.TotalPlotter] = "P图机数量",
                 [Key.TotalHarvester] = "收割机数量",
                 [Key.CoinPrice] = "币价",
-                [Key.EstimateWin] = "期望成功",
+                [Key.EstimateWin] = "成功期望",
+                [Key.PlotHeap] = "堆积图数",
             };
         }
 
@@ -61,6 +62,7 @@
             public const string TotalHarvester = nameof(TotalHarvester);
             public const string CoinPrice = nameof(CoinPrice);
             public const string EstimateWin = nameof(EstimateWin);
+            public const string PlotHeap = nameof(PlotHeap);
         }
 
         protected override async Task DoWorkAsync()
@@ -96,6 +98,7 @@
                 dictionary.Add(Key.TotalHarvester, harvesters.Length.ToString());
                 dictionary.Add(Key.CoinPrice, prices.First().Price.ToString("0.##"));
                 dictionary.Add(Key.EstimateWin, totalPlot <= 0 ? "None" : GetEstimateTime(totalPlot, farmer.Node.Space));
+                dictionary.Add(Key.PlotHeap, plotters.Sum(_ => _?.Files?.FirstOrDefault()?.Files?.Length ?? 0).ToString());
 
                 var thisState = new ReportState(harvesters, DateTime.UtcNow, farmer.Node.Time, dictionary);
                 persistState = await this.persistentService.RetrieveEntityAsync<StatisticsStateEntity>();
@@ -183,6 +186,7 @@
                 Key.TotalHarvester,
                 Key.CoinPrice,
                 Key.EstimateWin,
+                Key.PlotHeap,
             };
 
             // 统计数据
