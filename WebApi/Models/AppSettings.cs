@@ -25,5 +25,7 @@ namespace WebApi.Models
         internal SshEntity[] GetFarmers() => Farmers.BasedOn(FarmerDefault).BasedOn(MachineDefault).SetType(ServerType.Farmer).ToArray();
 
         internal SshEntity[] GetHarvesters() => Harvesters.BasedOn(HarvesterDefault).BasedOn(MachineDefault).SetType(ServerType.Harvester).ToArray();
+
+        internal SshEntity[] GetAllMachines() => GetPlotters().Concat(GetFarmers()).Concat(GetHarvesters()).ToArray();
     }
 }

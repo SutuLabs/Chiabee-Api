@@ -70,7 +70,7 @@
                 })
                 .ToArray();
 
-            var plans = GetExecutionPlan(plotters, hs).ToArray();
+            var plans = GetExecutionPlan(plotters, hs, this.appSettings.GetAllMachines()).ToArray();
             var result = plans
                 .AsParallel()
                 .Select(_ => ExecutePlan(_))
@@ -114,16 +114,16 @@
             }
         }
 
-        private IEnumerable<ExecutionRsyncPlan> GetExecutionPlan(PlotterStatus[] plotters, ServerStatus[] harvesters)
+        internal static IEnumerable<ExecutionRsyncPlan> GetExecutionPlan(PlotterStatus[] plotters, ServerStatus[] harvesters, SshEntity[] allMachines)
         {
             const int PlotSize = 108_888_888;// 1-K based
-            var dicLoc = new[] { this.plotterClients, this.harvesterClients }
-                .SelectMany(_ => _)
+            var dicLoc = allMachines
+                .Where(_ => _.Type == ServerType.Harvester || _.Type == ServerType.Plotter)
                 .ToDictionary(_ => _.Name, _ => _.Location);
             var locs = dicLoc
                 .Select(_ => _.Value)
                 .Distinct();
-            var allHs = this.appSettings.GetHarvesters();
+            var allHs = allMachines.Where(_ => _.Type == ServerType.Harvester).ToArray();
 
             return locs
                 .Select(loc => new
@@ -209,6 +209,6 @@
         private record HarvesterTarget(string Name, string[] Hosts, string[] Disks);
         private record HarvesterPlan(HarvesterTarget Harvester, string[] Jobs, int Weight);
         private record OptimizedRsyncPlan(string Name, string RsyncdHost, int? RsyncdIndex);
-        private record ExecutionRsyncPlan(string FromHost, string PlotFilePath, string ToHost, string DiskName);
+        internal record ExecutionRsyncPlan(string FromHost, string PlotFilePath, string ToHost, string DiskName);
     }
 }
