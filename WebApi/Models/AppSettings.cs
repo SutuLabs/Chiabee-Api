@@ -20,10 +20,10 @@ namespace WebApi.Models
         public SshEntity? HarvesterDefault { get; set; }
         public SshEntity[]? Harvesters { get; set; }
 
-        internal SshEntity[] GetPlotters() => Plotters.BasedOn(PlotterDefault.SetType(ServerType.Plotter)).BasedOn(MachineDefault).ToArray();
+        internal SshEntity[] GetPlotters() => Plotters.BasedOn(PlotterDefault).BasedOn(MachineDefault).SetType(ServerType.Plotter).ToArray();
 
-        internal SshEntity[] GetFarmers() => Farmers.BasedOn(FarmerDefault.SetType(ServerType.Farmer)).BasedOn(MachineDefault).ToArray();
+        internal SshEntity[] GetFarmers() => Farmers.BasedOn(FarmerDefault).BasedOn(MachineDefault).SetType(ServerType.Farmer).ToArray();
 
-        internal SshEntity[] GetHarvesters() => Harvesters.BasedOn(HarvesterDefault.SetType(ServerType.Harvester)).BasedOn(MachineDefault).ToArray();
+        internal SshEntity[] GetHarvesters() => Harvesters.BasedOn(HarvesterDefault).BasedOn(MachineDefault).SetType(ServerType.Harvester).ToArray();
     }
 }
