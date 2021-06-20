@@ -107,12 +107,13 @@ namespace WebApi.Services.ServerCommands
 
             using var copyCmd = client.RunCommand(@"ps -eo cmd | grep '^rsync'");
             //rsync --bwlimit=3000000 --compress-level=0 --remove-source-files -P /data/final/plot-k32-2021-06-19-06-49-15bd2a88dbe669123ee8eb2515463c460f35e2c76eaa902876aa1abcfd9322fa.plot rsync://sutu@10.179.0.234:12000/plots/A118
-            var re = new Regex(@"^rsync .*/data/final/(?<filename>plot-k[-0-9a-f]{84}.plot) rsync://.*?@(?<host>[.0-9]*):[0-9]{1,5}/plots/\w?\d{1,4}");
+            var re = new Regex(@"^rsync .*/data/final/(?<filename>plot-k[-0-9a-f]{84}.plot) rsync://.*?@(?<host>[.0-9]*):[0-9]{1,5}/plots/(?<disk>\w?\d{1,4})");
             var match = re.Match(copyCmd.Result);
             var filename = match.Success ? match.Groups["filename"].Value : null;
             var target = match.Success ? match.Groups["host"].Value : null;
+            var disk = match.Success ? match.Groups["disk"].Value : null;
 
-            var job = new MadmaxPlotJob(phase, -1, lastTime, filename, target, percent, speed);
+            var job = new MadmaxPlotJob(phase, -1, lastTime, filename, target, percent, speed, disk);
 
             return new MadmaxPlotJobStatus(job, stats);
 
@@ -225,7 +226,7 @@ namespace WebApi.Services.ServerCommands
         string[] Processes // rsync/chia_plot
         );
     public record MadmaxPlotJobStatus(MadmaxPlotJob Job, MadmaxPlotStatistics Statistics);
-    public record MadmaxPlotJob(string Phase, int WallTime, DateTime? LastUpdateTime, string? CopyingFile, string? CopyingTarget, int? CopyingPercent, int? CopyingSpeed);
+    public record MadmaxPlotJob(string Phase, int WallTime, DateTime? LastUpdateTime, string? CopyingFile, string? CopyingTarget, int? CopyingPercent, int? CopyingSpeed, string? CopyingDisk);
     public record MadmaxPlotStatistics(int AverageTime, int MaxTime, int MinTime, int DailyProduction);
     public record PlotmanJob(int Index, string Id, string K, string TempDir, string DestDir, string WallTime,
         string Phase, string TempSize, int Pid, string MemorySize, string IoTime);
