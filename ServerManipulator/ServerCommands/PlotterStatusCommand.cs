@@ -35,7 +35,7 @@ namespace WebApi.Services.ServerCommands
         {
             if (!client.EnsureConnected()) return default;
 
-            using var timeCmd = client.RunCommand(@"grep -o ""^Total .* sec"" ~/plotter/plot.log | sed -e ""s/^Total .* \([0-9]\+\.[0-9]\+\) sec$/\1/""");
+            using var timeCmd = client.RunCommand(@"grep -o '^Total .* sec' ~/plotter/plot.log | sed -e 's/^Total .* \([.0-9]\+\) sec$/\1/'");
             decimal[] times = timeCmd.Result.CleanSplit()
                 .Select(_ => decimal.TryParse(_, out var number) ? (decimal?)number : null)
                 .Where(_ => _ != null)
@@ -108,15 +108,19 @@ namespace WebApi.Services.ServerCommands
             static string ParseMadmaxOutput(string output)
             {
                 // Example see end of the file
-                var re = new Regex(@"\[P(?<phase>\d)(-\d)?\]( Table (?<table>\d))?");
+                var rePhase = new Regex(@"\[P(?<phase>\d)(-\d)?\]( Table (?<table>\d))?");
+                var reTotal = new Regex(@"^Total plot creation time was (?<time>[.0-9]+) sec \([.0-9]+ min\)");
+
                 var lines = output.CleanSplit().Reverse().ToArray();
                 foreach (var line in lines)
                 {
-                    var match = re.Match(line);
-                    if (!match.Success) continue;
+                    var totalMatch = reTotal.Match(line);
+                    if (totalMatch.Success) return "0:0";
+                    var phaseMatch = rePhase.Match(line);
+                    if (!phaseMatch.Success) continue;
 
-                    var phase = int.TryParse(match.Groups["phase"].Value, out var tp) ? tp : -1;
-                    var table = int.TryParse(match.Groups["table"].Value, out var tt) ? tt : -1;
+                    var phase = int.TryParse(phaseMatch.Groups["phase"].Value, out var tp) ? tp : -1;
+                    var table = int.TryParse(phaseMatch.Groups["table"].Value, out var tt) ? tt : -1;
                     var (ep, esp) = (phase, table) switch
                     {
                         // P1: 1-7
@@ -341,4 +345,5 @@ Phase 3 took 695.165 sec, wrote 21877147858 entries to final plot
 Phase 4 took 69.1341 sec, final plot size is 108835451858 bytes
 Total plot creation time was 2405.1 sec (40.085 min)
 Started copy to /data/final/plot-k32-2021-06-18-15-09-bee141598c3ad541303a90e508819f4f38779fa262aa9d64db8872112d4649fa.plot
+Copy to /data/final/plot-k32-2021-06-19-10-58-e90192e35a49b3a5df5f050c422db1b507f27b07f5954e6dea40468dd550a076.plot failed with: fwrite() failed
 */
