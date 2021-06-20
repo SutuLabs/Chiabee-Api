@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "WebApi\WebApi.csproj", "{E5ACCC5C-607A-46A9-99AF-17F6C59B3406}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerManipulator", "ServerManipulator\ServerManipulator.csproj", "{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerManipulator", "ServerManipulator\ServerManipulator.csproj", "{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{EC8507B5-C262-42A9-B065-6BC344DB3095}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E19295D-4118-4CF3-BE1F-A2E8D4C2AFE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC8507B5-C262-42A9-B065-6BC344DB3095}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC8507B5-C262-42A9-B065-6BC344DB3095}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC8507B5-C262-42A9-B065-6BC344DB3095}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC8507B5-C262-42A9-B065-6BC344DB3095}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

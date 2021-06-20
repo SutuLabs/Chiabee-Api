@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Text.Json;
     using System.Threading.Tasks;
@@ -70,7 +71,12 @@
                 })
                 .ToArray();
 
-            var plans = GetExecutionPlan(plotters, hs, this.appSettings.GetAllMachines()).ToArray();
+            var param = new ExecutionPlanParameter(plotters, hs, this.appSettings.GetAllMachines());
+
+            // get this json to used in unit test
+            ////var json = JsonConvert.SerializeObject(param);
+
+            var plans = GetExecutionPlan(param).ToArray();
             var result = plans
                 .AsParallel()
                 .Select(_ => ExecutePlan(_))
@@ -114,8 +120,10 @@
             }
         }
 
-        internal static IEnumerable<ExecutionRsyncPlan> GetExecutionPlan(PlotterStatus[] plotters, ServerStatus[] harvesters, SshEntity[] allMachines)
+        internal static IEnumerable<ExecutionRsyncPlan> GetExecutionPlan(ExecutionPlanParameter planParam)
         {
+            var (plotters, harvesters, allMachines) = planParam;
+
             const int PlotSize = 108_888_888;// 1-K based
             var dicLoc = allMachines
                 .Where(_ => _.Type == ServerType.Harvester || _.Type == ServerType.Plotter)
@@ -139,15 +147,24 @@
                 var hs = harvesters
                     .ToDictionary(_ => _.Name, _ => _);
                 var targets = allHarvesters
-                    .Select(h => hs.TryGetValue(h.Name, out var ss) ? (h, disks: ss.Disks.Select(d => (path: d.Path, available: Math.Max(0, d.Available / PlotSize - 1))).ToArray()) : (null, null))
+                    .Select(h => hs.TryGetValue(h.Name, out var ss) ? (h, disks: GetAvailableDisks(ss.Disks)) : (null, null))
                     .Where(_ => _.disks != null && _.disks.Sum(d => d.available) > 3)
                     .Reverse()
                     .Select(_ => new HarvesterPlan(
-                        new HarvesterTarget(_.h.Name, _.h.Hosts,
-                            _.disks.Where(_ => _.available > 0 && _.path.StartsWith(farmPrefix)).Select(d => d.path[farmPrefix.Length..]).ToArray()),
+                        new HarvesterTarget(_.h.Name, _.h.Hosts, _.disks.Select(d => d.name).ToArray()),
                         Array.Empty<string>(), 0))
-                    .ToDictionary(_ => _.Harvester.Name, _ => _);
+                    .SelectMany(_ => _.Harvester.Hosts.Select(h => (h, _)))
+                    .ToDictionary(_ => _.h, _ => _._);
                 if (targets.Count == 0) yield break;
+
+                //var diskOccupation = GetAvailableDisks(hs.SelectMany(_ => _.Value.Disks))
+                //    .ToDictionary(_ => _.name, _ => new DiskOccupy(_.name, _.available, 0));
+
+                (string name, int available)[] GetAvailableDisks(IEnumerable<DiskStatus> disks) => disks
+                    .Select(d => (path: d.Path, available: (int)Math.Max(0, d.Available / PlotSize - 1)))
+                    .Where(_ => _.available > 0 && _.path.StartsWith(farmPrefix))
+                    .Select(d => (d.path[farmPrefix.Length..], d.available))
+                    .ToArray();
 
                 var ps = plotters
                     .Select(_ =>
@@ -160,9 +177,9 @@
                         var popd = 0;
                         var target = _.MadmaxJob?.Job?.CopyingTarget;
                         var speed = _.MadmaxJob?.Job?.CopyingSpeed ?? 0;
-                        var targetName = target == null ? null : allHarvesters.FirstOrDefault(_ => _.Hosts.Contains(target)).Name;
+                        var disk = _.MadmaxJob?.Job?.CopyingDisk;
 
-                        return new PlotterPlan(_.Name, model, finalNum, popd, filePath, targetName, speed);
+                        return new PlotterPlan(_.Name, model, finalNum, popd, filePath, target, speed, disk);
                     })
                     .OrderByDescending(_ => _.FinalNum)
                     .ThenByDescending(_ => _.Popd)
@@ -171,33 +188,53 @@
                 // add weight only when plotter is transferring
                 foreach (var p in ps.Where(_ => _.CopyingTarget != null))
                 {
-                    var t = targets.FirstOrDefault(_ => _.Key == p.CopyingTarget).Value;
-                    if (t == null) continue;
-                    targets[t.Harvester.Name] = t with
+                    var t = targets[p.CopyingTarget];
+                    targets[p.CopyingTarget] = t with
                     {
                         Weight = t.Weight + p.CopyingSpeed,
                     };
+                    //if (diskOccupation.ContainsKey(p.CopyingDisk))
+                    //{
+                    //    var d = diskOccupation[p.CopyingDisk];
+                    //    diskOccupation[p.CopyingDisk] = d with
+                    //    {
+                    //        Copying = d.Copying + 1,
+                    //    };
+                    //}
                 }
 
                 foreach (var p in ps.Where(_ => _.CopyingTarget == null && _.FinalNum > 0))
                 {
-                    var t = targets.OrderBy(_ => _.Value.Weight).First().Value;
-                    targets[t.Harvester.Name] = t with
+                    var fg = targets
+                        .GroupBy(_ => _.Value.Harvester.Name)
+                        .OrderBy(g => g.Sum(_ => _.Value.Weight))
+                        .First().Key;
+                    var (key, t) = targets
+                        .Where(_ => _.Value.Harvester.Name == fg)
+                        .OrderBy(_ => _.Value.Weight).First();
+                    const int bandwidth = 120 * 1024 * 1024;
+                    targets[key] = t with
                     {
                         Jobs = t.Jobs.Concat(new[] { p.Name }).ToArray(),
-                        Weight = t.Weight + p.CopyingSpeed,
+                        Weight = t.Weight + bandwidth,
                     };
                 }
 
-                foreach (var t in targets.Select(_ => _.Value))
+                foreach (var (host, t) in targets)
                 {
-                    for (var i = 0; i < t.Jobs.Length; i++)
+                    foreach (var j in t.Jobs)
                     {
-                        var j = t.Jobs[i];
                         var p = ps.First(_ => _.Name == j);
-                        var host = t.Harvester.Hosts[i % t.Harvester.Hosts.Length];
-                        var disk = t.Harvester.Disks[i % t.Harvester.Disks.Length];
+                        var rnd = new Random().Next(t.Harvester.Disks.Length);
+                        var disk = t.Harvester.Disks[rnd];
                         yield return new ExecutionRsyncPlan(j, p.FilePath, host, disk);
+
+                        //string ChooseDisk()
+                        //{
+                        //    var disk = diskOccupation
+                        //        .Where(_ => _.Value.Copying < _.Value.Available)
+                        //        .OrderBy(_ => _.Value.Copying);
+                        //}
                     }
                 }
             }
@@ -205,10 +242,13 @@
 
 
         // POPD: Plot Output Per Day
-        private record PlotterPlan(string Name, string Model, int FinalNum, int Popd, string FilePath, string CopyingTarget, int CopyingSpeed);
+        private record PlotterPlan(string Name, string Model, int FinalNum, int Popd, string FilePath, string CopyingTarget, int CopyingSpeed, string CopyingDisk);
+        [DebuggerDisplay("{Name, nq}, Hosts: {Hosts.Length}, Disks: {Disks.Length}")]
         private record HarvesterTarget(string Name, string[] Hosts, string[] Disks);
+        [DebuggerDisplay("{Harvester}, Jobs: {Jobs.Length}, Weight: {Weight}")]
         private record HarvesterPlan(HarvesterTarget Harvester, string[] Jobs, int Weight);
-        private record OptimizedRsyncPlan(string Name, string RsyncdHost, int? RsyncdIndex);
+        private record DiskOccupy(string Name, int Available, int Copying);
         internal record ExecutionRsyncPlan(string FromHost, string PlotFilePath, string ToHost, string DiskName);
+        internal record ExecutionPlanParameter(PlotterStatus[] plotters, ServerStatus[] harvesters, SshEntity[] allMachines);
     }
 }

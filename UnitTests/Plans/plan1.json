@@ -1,0 +1,1415 @@
+{
+  "plotters": [
+    {
+      "Name": "r720p01-65",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 21
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-18-34-10907003c9a5d2ab29cdbb3417e23958edb3a0f1e783ae04ae8a51220da7e609.plot", "plot-k32-2021-06-19-19-01-91abd66b448ba0df6085599fab6940b6a01169a70cda9798462e52b5d65cce45.plot", "plot-k32-2021-06-19-19-29-d559728df658403253c280a2db814940a234cc9e211e92622bc66fb6f8175986.plot", "plot-k32-2021-06-19-19-58-dee62985e537c0f9efea818049bba4640621dd689076d366a1bba32fb4295f2a.plot", "plot-k32-2021-06-19-20-26-3f1b2269a0de400a797d85d566f317b30a3c18c38d1fb86fe432ae71d43ff517.plot", "plot-k32-2021-06-19-20-54-5c3e476a297cffd71fd51a0d65b115d03c48920e92f4d9a0dc164b1df9ecccbc.plot", "plot-k32-2021-06-19-21-22-fba198f12ad96eb0871157d2509863350eba7a494599c94aaf883c9cc3bc11e0.plot", "plot-k32-2021-06-19-21-51-63023c2c81dea302efa478144089bcccf680d08ea8ff37389e14f9012b7e5ec1.plot", "plot-k32-2021-06-19-22-19-428f2c7c6860589e30c427159ba0ca4f7f8091b4a61b3d658cd8ac40154c04e9.plot", "plot-k32-2021-06-19-22-46-36a1a3a5956c516eba9aff896252aae454386253c89ae86d7b37871a4dddecbe.plot", "plot-k32-2021-06-19-23-14-56afb7a8aa05bd07bfada9d9ee5c3b8a76449295da70e7d3054981e60bd6aecd.plot", "plot-k32-2021-06-19-23-42-66ded9882b9cb68bb572cd6f745f71e7e22a6769ab4676c6a5e6dc71c58be106.plot", "plot-k32-2021-06-20-00-11-7f201722f5068524ef1734af794186bdd0c31e8d4938bd26e2665b1d9da51ce9.plot", "plot-k32-2021-06-20-00-39-83d8f112318e8bc7a1bfcb491044323d7815dda6a1b7a923d40371ba7d01ad38.plot", "plot-k32-2021-06-20-01-07-708e6f44998f9a7368ba04cbdf70e242b287f33857a462c7d64923aaf6aa7408.plot", "plot-k32-2021-06-20-01-35-d3d48229c4fc225f71c27a310806ede7519d783d8fb7fefd3148411037e86336.plot", "plot-k32-2021-06-20-02-03-50775e6e9cb54e8363b7cb756fc0ab069a40f7019347e53388f91db674eabbf1.plot", "plot-k32-2021-06-20-02-32-fb0f9f114d4430da30246b96ce08beb8f8e0fe78d5a160677116dd7b7a48a52a.plot", "plot-k32-2021-06-20-03-00-ce8b9869b33e408c463f360b2111df29dfd05a797c8eed51034eebd088cac0b9.plot", "plot-k32-2021-06-20-03-28-69b5e52c71f1c2d8e5523302b130382e4991cde53797d61d230faaaee435e852.plot", "plot-k32-2021-06-20-03-56-c381773c97ea527c9eb94bbd7c092f728016677ffc23373f9af44437a0d73e2b.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "1:2",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:55:57.1541877+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-18-34-10907003c9a5d2ab29cdbb3417e23958edb3a0f1e783ae04ae8a51220da7e609.plot",
+          "CopyingTarget": "10.179.0.228",
+          "CopyingPercent": 26,
+          "CopyingSpeed": 116245135
+        },
+        "Statistics": {
+          "AverageTime": 1703,
+          "MaxTime": 5315,
+          "MinTime": 1659,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r720p02-69",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 10
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-18-01-8ebd9d54dc33189d8a07b7f993d4cd04974d438fdf25a1cc97957d57e60d2167.plot", "plot-k32-2021-06-19-23-34-c0fa2d9a178d2ccc3feca45b7b3e878b67b6a1c995fdf366f327307b06fbdc25.plot", "plot-k32-2021-06-20-00-02-f5539f0ee2a53eb4129d79ee71178b8bf342549b223757b14ab231a3ceb26696.plot", "plot-k32-2021-06-20-00-29-e242f99d3af64ccb0b8619e121b2c20f07b9b8da04a0a4fe2328ca931d2a59f4.plot", "plot-k32-2021-06-20-00-57-af175296912bea9e9f45115ad6acec3ec73022208a21621e77f5aecfe7a866f7.plot", "plot-k32-2021-06-20-01-25-eccacd200b4db8d6f27e784d6c194b834f25e934d222520e00cbdbefd59b992d.plot", "plot-k32-2021-06-20-01-53-21e27ff4b4756ed9a86794b2b457664b277b7b7a21f3ca211b2242e429b8f91f.plot", "plot-k32-2021-06-20-02-21-310a5490825ff201ba49aa010fc6bad1e7f58f263f2d56f971155727da6fc5e6.plot", "plot-k32-2021-06-20-02-49-dbda650337833295617c5b4b7443b1fdfd805c58ba7c56f987e89d9f61696a54.plot", "plot-k32-2021-06-20-03-16-b61506eeeef3d21b62d6f9110241f7d126ec093dc8207d33e633d7f35ca07881.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "0:0",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:54:20.3340579+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-18-01-8ebd9d54dc33189d8a07b7f993d4cd04974d438fdf25a1cc97957d57e60d2167.plot",
+          "CopyingTarget": "10.179.0.224",
+          "CopyingPercent": 20,
+          "CopyingSpeed": 3229614
+        },
+        "Statistics": {
+          "AverageTime": 1672,
+          "MaxTime": 1729,
+          "MinTime": 1634,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r720p03-73",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 4
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-20-00-00-f8ecee80a116cbded342e725787f87d98b1aca8649d2e5b5d8082eaf62e894b8.plot", "plot-k32-2021-06-20-01-01-09d1eeb44f6459485d6e5711907151908a4c9820831720aa0cf5b25c3d24740c.plot", "plot-k32-2021-06-20-02-03-7d70aeb6ced9920cb03f42a20711a8284d9637175313f747017c5f3442d6ea3b.plot", "plot-k32-2021-06-20-03-04-c562b0f6586ed4c2bab4e32d309518497f1e57cf3baa4917ff172d70839e3468.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "3:4",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:25.4036664+08:00",
+          "CopyingFile": "plot-k32-2021-06-20-00-00-f8ecee80a116cbded342e725787f87d98b1aca8649d2e5b5d8082eaf62e894b8.plot",
+          "CopyingTarget": "10.179.0.224",
+          "CopyingPercent": 7,
+          "CopyingSpeed": 16787701
+        },
+        "Statistics": {
+          "AverageTime": 3679,
+          "MaxTime": 3789,
+          "MinTime": 3579,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r720p04-77",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 2
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-20-03-01-3bab174fac70e619d42c253965bd1b81323dc1cc37faa292202052ff9cd915be.plot", "plot-k32-2021-06-20-03-42-2f1ac2cbc1b93c083af0d13a44ca676c4379cf912aa97e1175b734589d846d18.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "3:3",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:51.0050442+08:00",
+          "CopyingFile": "plot-k32-2021-06-20-03-01-3bab174fac70e619d42c253965bd1b81323dc1cc37faa292202052ff9cd915be.plot",
+          "CopyingTarget": "10.179.0.234",
+          "CopyingPercent": 5,
+          "CopyingSpeed": 94025809
+        },
+        "Statistics": {
+          "AverageTime": 2480,
+          "MaxTime": 2494,
+          "MinTime": 2367,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p01-129",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 10
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-08-15-8a5633732ab717a04c6852da8af4f6aa40ae2c8e7f55a4ba16a5a481b2c49515.plot", "plot-k32-2021-06-19-09-21-ab1399c91e9b51bdaa04acad858637a8f129b62633663a95bd5232a6b891fb8f.plot", "plot-k32-2021-06-19-11-32-892c0b6516dc3f2839b591c2d89bac0b0f4064522d1c4346d42f325e40c4161d.plot", "plot-k32-2021-06-19-12-38-150f17783e0c9b1473b73c4a64b8ae1e0f0a7ed305289bc594fb616871e12705.plot", "plot-k32-2021-06-19-13-43-b934e9749f291a751d3bc38c9f1e508e806abb01ff499bfd2e3c8af9077e4f08.plot", "plot-k32-2021-06-19-14-51-46cc6cca26ddd7d7430858a17d09ceec8c2a7e839cb72e7020407a81f30790c8.plot", "plot-k32-2021-06-19-15-59-0ed984908dbf0ca6decb9dc7dcae03a5140f3a5c259057faddf68a802a802e28.plot", "plot-k32-2021-06-19-17-44-61b6ee3cf86f2e39cba2d149f9edddf03c21252e3b20bbd0f04dc3e021ff14ca.plot", "plot-k32-2021-06-19-19-19-07a65386fa731c96a84738e2fdca1ded447c718d886c1203b6538aabae3f8f1d.plot", "plot-k32-2021-06-19-21-21-3bd4c827f5e677c27fbb21894bd0062e0f975558980bbd9e095d0972b2dce726.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "1:4",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:22.1640005+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-08-15-8a5633732ab717a04c6852da8af4f6aa40ae2c8e7f55a4ba16a5a481b2c49515.plot",
+          "CopyingTarget": "10.179.0.236",
+          "CopyingPercent": 14,
+          "CopyingSpeed": 62170071
+        },
+        "Statistics": {
+          "AverageTime": 4015,
+          "MaxTime": 4033,
+          "MinTime": 3914,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p02-131",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 4
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-23-02-1b34c230eadc60902b45c3d46efb5c4d1eb7b44b48c02ff0380e0b9b33b46596.plot", "plot-k32-2021-06-20-00-07-4f988f760f03878fb6b3ed2513d0fe72421b8a7db0fcdc23d2d38193a77972ea.plot", "plot-k32-2021-06-20-01-12-70b68e7b9a0261c0cf8679b4fb747d5911b39ab5edcadbce432d0844d90acbd2.plot", "plot-k32-2021-06-20-02-16-383ee174d44f615bd7495f69d5841524aadfd68bbfc8308a3200e23f802a28a2.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "2:1",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:48.4840516+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-23-02-1b34c230eadc60902b45c3d46efb5c4d1eb7b44b48c02ff0380e0b9b33b46596.plot",
+          "CopyingTarget": "10.179.0.232",
+          "CopyingPercent": 0,
+          "CopyingSpeed": 25092423
+        },
+        "Statistics": {
+          "AverageTime": 3882,
+          "MaxTime": 3930,
+          "MinTime": 3776,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p03-133",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 18
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-07-04-16377baf0d3c1d9430518f0ebd668710c05a2fc564146bbae5d3d54d11ddea1b.plot", "plot-k32-2021-06-19-09-13-4e8c70db3e7fee7220eaebc2b1b7357b5211f6e1329868e6608f11582fb38a50.plot", "plot-k32-2021-06-19-10-18-f7ac7b47e99d927e94081ab1bad9cfa32e3ac6cb9559256d96b2e05301dadda7.plot", "plot-k32-2021-06-19-11-22-85f14eae23e4ffba5ccff2b50a39a9f1560e8595b518f76edbb69c4fa0d3db59.plot", "plot-k32-2021-06-19-12-27-45156ea69809cb53a3aa12d8f29801b659ec00225e5f5681e5911aaba66adbdf.plot", "plot-k32-2021-06-19-13-31-669c225fc0d6fca5d2e7df5da6580456ce0ceada866f6e6c8913336a43298a99.plot", "plot-k32-2021-06-19-14-36-ea57d9e68939cb6939f1f012bfabaef614f33dcaa5f0f83a86059388447baed9.plot", "plot-k32-2021-06-19-15-40-ed3d5b35c346cf68d7dd46234164ef2e5b10adad9db395d56fd3b95c439637fb.plot", "plot-k32-2021-06-19-16-45-919f006c0cef8896a8bd85bda27a544c17916c03fbdcec452e3cda6f5ada90d8.plot", "plot-k32-2021-06-19-17-50-d8ba6b0287499d1522d80ea7f5455be6c69774b31f20e251a8f1c82b67804461.plot", "plot-k32-2021-06-19-18-54-30be5b3b60b7c63e70c5bd1d45c71e1f3bedd63f74aafee2d7ecdce6fbac63ce.plot", "plot-k32-2021-06-19-19-59-c9e67fdfad0bffc62e5529ff66af949a16e5f410a2d76838536acff101a1cabe.plot", "plot-k32-2021-06-19-21-03-27bcf9e110fea25491b4ac0d81943554b77f97da06185cc29e3cdfcb263aa1a7.plot", "plot-k32-2021-06-19-22-08-175f26188fe3a3ce23b21693cddd21e80f8cb623bd79bfae8bc6378d87a56f1d.plot", "plot-k32-2021-06-19-23-13-88bb32a97073f0eb962ef4df9abdea4cf13c73763731c8496d1ef2a9c5a35f42.plot", "plot-k32-2021-06-20-00-17-2b4cc35fc8de92bf71ddfe51da858b382f84d82b76a0df32125e81e9ce5e800d.plot", "plot-k32-2021-06-20-01-22-21a70c03e31a32ed01e93f584acff3cbcf36ee3f9ca0b811fea24202cf9c0e77.plot", "plot-k32-2021-06-20-02-27-80629989241dfde222c70831d4a83a201bce3dbb34f9de5d66ad0ec60a71e4ef.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "1:5",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:02.7046349+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-07-04-16377baf0d3c1d9430518f0ebd668710c05a2fc564146bbae5d3d54d11ddea1b.plot",
+          "CopyingTarget": "10.179.0.232",
+          "CopyingPercent": 3,
+          "CopyingSpeed": 22617784
+        },
+        "Statistics": {
+          "AverageTime": 3883,
+          "MaxTime": 3893,
+          "MinTime": 3837,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p04-135",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 7
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-20-02-9fc53193fd5f8bae09cef89a54be5707c0142ba934478c93afaa299dcc63af1d.plot", "plot-k32-2021-06-19-21-13-a5656256de7b54c337dddb34706ecb3159aeb1c594912b4b78ee865be03d5c5b.plot", "plot-k32-2021-06-19-22-23-384fd543d7eb220bdb0bc0607cca2bddeb1d9c8e8888383b22c7a0b312b98cc1.plot", "plot-k32-2021-06-19-23-33-5b0fd26bf33bda1aaa2440290c249f3af108fdd8b4f927b42c3f46a887cac08a.plot", "plot-k32-2021-06-20-00-43-d11dae9cda6ca9db40ff596d41e6b074e1422621fc2c1395371375753d438b8f.plot", "plot-k32-2021-06-20-01-53-4573bc10dc4ba9eaee9c3d48e95013d0e2b0bd2b6d8e7e9a85f4d76337947471.plot", "plot-k32-2021-06-20-03-03-c8695a01f31d00e8f0efff9ea18bf25f18830caa89f5872c5264e73f219d2700.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "2:6",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:52.3652654+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-20-02-9fc53193fd5f8bae09cef89a54be5707c0142ba934478c93afaa299dcc63af1d.plot",
+          "CopyingTarget": "10.179.0.232",
+          "CopyingPercent": null,
+          "CopyingSpeed": null
+        },
+        "Statistics": {
+          "AverageTime": 4196,
+          "MaxTime": 6159,
+          "MinTime": 4125,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p05-137",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 14
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-12-39-8662c314ad577f0cef48712ef75d4f541f37113d6b63c72a401cea5a46cd6339.plot", "plot-k32-2021-06-19-13-43-477ba7ad821cd4bc0052e5bcb736a6c6a9e6a8f21448939e62eef41a56878d8a.plot", "plot-k32-2021-06-19-14-47-ba575e24b516ba0d2afa3c39fe6c4eb755490836b0ea776487274420e01b42f7.plot", "plot-k32-2021-06-19-15-52-94aa3698d8c23de703a892701c590ee8babfc990a365123b37989d65aaf40c4e.plot", "plot-k32-2021-06-19-16-56-a55eaae0b74b44452d6f5c95faf1e058da6cc199c8b034c935651ea317ff925b.plot", "plot-k32-2021-06-19-18-00-456ca21f58ae120fabce41c8ad8b04b4ab98e0c724aeb5bb0af56f94b4fd8e12.plot", "plot-k32-2021-06-19-19-05-adbde389b588dc2248607208de48a0b7818d77c16402792a862be075314afa4a.plot", "plot-k32-2021-06-19-20-09-c720b67cc72f0a07043720ba2b3c9a58c2cbc51b98de4d4213fd1a4deec88d46.plot", "plot-k32-2021-06-19-21-13-5ff93efd69c09268866a83a51f8679660ad2032e7178720f50489df0d46b897c.plot", "plot-k32-2021-06-19-22-18-642a7915f6fb266519399c02beafd0db87ffb5e7bfc4739c2f4bac5b0dcb6ed4.plot", "plot-k32-2021-06-19-23-22-fe57bccfb1ac72c8700561074eb93735efb1b801bc6c369f81d77e557a782b24.plot", "plot-k32-2021-06-20-00-27-a6ad8889a14a6dbed9603af25e7be6f88254529fca438f13120302cb4387241b.plot", "plot-k32-2021-06-20-01-31-1fed2e2ded8bd5f4257913a8bd72b620b89c5a000e45d2721c3fb8cdd066d932.plot", "plot-k32-2021-06-20-02-35-4f9ca979aa5139d17285ace533e30445cd1daf009ae626d94730e664b1e706d9.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "1:3",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:52:56.9725521+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-12-39-8662c314ad577f0cef48712ef75d4f541f37113d6b63c72a401cea5a46cd6339.plot",
+          "CopyingTarget": "10.179.0.232",
+          "CopyingPercent": 78,
+          "CopyingSpeed": 28961669
+        },
+        "Statistics": {
+          "AverageTime": 3864,
+          "MaxTime": 3884,
+          "MinTime": 3835,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p06-139",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 5
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-23-01-c45e48d5f8b1508236d79a3532e673097e8cf517989e4a3c51467aafb4c3424e.plot", "plot-k32-2021-06-20-00-05-bdd3cfd2aef084a72991a923c6f7f51bb102694d41b8d557b55ce7e5de0307a7.plot", "plot-k32-2021-06-20-01-09-c583f763b4d63c8146519a669c796ae30a5634e95b6246a9935f876ad55ef568.plot", "plot-k32-2021-06-20-02-14-a963d8c6776ff1c8edb6e58d19c8249a288ab3ba1cd8d17f298481e50e7d6da4.plot", "plot-k32-2021-06-20-03-18-ea0987384919e8bc79b8c386466331d371aa4b63c41940c65a5696507a742724.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "2:3",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:52.8489085+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-23-01-c45e48d5f8b1508236d79a3532e673097e8cf517989e4a3c51467aafb4c3424e.plot",
+          "CopyingTarget": "10.179.0.230",
+          "CopyingPercent": 81,
+          "CopyingSpeed": 29706158
+        },
+        "Statistics": {
+          "AverageTime": 3865,
+          "MaxTime": 3888,
+          "MinTime": 3806,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p07-141",
+      "Jobs": null,
+      "FileCounts": [],
+      "Files": [],
+      "Configuration": null,
+      "MadmaxJob": null,
+      "Processes": []
+    },
+    {
+      "Name": "r420p08-143",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 16
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-10-37-d1f4dbb1225ff7ccce2f20c3b7722617cdfb165e2cd2ad928c75bd7ba193b9d2.plot", "plot-k32-2021-06-19-11-42-1bda9f389d1e3cbd7895c844deaefec21f423d07ac1a34e4415375e5273c45ce.plot", "plot-k32-2021-06-19-12-46-512b37a6b3a51940dc44b0530c5a51eec98a5685fc03d4f19f3cfa384ba3552c.plot", "plot-k32-2021-06-19-13-50-c6010d75a34bb25b668c5cceb12ec30b4e0b053905a8244c04678cc549646b7f.plot", "plot-k32-2021-06-19-14-55-7dcea249ad6cf344a4e388bcf1219367a5190c7f810c7d88d86d490e6fc4b746.plot", "plot-k32-2021-06-19-16-00-ce08509d35b92be835811225c1baab9b1b31e1a35d3d0e8371ce4ad6b8b59854.plot", "plot-k32-2021-06-19-17-04-75a18c2b7843e5219c8af8865356c5edf23c6a590cc32275e3eb58a606ba5a5b.plot", "plot-k32-2021-06-19-18-09-db3bb42ddba114140bdf4ca767a808c99d69153193c8c8e5e35b392cffe6025d.plot", "plot-k32-2021-06-19-19-13-367c62c20b5260fcd96c40a479f8c7b6b9180846ea865602f53ae4b28d098466.plot", "plot-k32-2021-06-19-20-18-525305200d3d2d35952fec7c68a78235a5ae2110bfc6f7316ca26fb06b32c313.plot", "plot-k32-2021-06-19-21-23-fb3be8d7321e4eec52b1a781cef1c30ae03cf12fa231a807f62737c59c71036c.plot", "plot-k32-2021-06-19-22-29-8c6e4b0e5142365be29b41d5a650b9866c0a2e8eb2a6ba62669e6fad38e874dc.plot", "plot-k32-2021-06-19-23-33-b2041ae83f72d79ab81f91cb8d3201de05360f20ccf9901bf96ec1423e34e220.plot", "plot-k32-2021-06-20-00-38-afe07d615e7826596fee1781bb46b5f03e4a7ea31d6b79a012b92d67dc67a83e.plot", "plot-k32-2021-06-20-01-42-4179ec71ef166e4215b9549b8ad56e5c4adb65a8a5bec703ef58b9bf41836ac9.plot", "plot-k32-2021-06-20-02-47-ca728a6dea407f1d7253ac9828572e7bdcfc8500607fcf2ebf4cfe36b9dcecc1.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "1:1",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:30.4647523+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-10-37-d1f4dbb1225ff7ccce2f20c3b7722617cdfb165e2cd2ad928c75bd7ba193b9d2.plot",
+          "CopyingTarget": "10.179.0.230",
+          "CopyingPercent": 36,
+          "CopyingSpeed": 47731179
+        },
+        "Statistics": {
+          "AverageTime": 3865,
+          "MaxTime": 3926,
+          "MinTime": 3795,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p09-145",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 5
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-22-31-fc9b50433696519cb716b3ea06d8a4da0c93175577a3aa95ec8c1918c1bc9c51.plot", "plot-k32-2021-06-19-23-36-bc77e96ea6be91c9c0e649204f6cb2eeb5d78110995c91b99da228e47569cf64.plot", "plot-k32-2021-06-20-00-40-62e3beb76cf3dd820841ee5e30a992fc7635df04f0fb5f143e22018effcd3dde.plot", "plot-k32-2021-06-20-01-45-8012ed31024f782f7333290a0156cdb37d763f7a9d5dba123b7ffdba26abd4d7.plot", "plot-k32-2021-06-20-02-50-e22702d9a2cd693d6259f11b769387dbc483afd4bf22cf189287fd7b96d8fa10.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "3:6",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:09.3497887+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-22-31-fc9b50433696519cb716b3ea06d8a4da0c93175577a3aa95ec8c1918c1bc9c51.plot",
+          "CopyingTarget": "10.179.0.230",
+          "CopyingPercent": 66,
+          "CopyingSpeed": 45298483
+        },
+        "Statistics": {
+          "AverageTime": 3875,
+          "MaxTime": 3895,
+          "MinTime": 3834,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p10-147",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 27
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-18-07-54-7353d13d7b0f817e4b3bb4efa2657990d807919cb435ee5e6481cc4887986317.plot", "plot-k32-2021-06-18-12-15-a184649ce08d602f7663d3407304ae2ca19af4f54ffbc70b69977a16d8eb6b8a.plot", "plot-k32-2021-06-18-13-23-68b89526b2cbcbe4eb7c3cb45e947a2241f792f37b4a0d858ed0a1fcb1b07f0e.plot", "plot-k32-2021-06-18-14-28-389d52f3c15cd5b5e42d24652526f31fd562d872973987b669bd874433446109.plot", "plot-k32-2021-06-18-17-43-5bb8057feb35adf16c25dbc4030d14a6a7b764b96ce87bc5159620041b4caad8.plot", "plot-k32-2021-06-18-19-53-292a562919ba747c849da6532bc56a99fa1fc254548de6bffcec19306a7e929e.plot", "plot-k32-2021-06-19-01-19-cee1e8d1e2cc431c737883a438114cc77e16f309e83139a9ef0a4db5d260c536.plot", "plot-k32-2021-06-19-02-24-1eb9b77059a37d871b0a3a8d8fa3dbdc249ced50c43b91b25ec6e6bc238fa488.plot", "plot-k32-2021-06-19-04-34-dd807468221827b99249daabc3100bbef89ba2db075a75dc27c2611f4b04a83e.plot", "plot-k32-2021-06-19-05-40-3fdc2dc9437cb3b4865b2bb570088683cc8f07e5c96fce7b067a32b2bbd74c78.plot", "plot-k32-2021-06-19-06-45-a602b8ee8bab141918d515a1d4b226cac2346306cef10756f4a5f9da9b0bd29a.plot", "plot-k32-2021-06-19-08-55-072ddcce40198c254706a404e298425205b280abdf05ce3d8f3ebf66d6864934.plot", "plot-k32-2021-06-19-11-05-0413233f1364b58af27685aa1d50bebab74222f3b82f884412e71f937fe0f494.plot", "plot-k32-2021-06-19-12-11-39a8ec3694783e9ef947e986ccbe1a98c0688fd4e01e30076629a1dbb707df09.plot", "plot-k32-2021-06-19-13-16-33d839992f4392844148c250a987392cc5cfc4f9d631f343ed390201e2bd86a9.plot", "plot-k32-2021-06-19-14-21-f799bc3bbdffc700bd42485c5aa771a6cbcd0262c46f86c8c2dc63143925c73a.plot", "plot-k32-2021-06-19-15-26-096fced80b0f2357a51d1411d9717f9e5099ae69a46c122a5be632950e0f1281.plot", "plot-k32-2021-06-19-16-31-69626638871aa75a6e39ae10c83712c2098dd1df67e2f6743c9b017295815f05.plot", "plot-k32-2021-06-19-17-37-4e386439f26ebbdf4e792eb7368b72bf02f4bca9999db4193d0b2357377b8bd0.plot", "plot-k32-2021-06-19-18-42-9273b2e1141ea9c682014c592dd47cb763e3c7547395db38164bfb844796456e.plot", "plot-k32-2021-06-19-19-47-971b58eb63b20e8b1db441edc0ae446ae19acc952137d2f4e41aadbd32bd4ae6.plot", "plot-k32-2021-06-19-20-53-5e6dadb7d96c4b203e147c0bf401f97a9b026231caaf19d9ddaaea0ab7073264.plot", "plot-k32-2021-06-19-21-58-e24145057898446c9cd53779bc8acc4ab8d1debc01aabdaf8208d0090f827210.plot", "plot-k32-2021-06-19-23-03-2bd21a51a54ac51e43f2ee72f9d09c744c869b5e6894ebaa684c31c4d9dd3335.plot", "plot-k32-2021-06-20-00-08-ca0c4dc586b8f899d9a18be1a59858740beca4928272416de3efa4e072ae2349.plot", "plot-k32-2021-06-20-01-14-85d359ef99520ce544ed25e7a7f3a2ebe597c0687f011d845ccf57d0a86b230f.plot", "plot-k32-2021-06-20-02-19-89a8f24b1d32918b8a501f2c3b295b99120dbfde995eedcb1cd8db5b837f4730.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "1:6",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:53:54.1362553+08:00",
+          "CopyingFile": "plot-k32-2021-06-18-07-54-7353d13d7b0f817e4b3bb4efa2657990d807919cb435ee5e6481cc4887986317.plot",
+          "CopyingTarget": "10.179.0.230",
+          "CopyingPercent": null,
+          "CopyingSpeed": null
+        },
+        "Statistics": {
+          "AverageTime": 3915,
+          "MaxTime": 3934,
+          "MinTime": 3871,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p11-149",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 14
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-12-54-df0a3236884e7015ef95c87d42cf0b9bdf4ffdfa97e15d4179a9aa2614ea2e6e.plot", "plot-k32-2021-06-19-13-58-d085ecf0e91a70b82fa65987c798bde86475289582d3d031a71a57f5114b35cb.plot", "plot-k32-2021-06-19-15-02-e1bd65a1c429a367b7d2f42778056d422494d60ac12e3e0888e7fc0f7a16bb7a.plot", "plot-k32-2021-06-19-16-06-e058eaccf25ac9ef2805d9fd2df87ac9226f55885e4e54788f180aff60e697c3.plot", "plot-k32-2021-06-19-17-11-85dde6a63ba93cd04beb11033f89a20e5fcc8102b53549b02c96bc96cfb1f5ad.plot", "plot-k32-2021-06-19-18-15-f2b83d9889a61f03b6b07679727534fe1af9db31f8339dc057a0139fd2fd5afc.plot", "plot-k32-2021-06-19-19-20-63c6ffa02b2bc4667974842475c48371ba9089651d88b65e466200908c1efab6.plot", "plot-k32-2021-06-19-20-25-df92e2c35aa37e715651d0de328bf5d5b8931a709c88a5987455b82cbdb4e61c.plot", "plot-k32-2021-06-19-21-29-332bb6c6a64d9c3df5fce54f2d0728e12514c876930620246cf308b6b60c0294.plot", "plot-k32-2021-06-19-22-33-97699bd86d448eb16aae5be909abab5b136ea01b73f02fd71b563c6fb38e1c22.plot", "plot-k32-2021-06-19-23-38-cb3524f1f6d753c00bc114ae7346f1eb17f9262bb54d7a6905bcbc64ce0ebab3.plot", "plot-k32-2021-06-20-00-42-b3d3217d69fee2910e2b375245e3391fd7074729728277b54d5f15b8e8f26539.plot", "plot-k32-2021-06-20-01-46-7a12c803783adadbb554a4e8da515c5316a78b232ec256e5623dc3c7c715c424.plot", "plot-k32-2021-06-20-02-51-75da3d73f922ff5fba86d4463e7a417b2b6a7131a5250ac96ce814cc03840791.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "3:6",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:56:45.3640237+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-12-54-df0a3236884e7015ef95c87d42cf0b9bdf4ffdfa97e15d4179a9aa2614ea2e6e.plot",
+          "CopyingTarget": "10.179.0.236",
+          "CopyingPercent": 18,
+          "CopyingSpeed": 71963770
+        },
+        "Statistics": {
+          "AverageTime": 3862,
+          "MaxTime": 3892,
+          "MinTime": 3800,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    },
+    {
+      "Name": "r420p12-151",
+      "Jobs": null,
+      "FileCounts": [
+        {
+          "Path": "/data/final",
+          "Count": 14
+        }
+      ],
+      "Files": [
+        {
+          "Path": "/data/final",
+          "Files": [ "plot-k32-2021-06-19-13-04-f969485e8a39a3c6b62099b19d39fcf5b2ab7dc7be27c26f6c02edf10d8cbb54.plot", "plot-k32-2021-06-19-14-08-73aa860b77d2258249bc77c96af238a1f29e4b43402e92b7ff30a9f34f641aa6.plot", "plot-k32-2021-06-19-15-12-bc3100f2d7b65c6fbe621c08a266c474d52a2e1591335d3b27ce9bcfa244bb69.plot", "plot-k32-2021-06-19-16-17-e30950d199e3f9f1f97997811470fa34e15745ce80201b0a8a56c027bb49439b.plot", "plot-k32-2021-06-19-17-21-ce9496f7578771badb5b69774bba9135d47265bec43cfbfcf41f97c3cc699f53.plot", "plot-k32-2021-06-19-18-26-e5472f1cea11afd86b205a3934e51fa824f98c68a140a951938ecb8d36da4762.plot", "plot-k32-2021-06-19-19-31-70f01bb44a39ce92bae806a58f15f626f650bc6160a103d59966bf0c3ffd2d40.plot", "plot-k32-2021-06-19-20-36-bc5036864edff27e34e857a41a132d2274d7b323d489271f828c947776c91758.plot", "plot-k32-2021-06-19-21-41-49b6a57f524397a8d5cbe463a085c1436255c6cb6439aed18aa4f219ce13659d.plot", "plot-k32-2021-06-19-22-46-b24087957853130c3598c8a6dc4c9de8eda197162d4b02a36c955a4abcb07d8f.plot", "plot-k32-2021-06-19-23-51-87ab1d2e8aeb8aea3231590749c9ea13d1e42552fee2d8f6fff9c92a86848081.plot", "plot-k32-2021-06-20-00-56-376079de58bc639b20658fa409b4d310be0e68eedfda3c19203c1b412bbcb226.plot", "plot-k32-2021-06-20-02-01-f56fcd3106fa7e9d543bd2f6a5d9daf4c7c12c067141c446abbc8458fd1330d6.plot", "plot-k32-2021-06-20-03-06-1ebcd976103202fea10c7301978a71c7fd334d1d8e5990bcf919ccc360dcf5ef.plot" ]
+        }
+      ],
+      "Configuration": null,
+      "MadmaxJob": {
+        "Job": {
+          "Phase": "3:1",
+          "WallTime": -1,
+          "LastUpdateTime": "2021-06-20T12:55:59.471818+08:00",
+          "CopyingFile": "plot-k32-2021-06-19-13-04-f969485e8a39a3c6b62099b19d39fcf5b2ab7dc7be27c26f6c02edf10d8cbb54.plot",
+          "CopyingTarget": "10.179.0.232",
+          "CopyingPercent": 6,
+          "CopyingSpeed": 9395240
+        },
+        "Statistics": {
+          "AverageTime": 3894,
+          "MaxTime": 3927,
+          "MinTime": 3797,
+          "DailyProduction": -1
+        }
+      },
+      "Processes": [ "chia_plot", "rsync" ]
+    }
+  ],
+  "harvesters": [
+    {
+      "Name": "harvester_s7-236",
+      "Type": 3,
+      "Process": {
+        "Total": 250,
+        "Running": 2,
+        "Sleeping": 248,
+        "Stopped": 0,
+        "Zombie": 0
+      },
+      "Memory": {
+        "Total": 15.6,
+        "Free": 0.2,
+        "Used": 0.4
+      },
+      "Cpus": [ 100.0, 100.0, 83.3, 29.4, 94.4, 100.0, 100.0, 100.0, 100.0, 82.4, 0.0, 0.0 ],
+      "Disks": [
+        {
+          "Device": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+          "Size": 114333860,
+          "Used": 6669008,
+          "Available": 101813924,
+          "Path": "/"
+        },
+        {
+          "Device": "/dev/sdd1",
+          "Size": 3844639728,
+          "Used": 3772889936,
+          "Available": 71333408,
+          "Path": "/farm/A127"
+        },
+        {
+          "Device": "/dev/sdb1",
+          "Size": 3844639728,
+          "Used": 3291083752,
+          "Available": 553139592,
+          "Path": "/farm/A126"
+        },
+        {
+          "Device": "/dev/sdf1",
+          "Size": 3844639728,
+          "Used": 2338015560,
+          "Available": 1506207784,
+          "Path": "/farm/A146"
+        },
+        {
+          "Device": "/dev/sdc1",
+          "Size": 3844639728,
+          "Used": 531495448,
+          "Available": 3312727896,
+          "Path": "/farm/A144"
+        },
+        {
+          "Device": "/dev/sde1",
+          "Size": 3844639728,
+          "Used": 531426420,
+          "Available": 3312796924,
+          "Path": "/farm/A145"
+        }
+      ],
+      "NetworkIoSpeed": 113495740,
+      "Power": null
+    },
+    {
+      "Name": "harvester_s1-224",
+      "Type": 3,
+      "Process": {
+        "Total": 264,
+        "Running": 4,
+        "Sleeping": 260,
+        "Stopped": 0,
+        "Zombie": 0
+      },
+      "Memory": {
+        "Total": 3.8,
+        "Free": 0.1,
+        "Used": 0.4
+      },
+      "Cpus": [ 0.0, 94.4, 72.2, 94.1, 100.0, 100.0, 94.4, 82.4, 38.1, 100.0, 94.4, 93.3 ],
+      "Disks": [
+        {
+          "Device": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+          "Size": 114333860,
+          "Used": 6785264,
+          "Available": 101697668,
+          "Path": "/"
+        },
+        {
+          "Device": "/dev/sdm1",
+          "Size": 3844639728,
+          "Used": 3750357000,
+          "Available": 93866344,
+          "Path": "/farm/A012"
+        },
+        {
+          "Device": "/dev/sdi1",
+          "Size": 3844639728,
+          "Used": 3772061812,
+          "Available": 72161532,
+          "Path": "/farm/A010"
+        },
+        {
+          "Device": "/dev/sdl1",
+          "Size": 3844639728,
+          "Used": 3720090084,
+          "Available": 124133260,
+          "Path": "/farm/A009"
+        },
+        {
+          "Device": "/dev/sdd1",
+          "Size": 3844639728,
+          "Used": 3720024940,
+          "Available": 124198404,
+          "Path": "/farm/A011"
+        },
+        {
+          "Device": "/dev/sdc1",
+          "Size": 3844639728,
+          "Used": 3820784888,
+          "Available": 23438456,
+          "Path": "/farm/A108"
+        },
+        {
+          "Device": "/dev/sdh1",
+          "Size": 3844639728,
+          "Used": 3724308656,
+          "Available": 119914688,
+          "Path": "/farm/A109"
+        },
+        {
+          "Device": "/dev/sda1",
+          "Size": 3844639728,
+          "Used": 3719538804,
+          "Available": 124684540,
+          "Path": "/farm/A122"
+        },
+        {
+          "Device": "/dev/sdf1",
+          "Size": 3844639728,
+          "Used": 3584148240,
+          "Available": 260075104,
+          "Path": "/farm/A123"
+        },
+        {
+          "Device": "/dev/sdb1",
+          "Size": 3844639728,
+          "Used": 90140,
+          "Available": 3844133204,
+          "Path": "/farm/A140"
+        },
+        {
+          "Device": "/dev/sdg1",
+          "Size": 3844639728,
+          "Used": 90140,
+          "Available": 3844133204,
+          "Path": "/farm/A141"
+        },
+        {
+          "Device": "/dev/sdj1",
+          "Size": 3844639728,
+          "Used": 90140,
+          "Available": 3844133204,
+          "Path": "/farm/A142"
+        },
+        {
+          "Device": "/dev/sdk1",
+          "Size": 3844639728,
+          "Used": 90140,
+          "Available": 3844133204,
+          "Path": "/farm/A143"
+        }
+      ],
+      "NetworkIoSpeed": 125707000,
+      "Power": null
+    },
+    {
+      "Name": "harvester_s5-232",
+      "Type": 3,
+      "Process": {
+        "Total": 270,
+        "Running": 4,
+        "Sleeping": 266,
+        "Stopped": 0,
+        "Zombie": 0
+      },
+      "Memory": {
+        "Total": 3.8,
+        "Free": 0.1,
+        "Used": 0.3
+      },
+      "Cpus": [ 82.4, 0.0, 100.0, 100.0, 100.0, 100.0, 100.0, 47.1, 78.9, 94.1, 0.0, 63.2 ],
+      "Disks": [
+        {
+          "Device": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+          "Size": 114333860,
+          "Used": 7771768,
+          "Available": 100711164,
+          "Path": "/"
+        },
+        {
+          "Device": "/dev/sdh1",
+          "Size": 3844592404,
+          "Used": 3826135240,
+          "Available": 18040780,
+          "Path": "/farm/A035"
+        },
+        {
+          "Device": "/dev/sdc1",
+          "Size": 3844639728,
+          "Used": 3826238736,
+          "Available": 17984608,
+          "Path": "/farm/A040"
+        },
+        {
+          "Device": "/dev/sdj1",
+          "Size": 3844639728,
+          "Used": 3719795516,
+          "Available": 124427828,
+          "Path": "/farm/A041"
+        },
+        {
+          "Device": "/dev/sdi1",
+          "Size": 3844592404,
+          "Used": 3758442040,
+          "Available": 85733980,
+          "Path": "/farm/A071"
+        },
+        {
+          "Device": "/dev/sdf1",
+          "Size": 3844639728,
+          "Used": 3844223344,
+          "Available": 0,
+          "Path": "/farm/A110"
+        },
+        {
+          "Device": "/dev/sdm1",
+          "Size": 3844592404,
+          "Used": 3844176020,
+          "Available": 0,
+          "Path": "/farm/A104"
+        },
+        {
+          "Device": "/dev/sdb1",
+          "Size": 3844592404,
+          "Used": 3844176020,
+          "Available": 0,
+          "Path": "/farm/A113"
+        },
+        {
+          "Device": "/dev/sde1",
+          "Size": 3844592404,
+          "Used": 3844176020,
+          "Available": 0,
+          "Path": "/farm/A114"
+        },
+        {
+          "Device": "/dev/sdd1",
+          "Size": 3844639728,
+          "Used": 3825923800,
+          "Available": 18299544,
+          "Path": "/farm/A131"
+        },
+        {
+          "Device": "/dev/sdg1",
+          "Size": 3844639728,
+          "Used": 1858048848,
+          "Available": 1986174496,
+          "Path": "/farm/A130"
+        },
+        {
+          "Device": "/dev/sdk1",
+          "Size": 3844639728,
+          "Used": 957184,
+          "Available": 3843266160,
+          "Path": "/farm/A128"
+        },
+        {
+          "Device": "/dev/sdl1",
+          "Size": 3844639728,
+          "Used": 90140,
+          "Available": 3844133204,
+          "Path": "/farm/A129"
+        }
+      ],
+      "NetworkIoSpeed": 126756140,
+      "Power": null
+    },
+    {
+      "Name": "harvester6-206",
+      "Type": 3,
+      "Process": {
+        "Total": 171,
+        "Running": 1,
+        "Sleeping": 170,
+        "Stopped": 0,
+        "Zombie": 0
+      },
+      "Memory": {
+        "Total": 7.7,
+        "Free": 2.2,
+        "Used": 0.3
+      },
+      "Cpus": [ 6.2, 100.0, 83.3, 93.8 ],
+      "Disks": [
+        {
+          "Device": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+          "Size": 114075828,
+          "Used": 6960840,
+          "Available": 101277164,
+          "Path": "/"
+        },
+        {
+          "Device": "/dev/sdg1",
+          "Size": 3844639728,
+          "Used": 3543029272,
+          "Available": 301194072,
+          "Path": "/farm/A097"
+        },
+        {
+          "Device": "/dev/sdi1",
+          "Size": 3844639728,
+          "Used": 3720076500,
+          "Available": 124146844,
+          "Path": "/farm/A101"
+        },
+        {
+          "Device": "/dev/sdh1",
+          "Size": 3844639728,
+          "Used": 3826441876,
+          "Available": 17781468,
+          "Path": "/farm/A100"
+        },
+        {
+          "Device": "/dev/sdf1",
+          "Size": 3844639728,
+          "Used": 90124,
+          "Available": 3649182388,
+          "Path": "/farm/A096"
+        }
+      ],
+      "NetworkIoSpeed": 1280,
+      "Power": null
+    },
+    {
+      "Name": "harvester_s3-228",
+      "Type": 3,
+      "Process": {
+        "Total": 278,
+        "Running": 1,
+        "Sleeping": 277,
+        "Stopped": 0,
+        "Zombie": 0
+      },
+      "Memory": {
+        "Total": 3.8,
+        "Free": 0.1,
+        "Used": 0.4
+      },
+      "Cpus": [ 100.0, 100.0, 100.0, 100.0, 88.2, 100.0, 100.0, 100.0, 100.0, 94.4, 100.0, 100.0 ],
+      "Disks": [
+        {
+          "Device": "/dev/sdh1",
+          "Size": 3844610880,
+          "Used": 3826580032,
+          "Available": 17614464,
+          "Path": "/farm/A095"
+        },
+        {
+          "Device": "/dev/sdc1",
+          "Size": 3844639728,
+          "Used": 3844223348,
+          "Available": 0,
+          "Path": "/farm/A106"
+        },
+        {
+          "Device": "/dev/sde1",
+          "Size": 3844639728,
+          "Used": 3719721456,
+          "Available": 124501888,
+          "Path": "/farm/A107"
+        },
+        {
+          "Device": "/dev/sdj1",
+          "Size": 3844639728,
+          "Used": 3719628952,
+          "Available": 124594392,
+          "Path": "/farm/A102"
+        },
+        {
+          "Device": "/dev/sdi1",
+          "Size": 3844639728,
+          "Used": 3748148756,
+          "Available": 96074588,
+          "Path": "/farm/A103"
+        },
+        {
+          "Device": "/dev/sdg1",
+          "Size": 3844610880,
+          "Used": 3826112312,
+          "Available": 18082184,
+          "Path": "/farm/A094"
+        },
+        {
+          "Device": "/dev/sdk1",
+          "Size": 3844640564,
+          "Used": 3826137076,
+          "Available": 18087104,
+          "Path": "/farm/A091"
+        },
+        {
+          "Device": "/dev/sdm1",
+          "Size": 3844592404,
+          "Used": 3770737584,
+          "Available": 73438436,
+          "Path": "/farm/A105"
+        },
+        {
+          "Device": "/dev/sdb1",
+          "Size": 3844639728,
+          "Used": 2429675000,
+          "Available": 1414548344,
+          "Path": "/farm/A136"
+        },
+        {
+          "Device": "/dev/sdd1",
+          "Size": 3844639728,
+          "Used": 90140,
+          "Available": 3844133204,
+          "Path": "/farm/A138"
+        },
+        {
+          "Device": "/dev/sdf1",
+          "Size": 3844639728,
+          "Used": 90140,
+          "Available": 3844133204,
+          "Path": "/farm/A137"
+        },
+        {
+          "Device": "/dev/sdl1",
+          "Size": 3844639728,
+          "Used": 90140,
+          "Available": 3844133204,
+          "Path": "/farm/A139"
+        }
+      ],
+      "NetworkIoSpeed": 600,
+      "Power": null
+    },
+    {
+      "Name": "harvester_s4-230",
+      "Type": 3,
+      "Process": {
+        "Total": 265,
+        "Running": 1,
+        "Sleeping": 264,
+        "Stopped": 0,
+        "Zombie": 0
+      },
+      "Memory": {
+        "Total": 3.8,
+        "Free": 0.1,
+        "Used": 0.4
+      },
+      "Cpus": [ 100.0, 100.0, 100.0, 83.3, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 ],
+      "Disks": [
+        {
+          "Device": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+          "Size": 114333860,
+          "Used": 6752180,
+          "Available": 101730752,
+          "Path": "/"
+        },
+        {
+          "Device": "/dev/sdb1",
+          "Size": 3844640564,
+          "Used": 3720010280,
+          "Available": 124213900,
+          "Path": "/farm/A090"
+        },
+        {
+          "Device": "/dev/sdf1",
+          "Size": 3844639728,
+          "Used": 3844223348,
+          "Available": 0,
+          "Path": "/farm/A073"
+        },
+        {
+          "Device": "/dev/sdg1",
+          "Size": 3844639728,
+          "Used": 3755597896,
+          "Available": 88625448,
+          "Path": "/farm/A099"
+        },
+        {
+          "Device": "/dev/sde1",
+          "Size": 3844639728,
+          "Used": 3818155844,
+          "Available": 26067500,
+          "Path": "/farm/A098"
+        },
+        {
+          "Device": "/dev/sdl1",
+          "Size": 3844639728,
+          "Used": 3719631044,
+          "Available": 124592300,
+          "Path": "/farm/A117"
+        },
+        {
+          "Device": "/dev/sdm1",
+          "Size": 3844639728,
+          "Used": 3720214304,
+          "Available": 124009040,
+          "Path": "/farm/A116"
+        },
+        {
+          "Device": "/dev/sdj1",
+          "Size": 3844639728,
+          "Used": 3720013024,
+          "Available": 124210320,
+          "Path": "/farm/A124"
+        },
+        {
+          "Device": "/dev/sdk1",
+          "Size": 3844639728,
+          "Used": 3720004132,
+          "Available": 124219212,
+          "Path": "/farm/A125"
+        },
+        {
+          "Device": "/dev/sdc1",
+          "Size": 3844639728,
+          "Used": 3844223344,
+          "Available": 0,
+          "Path": "/farm/A132"
+        },
+        {
+          "Device": "/dev/sdd1",
+          "Size": 3844639728,
+          "Used": 2473421664,
+          "Available": 1370801680,
+          "Path": "/farm/A133"
+        },
+        {
+          "Device": "/dev/sdh1",
+          "Size": 3844639728,
+          "Used": 1275338020,
+          "Available": 2568885324,
+          "Path": "/farm/A134"
+        },
+        {
+          "Device": "/dev/sdi1",
+          "Size": 3844639728,
+          "Used": 637758816,
+          "Available": 3206464528,
+          "Path": "/farm/A135"
+        }
+      ],
+      "NetworkIoSpeed": 600,
+      "Power": null
+    },
+    {
+      "Name": "harvester_s6-234",
+      "Type": 3,
+      "Process": {
+        "Total": 237,
+        "Running": 1,
+        "Sleeping": 236,
+        "Stopped": 0,
+        "Zombie": 0
+      },
+      "Memory": {
+        "Total": 3.8,
+        "Free": 0.1,
+        "Used": 0.3
+      },
+      "Cpus": [ 100.0, 100.0, 100.0, 100.0, 17.6, 88.2, 100.0, 94.1, 94.4, 100.0, 94.4, 63.2 ],
+      "Disks": [
+        {
+          "Device": "/dev/mapper/ubuntu--vg-ubuntu--lv",
+          "Size": 114333860,
+          "Used": 6802196,
+          "Available": 101680736,
+          "Path": "/"
+        },
+        {
+          "Device": "/dev/sdd1",
+          "Size": 3844639728,
+          "Used": 3818162748,
+          "Available": 26060596,
+          "Path": "/farm/A115"
+        },
+        {
+          "Device": "/dev/sde1",
+          "Size": 3844639728,
+          "Used": 3409942820,
+          "Available": 434280524,
+          "Path": "/farm/A121"
+        },
+        {
+          "Device": "/dev/sdc1",
+          "Size": 3844639728,
+          "Used": 3328229076,
+          "Available": 515994268,
+          "Path": "/farm/A119"
+        },
+        {
+          "Device": "/dev/sdb1",
+          "Size": 3844639728,
+          "Used": 3823188412,
+          "Available": 21034932,
+          "Path": "/farm/A118"
+        },
+        {
+          "Device": "/dev/sdf1",
+          "Size": 3844639728,
+          "Used": 425193868,
+          "Available": 3419029476,
+          "Path": "/farm/A120"
+        }
+      ],
+      "NetworkIoSpeed": 125590480,
+      "Power": null
+    }
+  ],
+  "allMachines": [
+    {
+      "Hosts": [ "10.179.0.65" ],
+      "Location": "2216",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r720p01-65",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.69" ],
+      "Location": "2216",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r720p02-69",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.73" ],
+      "Location": "2216",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r720p03-73",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.77" ],
+      "Location": "2216",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r720p04-77",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.129" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p01-129",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.131" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p02-131",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.133" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p03-133",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.135" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p04-135",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.137" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p05-137",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.139" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p06-139",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.141" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p07-141",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.143" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p08-143",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.145" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p09-145",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.147" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p10-147",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.149" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p11-149",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.151" ],
+      "Location": "2214",
+      "Type": 1,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "r420p12-151",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.194" ],
+      "Location": "2214",
+      "Type": 2,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "farm1-194",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.206" ],
+      "Location": "2202",
+      "Type": 3,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "harvester6-206",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.224", "10.179.0.225" ],
+      "Location": "2216",
+      "Type": 3,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "harvester_s1-224",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.226", "10.179.0.227" ],
+      "Location": "air",
+      "Type": 3,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "harvester_s2-226",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.228", "10.179.0.229" ],
+      "Location": "2216",
+      "Type": 3,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "harvester_s3-228",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.230", "10.179.0.231" ],
+      "Location": "2214",
+      "Type": 3,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "harvester_s4-230",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.232", "10.179.0.233" ],
+      "Location": "2214",
+      "Type": 3,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "harvester_s5-232",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.234", "10.179.0.235" ],
+      "Location": "2216",
+      "Type": 3,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "harvester_s6-234",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    },
+    {
+      "Hosts": [ "10.179.0.236", "10.179.0.237" ],
+      "Location": "2214",
+      "Type": 3,
+      "Program": null,
+      "Port": 22,
+      "Username": "sutu",
+      "Name": "harvester_s7-236",
+      "PrivateKeyFile": "P:\\.ssh\\id_rsa.PEM"
+    }
+  ]
+}

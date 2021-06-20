@@ -1,4 +1,6 @@
-﻿namespace WebApi
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("UnitTests")]
+
+namespace WebApi
 {
     using System;
     using Microsoft.AspNetCore.Hosting;
