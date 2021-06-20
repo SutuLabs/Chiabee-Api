@@ -24,7 +24,7 @@ namespace WebApi.Models
         public ServerType Type => Properties.Type;
     }
 
-    public record MachineProperty(string Name, ServerType Type, string Location, PlotProgram Program);
+    public record MachineProperty(string Name, ServerType Type, string Location, PlotProgram Program, string[] Hosts);
 
     public enum PlotProgram
     {

@@ -175,7 +175,7 @@
                 var hs = harvesters.ToDictionary(_ => _.Name, _ => _);
                 var targets = this.appSettings.GetHarvesters()
                     .Where(h => hs.TryGetValue(h.Name, out var ss) && (ss.Disks.Sum(d => Math.Max(0, d.Available / 108_888_888 - 1)) > 3)) // 1-K based
-                    .Select(_ => _.Host)
+                    .Select(_ => _.Hosts.First())
                     .Reverse()
                     .Select(_ => new HarvestorPlan(_, Array.Empty<string>(), 0))
                     .ToDictionary(_ => _.Host, _ => _);

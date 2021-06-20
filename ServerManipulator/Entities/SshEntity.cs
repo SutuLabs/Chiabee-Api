@@ -7,7 +7,7 @@ namespace WebApi.Models
 
     public class SshEntity
     {
-        public string? Host { get; set; }
+        public string[]? Hosts { get; set; }
         public string? Location { get; set; }
         public ServerType? Type { get; set; }
         public PlotProgram? Program { get; set; }
@@ -15,7 +15,6 @@ namespace WebApi.Models
         public string? Username { get; set; }
         public string? Name { get; set; }
         public string? PrivateKeyFile { get; set; }
-        public string[]? AlternativeHosts { get; set; }
     }
 
     public static class SshEntityExtensions
@@ -44,7 +43,7 @@ namespace WebApi.Models
 
             return new SshEntity
             {
-                Host = entity.Host ?? baseEntity.Host,
+                Hosts = entity.Hosts ?? baseEntity.Hosts,
                 Location = entity.Location ?? baseEntity.Location,
                 Type = entity.Type ?? baseEntity.Type,
                 Program = entity.Program ?? baseEntity.Program,
@@ -52,7 +51,6 @@ namespace WebApi.Models
                 PrivateKeyFile = entity.PrivateKeyFile ?? baseEntity.PrivateKeyFile,
                 Username = entity.Username ?? baseEntity.Username,
                 Name = entity.Name ?? baseEntity.Name,
-                AlternativeHosts = entity.AlternativeHosts ?? baseEntity.AlternativeHosts,
             };
         }
 
@@ -73,7 +71,8 @@ namespace WebApi.Models
                 entity.Name ?? throw new ArgumentNullException(nameof(entity.Name)),
                 entity.Type ?? ServerType.Undefined,
                 entity.Location ?? throw new ArgumentNullException(nameof(entity.Location)),
-                entity.Program ?? PlotProgram.MadmaxPlotter);
+                entity.Program ?? PlotProgram.MadmaxPlotter,
+                entity.Hosts ?? Array.Empty<string>());
             ;
         }
     }

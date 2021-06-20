@@ -143,9 +143,7 @@
                     .Where(_ => _.disks != null && _.disks.Sum(d => d.available) > 3)
                     .Reverse()
                     .Select(_ => new HarvesterPlan(
-                        new HarvesterTarget(
-                            _.h.Name,
-                            new[] { _.h.Host }.Concat(_.h.AlternativeHosts ?? Array.Empty<string>()).ToArray(),
+                        new HarvesterTarget(_.h.Name, _.h.Hosts,
                             _.disks.Where(_ => _.available > 0 && _.path.StartsWith(farmPrefix)).Select(d => d.path[farmPrefix.Length..]).ToArray()),
                         Array.Empty<string>(), 0))
                     .ToDictionary(_ => _.Harvester.Name, _ => _);
@@ -162,7 +160,7 @@
                         var popd = 0;
                         var target = _.MadmaxJob?.Job?.CopyingTarget;
                         var speed = _.MadmaxJob?.Job?.CopyingSpeed ?? 0;
-                        var targetName = target == null ? null : allHarvesters.FirstOrDefault(_ => new[] { _.Host }.Concat(_.AlternativeHosts ?? new string[] { }).Contains(target)).Name;
+                        var targetName = target == null ? null : allHarvesters.FirstOrDefault(_ => _.Hosts.Contains(target)).Name;
 
                         return new PlotterPlan(_.Name, model, finalNum, popd, filePath, targetName, speed);
                     })
