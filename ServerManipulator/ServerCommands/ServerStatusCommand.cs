@@ -29,6 +29,7 @@
                 Name = client.Name,
                 Type = client.Type,
                 NetworkIoSpeed = netSpeed,
+                Location = client.Properties.Location,
                 Power = pwr,
             };
 
@@ -83,6 +84,7 @@
         public decimal[] Cpus { get; init; }
         public DiskStatus[] Disks { get; init; }
         public int? NetworkIoSpeed { get; init; }
+        public string Location { get; init; }
         public decimal? Power { get; init; }
     }
 
