@@ -54,8 +54,19 @@ namespace WebApi.Services.ServerCommands
             using var lastTimeCmd = client.RunCommand(@"stat -c '%y' ~/plotter/plot.log");
             var lastTime = DateTime.TryParse(lastTimeCmd.Result, out var lt) ? (DateTime?)lt : null;
 
-            using var rsyncCmd = client.RunCommand(@"tail -c 100 ~/plotter/rsync.log");
-            var (percent, speed) = ParseRsync(rsyncCmd.Result);
+            var (percent, speed) = GetRsyncInfo(client);
+
+            static (int? percent, int? speed) GetRsyncInfo(TargetMachine client)
+            {
+                const int MaxRsyncFileAgeSeconds = 60;
+
+                using var rsyncLastTimeCmd = client.RunCommand(@"stat -c '%y' ~/plotter/rsync.log");
+                if (!DateTime.TryParse(rsyncLastTimeCmd.Result, out var rlt)) return (null, null);
+                if ((DateTime.UtcNow - rlt).TotalSeconds >= MaxRsyncFileAgeSeconds) return (null, null);
+
+                using var rsyncCmd = client.RunCommand(@"tail -c 100 ~/plotter/rsync.log");
+                return ParseRsync(rsyncCmd.Result);
+            }
 
             // 58,653,966,336  53%   11.00MB/s    1:14:15
             static (int? percent, int? speed) ParseRsync(string output)
