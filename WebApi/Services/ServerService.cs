@@ -94,17 +94,16 @@
 
         public async Task<PlotInfo[]> GetPlotsInfo() =>
             new[] { this.farmerClients, this.harvesterClients }
+                .SelectMany(_ => _)
                 .AsParallel()
-                .SelectMany(_ => _
-                    .SelectMany(_ => TryGet(() => _.GetPlotFarmInfo()) ?? new PlotInfo[] { })
-                    .Where(_ => _ != null))
+                .SelectMany(_ => TryGet(() => _.GetPlotFarmInfo()) ?? Array.Empty<PlotInfo>())
                 .Where(_ => _ != null)
                 .ToArray();
 
         public async Task<MachineWithDisks[]> GetHarvesterDisksInfo() =>
             new[] { this.farmerClients, this.harvesterClients }
-                .AsParallel()
                 .SelectMany(_ => _)
+                .AsParallel()
                 .Select(_ => new MachineWithDisks(_.Name, TryGet(() => _.GetHarvesterDiskInfo())))
                 .ToArray();
 
@@ -112,6 +111,7 @@
             new[] { this.farmerClients, this.harvesterClients }
                 .SelectMany(_ => _)
                 .Where(_ => _.Name == name)
+                .AsParallel()
                 .Select(_ => new MachineWithDisks(_.Name, TryGet(() => _.GetHarvesterDiskInfo())))
                 .FirstOrDefault();
 
