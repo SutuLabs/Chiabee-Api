@@ -128,7 +128,8 @@
                 .Select(_ => new FarmerNodeStatus(
                     _.Name,
                     TryGet(() => _.GetFarmerStatus()),
-                    TryGet(() => _.GetNodeStatus())))
+                    TryGet(() => _.GetNodeStatus()),
+                    TryGet(() => _.GetExtentedFarmerStatus())))
                 .Where(_ => _ != null && _.Farmer != null && _.Node != null)
                 .ToArray();
 

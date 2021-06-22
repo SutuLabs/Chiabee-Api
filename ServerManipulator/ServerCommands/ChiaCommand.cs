@@ -102,6 +102,27 @@
             }
         }
 
+        public static ExtendedFarmerStatus GetExtentedFarmerStatus(this TargetMachine client)
+        {
+            if (!client.EnsureConnected()) return null;
+            using var farmCmd = client.RunCommand(@"egrep '^  xch_target_address: ' ~/.chia/mainnet/config/config.yaml");
+            //xch_target_address: xch1ca2yhwkzdgfpww3289h6uxvsv562u69tuk0npzt0473ytn6naukqjhu922
+            var re = new Regex(@"xch_target_address: (?<address>[\d\w]{56,70})");
+            var matches = re.Matches(farmCmd.Result);
+            string address = null;
+            foreach (Match match in matches)
+            {
+                var cur = match.Groups["address"].Value;
+                if (cur != address && address != null)
+                {
+                    address = "NOT MATCH";
+                    break;
+                }
+            }
+
+            return new ExtendedFarmerStatus(address);
+        }
+
         private static int? GetInt(string input)
         {
             if (input == "Unknown") return null;
@@ -117,7 +138,8 @@
         }
     }
 
-    public record FarmerNodeStatus(string Name, FarmerStatus Farmer, NodeStatus Node);
+    public record FarmerNodeStatus(string Name, FarmerStatus Farmer, NodeStatus Node, ExtendedFarmerStatus Extended);
     public record NodeStatus(string Status, DateTime Time, int Height, string Space, string Difficulty, string Iterations, string TotalIterations);
     public record FarmerStatus(string Status, decimal? TotalFarmed, decimal? TxFees, decimal? Rewards, int? LastFarmedHeight, int? PlotCount, string TotalSize, string Space, string ExpectedToWin);
+    public record ExtendedFarmerStatus(string TargetAddress);
 }
