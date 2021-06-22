@@ -188,7 +188,8 @@
                 // add weight only when plotter is transferring
                 foreach (var p in ps.Where(_ => _.CopyingTarget != null))
                 {
-                    var t = targets[p.CopyingTarget];
+                    var t = targets.FirstOrDefault(_ => _.Key == p.CopyingTarget).Value;
+                    if (t == null) continue;
                     targets[p.CopyingTarget] = t with
                     {
                         Weight = t.Weight + p.CopyingSpeed,
