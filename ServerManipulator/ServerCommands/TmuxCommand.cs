@@ -53,7 +53,7 @@ tmux send-keys 'chia start harvester' 'C-m'
 tmux split-window -v -t 0
 tmux send-keys 'tail -n 10 -F {log}' 'C-m'
 tmux split-window -v -t 0
-tmux send-keys 'watch -n 5 ""tail -n 10000 {log} | grep -E -o \""Looking up qualities on /farm/.*\"" | sort -u""' 'C-m'
+tmux send-keys 'watch -n 5 ""tail -n 10000 {log} | grep -E -o \""Looking up qualities on /farm/.*\/\"" | sort -u""' 'C-m'
 tmux split-window -h
 tmux send-keys 'chia' 'C-m'
 tmux send-keys 'watch -n 5 ""chia plots show | grep /farm |sort""' 'C-m'";
