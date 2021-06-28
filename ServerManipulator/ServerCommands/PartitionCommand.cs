@@ -120,15 +120,18 @@ sudo chown sutu /farm/$plabel/
         public static bool RemovePlotDir(this TargetMachine m, string path)
         {
             var prefix = "/farm/";
-            if (!path.StartsWith(prefix)) return false;
-            var legacyPath = $"{path[..prefix.Length]}legacy{path[prefix.Length..]}";
-            var cmds = @$"
+            if (path.StartsWith(prefix))
+            {
+                var legacyPath = $"{path[..prefix.Length]}legacy{path[prefix.Length..]}";
+                var cmds = @$"
 sudo umount {path}
 sudo mv {path} {legacyPath}
 
 sudo sed -i ""/{path.Replace("/", "\\/")} ext4/d"" /etc/fstab
 ";
-            m.ExecuteScript(cmds, true);
+                m.ExecuteScript(cmds, true);
+            }
+
             using var cmd = m.RunCommand($". ./chia-blockchain/activate && chia plots remove -d {path}");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
