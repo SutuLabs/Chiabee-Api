@@ -68,7 +68,8 @@
         protected override async Task DoWorkAsync()
         {
             var alertUrl = this.appSettings.WeixinAlertUrl;
-            var reportUrl = this.appSettings.WeixinReportUrl;
+            var hourlyReportUrl = this.appSettings.WeixinHourlyReportUrl;
+            var dailyReportUrl = this.appSettings.WeixinDailyReportUrl;
             StatisticsStateEntity persistState = null;
 
             try
@@ -132,7 +133,7 @@
                 if ((DateTime.UtcNow - lastSendHourReportTime).TotalMinutes > 55
                     && this.appSettings.HourlyReportMin == DateTime.UtcNow.Minute)
                 {
-                    await SendReport(thisState, "小时", persistState.LastHourJsonGzip.Decompress());
+                    await SendReport(thisState, "小时", persistState.LastHourJsonGzip.Decompress(), hourlyReportUrl);
 
                     // update time
                     persistState.LastHour = DateTime.UtcNow;
@@ -144,7 +145,7 @@
                 if ((DateTime.UtcNow - lastSendDayReportTime).TotalHours > 22
                     && this.appSettings.DailyReportHour == DateTime.UtcNow.Hour)
                 {
-                    await SendReport(thisState, "每日", persistState.LastDayJsonGzip.Decompress());
+                    await SendReport(thisState, "每日", persistState.LastDayJsonGzip.Decompress(), dailyReportUrl);
 
                     // update time
                     persistState.LastDay = DateTime.UtcNow;
@@ -161,7 +162,7 @@
                     await this.persistentService.LogEntityAsync(persistState);
             }
 
-            async Task SendReport(ReportState thisState, string reportTitle, string json)
+            async Task SendReport(ReportState thisState, string reportTitle, string json, string reportUrl)
             {
                 if (!json.TryParseJson<ReportState>(out var lastReportState, out var error))
                 {
