@@ -137,5 +137,23 @@ sudo sed -i ""/{path.Replace("/", "\\/")} ext4/d"" /etc/fstab
             if (cmd.ExitStatus <= 1) return true;
             return false;
         }
+
+        public static bool RemoveNtfsPartition(this TargetMachine m, string dname)
+        {
+            var cmds = @$"
+disk=/dev/{dname}
+" +
+@"
+fstype=$(lsblk -no fstype ${disk}1)
+if [ ""$fstype"" = ""ntfs"" ] ; then
+    echo removing ${fstype} partition on ${disk} ...
+    sudo parted ${disk} rm 1
+else
+    echo not removing ${fstype} partition on ${disk} ...
+fi
+";
+            m.ExecuteScript(cmds, true);
+            return true;
+        }
     }
 }

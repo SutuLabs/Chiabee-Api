@@ -255,6 +255,17 @@
                 return BadRequest();
         }
 
+        [HttpPost("remove-ntfs-part")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> RemoveNtfsPartition(string host, string block)
+        {
+            var result = serverService.RemoveNtfsPartition(host, block);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpDelete("plot-dir")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> RemovePlotDir(string host, string path)
