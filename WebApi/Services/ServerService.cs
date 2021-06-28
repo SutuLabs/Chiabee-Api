@@ -283,6 +283,15 @@
             return m.RemoveNtfsPartition(block);
         }
 
+        public bool EnableSmart(string host, string block)
+        {
+            var machines = this.harvesterClients;
+            var m = machines.FirstOrDefault(_ => _.Name == host);
+            if (m == null) return false;
+
+            return m.EnableSmart(block);
+        }
+
         public bool RemovePlotDir(string host, string path)
         {
             var machines = this.harvesterClients;

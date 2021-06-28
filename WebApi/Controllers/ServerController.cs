@@ -266,6 +266,17 @@
                 return BadRequest();
         }
 
+        [HttpPost("enable-smart")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> EnableSmart(string host, string block)
+        {
+            var result = serverService.EnableSmart(host, block);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpDelete("plot-dir")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> RemovePlotDir(string host, string path)

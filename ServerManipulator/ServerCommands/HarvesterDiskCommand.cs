@@ -126,6 +126,14 @@ sdm                                             3.7T disk
             using var cmd = m.RunCommand($"echo sutu | sudo -S sudo mount -a");
             return cmd.ExitStatus;
         }
+
+        public static bool EnableSmart(this TargetMachine m, string dname)
+        {
+            if (!dname.StartsWith("sd")) return false;
+            using var cmd = m.RunCommand($"echo sutu | sudo -S sudo smartctl -d sat -a /dev/{dname} -s on");
+            if (cmd.ExitStatus > 0) return false;
+            return true;
+        }
     }
 
     public record HarvesterDiskInfo(string Sn, string Model, string BlockDevice, DevicePartInfo[] Parts, DiskSmartInfo Smart);
