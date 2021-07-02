@@ -7,7 +7,7 @@
     using Renci.SshNet;
     using WebApi.Models;
 
-    public static class ChiaCommand
+    public static class FarmerCommand
     {
         public static NodeStatus GetNodeStatus(this TargetMachine client)
         {
