@@ -124,6 +124,33 @@
             return new ExtendedFarmerStatus(address);
         }
 
+        public static bool MountFarms(this TargetMachine client)
+        {
+            if (!client.EnsureConnected()) return false;
+
+            using var chiacmd = client.RunCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
+            var chiaFarms = chiacmd.Result
+                .CleanSplit();
+
+            using var dfcmd = client.RunCommand(@"df | grep -o '/farm/s.*$'");
+            var dfFarms = dfcmd.Result
+                .CleanSplit();
+
+            var missings = chiaFarms.Except(dfFarms);
+            var uninhabiteds = dfFarms.Except(chiaFarms);
+
+            var cmds = @$"
+. ~/chia-blockchain/activate
+{PrefixAndCombine("chia plots add -d ", missings)}
+{PrefixAndCombine("chia plots remove -d ", uninhabiteds)}
+";
+            client.ExecuteScript(cmds, true);
+            return true;
+
+            static string PrefixAndCombine(string prefix, IEnumerable<string> lines)
+                => string.Join(Environment.NewLine, lines.Select(_ => prefix + _));
+        }
+
         private static int? GetInt(string input)
         {
             if (input == "Unknown") return null;

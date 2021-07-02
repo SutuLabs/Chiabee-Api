@@ -315,6 +315,15 @@
                 .Aggregate(true, (c, l) => c & l);
         }
 
+        public bool MountFarms(string host)
+        {
+            var machines = this.farmerClients;
+            var m = machines.FirstOrDefault(_ => _.Name == host);
+            if (m == null) return false;
+
+            return m.MountFarms();
+        }
+
         public async Task<SerialNumberRecord[]> GetSerialNumbers()
         {
             var s = await this.persistentService.RetrieveEntityAsync<DiskInfoEntity>();

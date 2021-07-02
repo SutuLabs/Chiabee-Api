@@ -299,6 +299,17 @@
                 return BadRequest();
         }
 
+        [HttpPost("mount-farms")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> MountFarms(string host)
+        {
+            var result = this.serverService.MountFarms(host);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpGet("errors")]
         public async Task<IActionResult> GetFarmerErrorInfo()
         {
