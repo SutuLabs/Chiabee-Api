@@ -44,7 +44,8 @@
                     new StatusDefinition(nameof(NodeStatus.Iterations), "Current VDF sub_slot_iters"),
                     new StatusDefinition(nameof(NodeStatus.TotalIterations), "Total iterations since the start of the blockchain")
                     )
-                    .ToDictionary(_ => _.Key, _ => _.Value);
+                    .GroupBy(_ => _.Key)
+                    .ToDictionary(_ => _.Key, _ => _.First().Value);
                 return new NodeStatus(
                     pairs.ContainsKey(nameof(NodeStatus.Status)) ? pairs[nameof(NodeStatus.Status)] : "Special",
                     time,
