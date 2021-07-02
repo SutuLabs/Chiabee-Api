@@ -38,8 +38,8 @@
             var plotter = this.appSettings.GetPlotters();
             var harvester = this.appSettings.GetHarvesters();
 
-            this.plotterClients = plotter.ToMachineClients().ToArray();
-            this.harvesterClients = harvester.ToMachineClients().ToArray();
+            this.plotterClients = plotter.ToMachineClients(this.logger).ToArray();
+            this.harvesterClients = harvester.ToMachineClients(this.logger).ToArray();
         }
 
         protected override async Task DoWorkAsync()

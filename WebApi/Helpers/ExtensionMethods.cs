@@ -6,6 +6,7 @@ namespace WebApi.Helpers
     using System.IO.Compression;
     using System.Linq;
     using System.Text;
+    using Microsoft.Extensions.Logging;
     using Renci.SshNet;
     using WebApi.Entities;
     using WebApi.Models;
@@ -24,13 +25,13 @@ namespace WebApi.Helpers
             return user;
         }
 
-        public static TargetMachine ToMachineClient(this SshEntity entity)
+        public static TargetMachine ToMachineClient(this SshEntity entity, ILogger logger)
         {
             var machine = entity.Port is int port
                 ? new TargetMachine(
-                    entity.ToProperty(), entity.Hosts.First(), port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile))
+                    entity.ToProperty(), logger, entity.Hosts.First(), port, entity.Username, new PrivateKeyFile(entity.PrivateKeyFile))
                 : new TargetMachine(
-                    entity.ToProperty(), entity.Hosts.First(), entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
+                    entity.ToProperty(), logger, entity.Hosts.First(), entity.Username, new PrivateKeyFile(entity.PrivateKeyFile));
 
             machine.ConnectionInfo.Timeout = new TimeSpan(0, 0, 5);
             machine.ConnectionInfo.RetryAttempts = 1;
@@ -38,9 +39,9 @@ namespace WebApi.Helpers
             return machine;
         }
 
-        public static IEnumerable<TargetMachine> ToMachineClients(this IEnumerable<SshEntity> entity)
+        public static IEnumerable<TargetMachine> ToMachineClients(this IEnumerable<SshEntity> entity, ILogger logger)
         {
-            return entity.Select(_ => _.ToMachineClient());
+            return entity.Select(_ => _.ToMachineClient(logger));
         }
 
         public static string Compress(this string s)

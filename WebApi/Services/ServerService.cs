@@ -10,6 +10,7 @@
     using System.Threading.Tasks;
     using CsvHelper;
     using CsvHelper.Configuration.Attributes;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Renci.SshNet;
     using WebApi.Entities;
@@ -29,22 +30,25 @@
         internal FixedSizedQueue<EligibleFarmerEvent> eventList = new();
         internal Dictionary<string, ErrorEvent> errorList = new();
         private readonly AppSettings appSettings;
+        private readonly ILogger<ServerService> logger;
         private readonly PersistentService persistentService;
 
         public ServerService(
+            ILogger<ServerService> logger,
             IOptions<AppSettings> appSettings,
             PersistentService persistentService)
         {
+            this.logger = logger;
             this.appSettings = appSettings.Value;
 
             var farmer = this.appSettings.GetFarmers();
             var plotter = this.appSettings.GetPlotters();
             var harvester = this.appSettings.GetHarvesters();
 
-            this.plotterClients = plotter.ToMachineClients().ToArray();
-            this.harvesterClients = harvester.ToMachineClients().ToArray();
-            this.farmerLogClient = farmer.First().ToMachineClient();
-            this.farmerClients = farmer.ToMachineClients().ToArray();
+            this.plotterClients = plotter.ToMachineClients(logger).ToArray();
+            this.harvesterClients = harvester.ToMachineClients(logger).ToArray();
+            this.farmerLogClient = farmer.First().ToMachineClient(logger);
+            this.farmerClients = farmer.ToMachineClients(logger).ToArray();
 
             this.farmerLogClient.StartTailChiaLog((err) =>
             {
