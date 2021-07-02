@@ -132,19 +132,20 @@
             var chiaFarms = chiacmd.Result
                 .CleanSplit();
 
-            using var dfcmd = client.RunCommand(@"df | grep -o '/farm/s.*$'");
+            using var dfcmd = client.RunCommand(@"df | grep -o '/farm/s[0-9]\+/.*$'");
             var dfFarms = dfcmd.Result
                 .CleanSplit();
 
-            var missings = chiaFarms.Except(dfFarms);
-            var uninhabiteds = dfFarms.Except(chiaFarms);
+            var missings = chiaFarms.Except(dfFarms).ToArray();
+            var uninhabiteds = dfFarms.Except(chiaFarms).ToArray();
+            if (missings.Length + uninhabiteds.Length == 0) return true;
 
             var cmds = @$"
 . ~/chia-blockchain/activate
-{PrefixAndCombine("chia plots add -d ", missings)}
-{PrefixAndCombine("chia plots remove -d ", uninhabiteds)}
+{PrefixAndCombine("chia plots remove -d ", missings)}
+{PrefixAndCombine("chia plots add -d ", uninhabiteds)}
 ";
-            client.ExecuteScript(cmds, true);
+            client.ExecuteScript(cmds);
             return true;
 
             static string PrefixAndCombine(string prefix, IEnumerable<string> lines)
