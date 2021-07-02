@@ -77,7 +77,13 @@
                 // get all data for preparing this state data
                 var farm = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
                 var farmers = JsonConvert.DeserializeObject<FarmerNodeStatus[]>(farm.FarmerJsonGzip.Decompress());
-                var farmer = farmers.First();
+                var farmer = farmers.FirstOrDefault();
+                if (farmer == null)
+                {
+                    await SendMessageAsync(new MarkdownMessage("ERROR: farmer not exist"), alertUrl);
+                    return;
+                }
+
                 var plotters = JsonConvert.DeserializeObject<PlotterStatus[]>(farm.PlotterJsonGzip.Decompress());
                 var harvesters = JsonConvert.DeserializeObject<HarvesterStatus[]>(farm.HarvesterJsonGzip.Decompress());
 
@@ -292,6 +298,8 @@
 
         private string GetEstimateTime(int plot, string totalNetSpace)
         {
+            if (totalNetSpace == null) return null;
+
             // in seconds (last paragraph in https://docs.google.com/document/d/1tmRIb7lgi4QfKkNaxuKOBHRmwbVlGL4f7EsBDr_5xZE/edit#heading=h.z0v0b3hmk4fl)
             const double averageBlockTime = 18.75;
             const double plotSize = 101.4 / 1024;//tib
