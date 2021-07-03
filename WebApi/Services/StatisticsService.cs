@@ -98,7 +98,8 @@
                 dictionary.Add(Key.NodeStatus, farmer.Node.Status);
                 dictionary.Add(Key.FarmStatus, farmer.Farmer.Status);
                 dictionary.Add(Key.TotalFarmed, farmer.Farmer.TotalFarmed?.ToString());
-                var totalPlot = harvesters.Sum(_ => _.TotalPlot) ?? -1;
+                var totalPlot = harvesters.Sum(_ => _.TotalPlot) ?? 0;
+                totalPlot += farmer.Farmer?.PlotCount ?? 0;
                 dictionary.Add(Key.TotalPlot, totalPlot.ToString());
                 dictionary.Add(Key.NetSpace, farmer.Node.Space);
                 dictionary.Add(Key.TotalPlotter, plotters.Length.ToString());
