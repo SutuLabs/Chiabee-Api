@@ -119,6 +119,8 @@
                     address = "NOT MATCH";
                     break;
                 }
+
+                address = cur;
             }
 
             return new ExtendedFarmerStatus(address);
