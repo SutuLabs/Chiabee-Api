@@ -58,8 +58,10 @@ echo Working on $disk ...
 puuid=$(lsblk -no PARTUUID ${disk}1)
 echo Got PARTUUID $puuid from ${disk}1, Applying label: $oldLabel -\> $newLabel
 
-sudo umount /farm/$oldLabel
-sudo mv /farm/$oldLabel /farm/legacy-$oldLabel
+if [ ! ""$oldLabel"" == """" ]; then
+    sudo umount /farm/$oldLabel
+    sudo mv /farm/$oldLabel /farm/legacy-$oldLabel
+fi
 
 sudo sed -i ""/\/dev\/disk\/by-partuuid\/$puuid/d"" /etc/fstab
 
@@ -70,9 +72,9 @@ sudo mount -a
 sudo chown sutu /farm/$newLabel/
 ";
             var (d, g) = m.ExecuteScript(cmds, true);
-            using var cmd = m.RunCommand($@". ./chia-blockchain/activate;
-chia plots remove -d /farm/{oldLabel};
-chia plots add -d /farm/{newLabel};");
+            using var cmd = m.RunCommand($". ./chia-blockchain/activate;"
+                + (string.IsNullOrEmpty(oldLabel) ? "" : $"chia plots remove -d /farm/{oldLabel};")
+                + $"chia plots add -d /farm/{newLabel};");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
             return false;
