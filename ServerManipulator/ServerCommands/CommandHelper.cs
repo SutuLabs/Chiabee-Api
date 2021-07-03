@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Sockets;
+    using System.Runtime.CompilerServices;
+    using Microsoft.Extensions.Logging;
     using Renci.SshNet.Common;
     using WebApi.Models;
 
@@ -34,7 +36,7 @@
             }
         }
 
-        public static T TryGet<T>(Func<T> func)
+        public static T TryGet<T>(Func<T> func, ILogger logger = null, [CallerMemberName] string callerName = "")
         {
             try
             {
@@ -44,9 +46,14 @@
             {
                 return default;
             }
-            catch (Exception)
+            catch (SshException sex) when (sex.Message == "Message type 52 is not valid in the current context.")
             {
-                throw;
+                return default;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, $"error when try get {callerName}");
+                return default;
             }
         }
 

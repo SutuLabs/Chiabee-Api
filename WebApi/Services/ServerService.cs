@@ -6,6 +6,7 @@
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Text;
     using System.Threading.Tasks;
     using CsvHelper;
@@ -17,7 +18,6 @@
     using WebApi.Helpers;
     using WebApi.Models;
     using WebApi.Services.ServerCommands;
-    using static WebApi.Services.ServerCommands.CommandHelper;
 
     public class ServerService : IDisposable
     {
@@ -87,6 +87,9 @@
 
             return successFlag;
         }
+
+        private T TryGet<T>(Func<T> func, [CallerMemberName] string callerName = "")
+            => CommandHelper.TryGet(func, this.logger, callerName);
 
         public async Task<ServerStatus[]> GetServersInfo() =>
             new[] { this.farmerClients, this.plotterClients, this.harvesterClients }
