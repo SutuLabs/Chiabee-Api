@@ -29,7 +29,7 @@
             PersistentService persistentService,
             ServerService server,
             IOptions<AppSettings> appSettings)
-            : base(logger, nameof(RsyncScheduleService), 3, 5)
+            : base(logger, nameof(RsyncScheduleService), 3, 30)
         {
             this.persistentService = persistentService;
             this.server = server;
