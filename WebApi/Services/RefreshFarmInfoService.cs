@@ -1,5 +1,6 @@
 ﻿namespace WebApi.Services
 {
+    using System.Diagnostics;
     using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
@@ -28,11 +29,19 @@
 
         protected override async Task DoWorkAsync()
         {
+            var sw = new Stopwatch();
+            sw.Start();
             var pi = JsonSerializer.Serialize(await this.server.GetPlotterInfo());
+            var pms = sw.ElapsedMilliseconds;
             var fi = JsonSerializer.Serialize(await this.server.GetFarmerInfo());
+            var fms = sw.ElapsedMilliseconds - pms;
             var hi = JsonSerializer.Serialize(await this.server.GetHarvesterInfo());
+            var hms = sw.ElapsedMilliseconds - fms - pms;
+
             var entity = new FarmStateEntity { PlotterJsonGzip = pi.Compress(), FarmerJsonGzip = fi.Compress(), HarvesterJsonGzip = hi.Compress() };
             await this.persistentService.LogEntityAsync(entity);
+            sw.Stop();
+            this.logger.LogInformation($"Work time: plotter info = {pms}ms, farmer info = {fms}ms, harvester info = {hms}ms, total = {sw.ElapsedMilliseconds}ms");
         }
     }
 }
