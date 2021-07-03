@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="IcerDesign.Renci.SshNet" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="SSH.NET" Version="2020.0.1" />
     <PackageReference Include="YamlDotNet" Version="11.1.1" />
   </ItemGroup>
 

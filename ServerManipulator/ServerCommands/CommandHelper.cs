@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Sockets;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using Microsoft.Extensions.Logging;
     using Renci.SshNet.Common;
@@ -82,6 +83,17 @@
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> enumerable) where T : class
         {
             return enumerable.Where(e => e != null).Select(e => e!);
+        }
+
+        public static void SetSshNetConcurrency(int concurrency)
+        {
+            var field = typeof(Renci.SshNet.Session).GetField("AuthenticationConnection",
+                         BindingFlags.Static |
+                         BindingFlags.NonPublic);
+            if (field != null)
+            {
+                field.SetValue(null, new SemaphoreLight(concurrency));
+            }
         }
     }
 

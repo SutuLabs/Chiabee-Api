@@ -44,6 +44,8 @@
             services.AddHostedService<RefreshPriceService>();
             services.AddHostedService<StatisticsService>();
             services.AddHostedService<RsyncScheduleService>();
+
+            Services.ServerCommands.CommandHelper.SetSshNetConcurrency(100);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

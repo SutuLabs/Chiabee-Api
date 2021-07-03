@@ -97,6 +97,7 @@
                 .AsParallel()
                 .Select(_ => TryGet(() => _.GetServerStatus()))
                 .Where(_ => _ != null)
+                .WithDegreeOfParallelism(100)
                 .ToArray();
 
         public async Task<PlotInfo[]> GetPlotsInfo() =>
@@ -127,6 +128,7 @@
                 .AsParallel()
                 .Select(_ => TryGet(() => _.GetPlotterStatus()))
                 .Where(_ => _ != null)
+                .WithDegreeOfParallelism(100)
                 .ToArray();
 
         public async Task<FarmerNodeStatus[]> GetFarmerInfo() =>
@@ -145,6 +147,7 @@
                 .AsParallel()
                 .Select(_ => TryGet(() => _.GetHarvesterStatus()))
                 .Where(_ => _ != null)
+                .WithDegreeOfParallelism(100)
                 .ToArray();
 
         public async Task<bool> PlotterDaemons(string[] names) =>

@@ -1,9 +1,11 @@
 ﻿namespace WebApi.Services.ServerCommands
 {
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Text.Json.Serialization;
     using System.Text.RegularExpressions;
+    using Microsoft.Extensions.Logging;
     using Renci.SshNet;
     using WebApi.Models;
 
@@ -11,16 +13,19 @@
     {
         public static ServerStatus GetServerStatus(this TargetMachine client)
         {
-            if (!client.EnsureConnected()) return null;
+            var sw = new Stopwatch();
+            sw.Start();
+
+            if (!client.EnsureConnected()) return StopAndLog("disconnected", default(ServerStatus));
             using var topCmd = client.RunCommand(@"top -b1n1 -E G |grep ""Cpu\|Mem \|Tasks""");
             var output = topCmd.Result;
-            if (string.IsNullOrEmpty(output)) return null;
+            if (string.IsNullOrEmpty(output)) return StopAndLog("empty", default(ServerStatus));
 
             var disks = client.GetDiskStatus();
             var netSpeed = client.GetNetworkIoSpeed();
             var pwr = client.GetPowerConsumption();
 
-            return new ServerStatus()
+            var ss = new ServerStatus()
             {
                 Process = ParseProcessState(output),
                 Memory = ParseMemoryState(output),
@@ -32,6 +37,18 @@
                 Location = client.Properties.Location,
                 Power = pwr,
             };
+            return StopAndLog("success", ss);
+
+            T StopAndLog<T>(string message, T value)
+            {
+                sw.Stop();
+                var msg = $"[{message}]get server status from {client.Name} for {sw.ElapsedMilliseconds}ms";
+                if (sw.ElapsedMilliseconds > 10000)
+                    client.Logger.LogInformation(msg);
+                else if (sw.ElapsedMilliseconds > 30000)
+                    client.Logger.LogWarning(msg);
+                return value;
+            }
 
             static ProcessState ParseProcessState(string output)
             {
