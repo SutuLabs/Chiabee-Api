@@ -1,5 +1,6 @@
 ﻿namespace WebApi.Services.ServerCommands
 {
+    using System;
     using System.IO;
     using System.Text;
     using Microsoft.Extensions.Logging;
@@ -67,7 +68,8 @@ tmux send-keys 'watch -n 5 ""chia plots show | grep /farm |sort""' 'C-m'";
         {
             var tempfile = "tempremoteexecution.sh";
             if (!client.EnsureConnected()) return default;
-            client.Logger.LogInformation($"Upload and executing script: {script}");
+            var r = new Random().Next(1000, 10000);
+            client.Logger.LogInformation($"[{r}]Upload and executing script[{client.Name}]: {script}");
             var cmds = "#!/bin/bash\n\n" + script;
             cmds = cmds.Replace("\r", "");
             using var ms = new MemoryStream(Encoding.ASCII.GetBytes(cmds));
@@ -81,7 +83,7 @@ tmux send-keys 'watch -n 5 ""chia plots show | grep /farm |sort""' 'C-m'";
                 (sudo ? $"echo {pass} | sudo -S bash ./{tempfile};" : $"./{tempfile};") +
                 $"rm {tempfile};";
             using var cmd = client.RunCommand(cmds);
-            client.Logger.LogInformation($"Result[{cmd.ExitStatus}]: {cmd.Result}");
+            client.Logger.LogInformation($"[{r}]Result[{cmd.ExitStatus}]: {cmd.Result}");
             return (cmd.ExitStatus, cmd.Result);
         }
     }
