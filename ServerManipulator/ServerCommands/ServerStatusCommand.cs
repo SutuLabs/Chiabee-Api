@@ -40,15 +40,7 @@
             return StopAndLog("success", ss);
 
             T StopAndLog<T>(string message, T value)
-            {
-                sw.Stop();
-                var msg = $"[{message}]get server status from {client.Name} for {sw.ElapsedMilliseconds}ms";
-                if (sw.ElapsedMilliseconds > 10000)
-                    client.Logger.LogInformation(msg);
-                else if (sw.ElapsedMilliseconds > 30000)
-                    client.Logger.LogWarning(msg);
-                return value;
-            }
+                => client.StopwatchAndLog(message, sw, value, nameof(GetServerStatus));
 
             static ProcessState ParseProcessState(string output)
             {
@@ -87,6 +79,17 @@
                         decimal.Parse(match.Groups["id"].Value));
                 }
             }
+        }
+
+        public static T StopwatchAndLog<T>(this TargetMachine client, string identifier, Stopwatch sw, T value, string workName, int infoMs = 10000, int warningMs = 30000)
+        {
+            sw.Stop();
+            var msg = $"[{identifier}]Work {workName} {client.Name} for {sw.ElapsedMilliseconds}ms";
+            if (sw.ElapsedMilliseconds > infoMs)
+                client.Logger.LogInformation(msg);
+            else if (sw.ElapsedMilliseconds > warningMs)
+                client.Logger.LogWarning(msg);
+            return value;
         }
     }
 

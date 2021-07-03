@@ -4,31 +4,45 @@ namespace WebApi.Services.ServerCommands
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Text.RegularExpressions;
     using WebApi.Models;
 
     public static class PlotterStatusCommand
     {
-        public static PlotterStatus GetPlotterStatus(this TargetMachine client)
+        public static PlotterStatus? GetPlotterStatus(this TargetMachine client)
         {
+            var sw = new Stopwatch();
+            sw.Start();
+            if (!client.EnsureConnected()) return StopAndLog("disconnected", default(PlotterStatus));
+
             var files = client.GetDirectoryFileCountCommand(new[] { "/data/final" });
             var processes = client.GetProcesses(new[] { "rsync", "chia_plot" });
             var fc = files
                 .Select(_ => new DirectoryFileCount(_.Path, _.Files.Length))
                 .ToArray();
-            switch (client.Properties.Program)
+
+            return StopAndLog("success", GetResult());
+
+            PlotterStatus GetResult()
             {
-                case PlotProgram.MadmaxPlotter:
-                    var job = client.GetMadmaxPlotJob();
-                    return new PlotterStatus(client.Name, null, fc, files, null, job, processes);
-                case PlotProgram.Plotman:
-                    var jobs = client.GetPlotJobs();
-                    var cfg = client.ReadPlotManConfiguration();
-                    return new PlotterStatus(client.Name, jobs, fc, files, cfg, null, processes);
-                default:
-                    return new PlotterStatus(client.Name, null, fc, files, null, null, processes);
+                switch (client.Properties.Program)
+                {
+                    case PlotProgram.MadmaxPlotter:
+                        var job = client.GetMadmaxPlotJob();
+                        return new PlotterStatus(client.Name, null, fc, files, null, job, processes);
+                    case PlotProgram.Plotman:
+                        var jobs = client.GetPlotJobs();
+                        var cfg = client.ReadPlotManConfiguration();
+                        return new PlotterStatus(client.Name, jobs, fc, files, cfg, null, processes);
+                    default:
+                        return new PlotterStatus(client.Name, null, fc, files, null, null, processes);
+                }
             }
+
+            T StopAndLog<T>(string message, T value)
+                => client.StopwatchAndLog(message, sw, value, nameof(GetPlotterStatus));
         }
 
         public static MadmaxPlotJobStatus? GetMadmaxPlotJob(this TargetMachine client)
