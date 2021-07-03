@@ -128,6 +128,9 @@
         {
             if (!client.EnsureConnected()) return false;
 
+            // refresh cross mount
+            using var refreshCmd = client.RunCommand($"du /farm --max-depth=2 2>/dev/null");
+
             using var chiacmd = client.RunCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
             var chiaFarms = chiacmd.Result
                 .CleanSplit();
