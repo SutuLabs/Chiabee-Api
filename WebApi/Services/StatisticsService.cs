@@ -29,7 +29,7 @@
             PersistentService persistentService,
             ServerService server,
             IOptions<AppSettings> appSettings)
-            : base(logger, nameof(StatisticsService), 5, 20)
+            : base(logger, nameof(StatisticsService), 50, 20)
         {
             this.persistentService = persistentService;
             this.server = server;
