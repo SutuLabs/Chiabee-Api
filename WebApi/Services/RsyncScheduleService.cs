@@ -221,15 +221,23 @@
                     };
                 }
 
+                var assignedDisks = new HashSet<string>();
                 foreach (var (host, t) in targets)
                 {
                     foreach (var j in t.Jobs)
                     {
                         var p = ps.First(_ => _.Name == j);
-                        var rnd = new Random().Next(t.Harvester.Disks.Length);
-                        var disk = t.Harvester.Disks[rnd];
+                        var disks = t.Harvester.Disks
+                            .Where(_ => !assignedDisks.Contains(GetDiskName(_)))
+                            .ToArray();
+                        if (disks.Length == 0) break;
+
+                        var rnd = new Random().Next(disks.Length);
+                        var disk = disks[rnd];
+                        assignedDisks.Add(GetDiskName(disk));
                         yield return new ExecutionRsyncPlan(j, p.FilePath, host, disk);
 
+                        string GetDiskName(string disk) => $"{host}-{disk}";
                         //string ChooseDisk()
                         //{
                         //    var disk = diskOccupation
