@@ -71,11 +71,11 @@
 
         private static EligibleFarmerEvent GetEligibleInfo(TargetMachine client)
         {
-            using var cmd = client.RunCommand("tail -n 50 ~/.chia/mainnet/log/debug.log | grep eligible");
+            using var cmd = client.RunCommand("tac ~/.chia/mainnet/log/debug.log | grep -m1 'plots were eligible for farming'");
             return cmd.Result
                 .CleanSplit()
                 .Reverse()
-                .Select(_ => ParseLine(_))
+                .Select(ParseLine)
                 .FirstOrDefault(_ => _ != null);
         }
 
