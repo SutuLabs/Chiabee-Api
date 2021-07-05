@@ -6,6 +6,7 @@
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using WebApi.Models;
 
     public static class TailChiaLogCommand
@@ -15,17 +16,22 @@
             Task.Factory.StartNew(() => Ta(client, errorRaised, eventRaised), TaskCreationOptions.LongRunning);
         }
 
-        private static void Ta(TargetMachine client, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
+        private static async Task Ta(TargetMachine client, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
         {
-            client.EnsureConnected();
+            if (!client.EnsureConnected())
+            {
+                client.Logger.LogInformation($"Cannot connect to {client.Name}. Cancel tail log.");
+                return;
+            }
 
+            client.Logger.LogInformation($"Connected to {client.Name}. Start tailing log.");
             var cmd = client.CreateCommand("tail -n 10000 -F ~/.chia/mainnet/log/debug.log");
             var result = cmd.BeginExecute();
 
             using var reader = new StreamReader(cmd.OutputStream, Encoding.UTF8, true, 1024, true);
             while (!result.IsCompleted || !reader.EndOfStream)
             {
-                string line = reader.ReadLine();
+                var line = await reader.ReadLineAsync();
                 if (line == null) continue;
 
                 // 2021-05-07T22:32:07.400 harvester chia.harvester.harvester: INFO     0 plots were eligible for farming 7ffcbb648f... Found 0 proofs. Time: 0.00295 s. Total 119 plots
@@ -46,7 +52,7 @@
 
                 if (level != "INFO")
                 {
-                    errorRaised?.Invoke(new ErrorEvent(time, level, log));
+                    errorRaised?.Invoke(new ErrorEvent(time, client.Name, level, log));
                 }
                 else if (reToPeer.Match(log).Success)
                 {
@@ -67,6 +73,7 @@
                 {
                     var m = reEligible.Match(log);
                     eventRaised?.Invoke(new EligibleFarmerEvent(time,
+                        client.Name,
                         int.Parse(m.Groups["plots"].Value),
                         int.Parse(m.Groups["proofs"].Value),
                         decimal.Parse(m.Groups["duration"].Value),
@@ -98,15 +105,19 @@
                 //1 plots were eligible for farming 9483499d77... Found 0 proofs. Time: 0.12953 s. Total 119 plots
                 else
                 {
-                    Debug.WriteLine($"{log}");
+                    //Debug.WriteLine($"{log}");
                 }
+
+                await Task.Delay(100);
             }
 
             cmd.EndExecute(result);
         }
     }
 
-    public record FarmerEvent(DateTime Time);
-    public record EligibleFarmerEvent(DateTime Time, int EligibleNumber, int Proofs, decimal Duration, int Total) : FarmerEvent(Time);
-    public record ErrorEvent(DateTime Time, string Level, string Error);
+    public record FarmerEvent(DateTime Time, string MachineName);
+    public record EligibleFarmerEvent(
+        DateTime Time, string MachineName, int EligibleNumber, int Proofs, decimal Duration, int Total)
+        : FarmerEvent(Time, MachineName);
+    public record ErrorEvent(DateTime Time, string MachineName, string Level, string Error);
 }

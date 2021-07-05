@@ -75,11 +75,11 @@
             return cmd.Result
                 .CleanSplit()
                 .Reverse()
-                .Select(ParseLine)
+                .Select(_ => ParseLine(_, client.Name))
                 .FirstOrDefault(_ => _ != null);
         }
 
-        private static EligibleFarmerEvent ParseLine(string line)
+        private static EligibleFarmerEvent ParseLine(string line, string machineName)
         {
             // 2021-05-07T22:32:07.400 harvester chia.harvester.harvester: INFO     0 plots were eligible for farming 7ffcbb648f... Found 0 proofs. Time: 0.00295 s. Total 119 plots
             var re = new Regex(@"(?<time>[0-9\-]{10}T[0-9:]{8}\.[0-9]{3}) *(?<name>[\w\.]*) *(?<comp>[\w\.]*) *: *(?<level>\w*) *(?<log>.*)$");
@@ -94,6 +94,7 @@
             var reEligible = new Regex(@"(?<plots>\d+) plots were eligible for farming (?<id>[\w\d]+)... Found (?<proofs>\d+) proofs. Time: (?<duration>\d+\.\d+) s. Total (?<total>\d+) plots");
             var m = reEligible.Match(log);
             return new EligibleFarmerEvent(time,
+                machineName,
                 int.Parse(m.Groups["plots"].Value),
                 int.Parse(m.Groups["proofs"].Value),
                 decimal.Parse(m.Groups["duration"].Value),

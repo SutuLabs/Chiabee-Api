@@ -1,6 +1,7 @@
 ﻿namespace WebApi.Services
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
@@ -23,12 +24,12 @@
     {
         private TargetMachine[] plotterClients;
         private TargetMachine[] harvesterClients;
-        private TargetMachine farmerLogClient;
+        private TargetMachine[] logClients;
         private TargetMachine[] farmerClients;
         private bool disposedValue;
 
         internal FixedSizedQueue<EligibleFarmerEvent> eventList = new();
-        internal Dictionary<string, ErrorEvent> errorList = new();
+        internal ConcurrentDictionary<string, ErrorEvent> errorList = new();
         private readonly AppSettings appSettings;
         private readonly ILogger<ServerService> logger;
         private readonly PersistentService persistentService;
@@ -40,6 +41,7 @@
         {
             this.logger = logger;
             this.appSettings = appSettings.Value;
+            this.persistentService = persistentService;
 
             var farmer = this.appSettings.GetFarmers();
             var plotter = this.appSettings.GetPlotters();
@@ -47,22 +49,23 @@
 
             this.plotterClients = plotter.ToMachineClients(logger).ToArray();
             this.harvesterClients = harvester.ToMachineClients(logger).ToArray();
-            this.farmerLogClient = farmer.First().ToMachineClient(logger);
+            this.logClients = new[] { farmer, harvester }.SelectMany(_ => _).ToMachineClients(logger).ToArray();
             this.farmerClients = farmer.ToMachineClients(logger).ToArray();
 
-            this.farmerLogClient.StartTailChiaLog((err) =>
+            Action<ErrorEvent> HandleErrorEvent = (err) =>
             {
-                if (this.errorList.ContainsKey(err.Error))
-                {
-                    this.errorList.Remove(err.Error);
-                }
-
-                this.errorList.Add(err.Error, new ErrorEvent(err.Time, err.Level, err.Error));
-            }, (evt) =>
+                var key = $"{err.Error}_{err.MachineName}";
+                var newVal = new ErrorEvent(err.Time, err.MachineName, err.Level, err.Error);
+                this.errorList.AddOrUpdate(key, newVal, (_, __) => newVal);
+            };
+            Action<EligibleFarmerEvent> HandleEvent = (evt) =>
             {
                 this.eventList.Enqueue(evt);
-            });
-            this.persistentService = persistentService;
+            };
+
+            this.logClients
+                .AsParallel()
+                .ForAll(_ => _.StartTailChiaLog(HandleErrorEvent, HandleEvent));
         }
 
         public async Task<bool> StopPlot(string machineName, string plotId)
@@ -371,7 +374,7 @@
             {
                 if (disposing)
                 {
-                    var cs = new[] { this.farmerClients, this.plotterClients, this.harvesterClients, new[] { this.farmerLogClient } }
+                    var cs = new[] { this.farmerClients, this.plotterClients, this.harvesterClients, this.logClients }
                         .SelectMany(_ => _);
                     foreach (var c in cs)
                     {
