@@ -12,9 +12,11 @@
     using System.Threading.Tasks;
     using CsvHelper;
     using CsvHelper.Configuration.Attributes;
+    using Microsoft.AspNetCore.SignalR;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using Renci.SshNet;
+    using WebApi.Controllers;
     using WebApi.Entities;
     using WebApi.Helpers;
     using WebApi.Models;
@@ -32,14 +34,17 @@
         internal ConcurrentDictionary<string, ErrorEvent> errorList = new();
         private readonly AppSettings appSettings;
         private readonly ILogger<ServerService> logger;
+        private readonly IHubContext<EventHub> eventHub;
         private readonly PersistentService persistentService;
 
         public ServerService(
             ILogger<ServerService> logger,
             IOptions<AppSettings> appSettings,
+            IHubContext<EventHub> eventHub,
             PersistentService persistentService)
         {
             this.logger = logger;
+            this.eventHub = eventHub;
             this.appSettings = appSettings.Value;
             this.persistentService = persistentService;
 
@@ -52,15 +57,17 @@
             this.logClients = new[] { farmer, harvester }.SelectMany(_ => _).ToMachineClients(logger).ToArray();
             this.farmerClients = farmer.ToMachineClients(logger).ToArray();
 
-            Action<ErrorEvent> HandleErrorEvent = (err) =>
+            Func<ErrorEvent, Task> HandleErrorEvent = async (err) =>
             {
                 var key = $"{err.Error}_{err.MachineName}";
                 var newVal = new ErrorEvent(err.Time, err.MachineName, err.Level, err.Error);
                 this.errorList.AddOrUpdate(key, newVal, (_, __) => newVal);
+                await this.eventHub.Clients.All.SendAsync("Error", err);
             };
-            Action<EligibleFarmerEvent> HandleEvent = (evt) =>
+            Func<EligibleFarmerEvent, Task> HandleEvent = async (evt) =>
             {
                 this.eventList.Enqueue(evt);
+                await this.eventHub.Clients.All.SendAsync("Event", evt);
             };
 
             this.logClients

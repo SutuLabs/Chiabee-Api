@@ -9,6 +9,7 @@
     using Microsoft.AspNetCore.Authentication;
     using WebApi.Models;
     using WebApi.Entities;
+    using WebApi.Controllers;
 
     public class Startup
     {
@@ -24,6 +25,7 @@
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.AddCors();
             services.AddControllers();
+            services.AddSignalR();
             services.AddMemoryCache();
 
             services.AddAuthentication("BasicAuthentication")
@@ -60,7 +62,11 @@
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => endpoints.MapControllers());
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHub<EventHub>("/hub/events");
+            });
         }
     }
 }

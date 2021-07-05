@@ -11,12 +11,12 @@
 
     public static class TailChiaLogCommand
     {
-        public static void StartTailChiaLog(this TargetMachine client, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
+        public static void StartTailChiaLog(this TargetMachine client, Func<ErrorEvent, Task> errorRaised, Func<EligibleFarmerEvent, Task> eventRaised)
         {
             Task.Factory.StartNew(() => Ta(client, errorRaised, eventRaised), TaskCreationOptions.LongRunning);
         }
 
-        private static async Task Ta(TargetMachine client, Action<ErrorEvent> errorRaised, Action<EligibleFarmerEvent> eventRaised)
+        private static async Task Ta(TargetMachine client, Func<ErrorEvent, Task> errorRaised, Func<EligibleFarmerEvent, Task> eventRaised)
         {
             if (!client.EnsureConnected())
             {
@@ -52,7 +52,7 @@
 
                 if (level != "INFO")
                 {
-                    errorRaised?.Invoke(new ErrorEvent(time, client.Name, level, log));
+                    await errorRaised?.Invoke(new ErrorEvent(time, client.Name, level, log));
                 }
                 else if (reToPeer.Match(log).Success)
                 {
@@ -72,7 +72,7 @@
                 else if (reEligible.Match(log).Success)
                 {
                     var m = reEligible.Match(log);
-                    eventRaised?.Invoke(new EligibleFarmerEvent(time,
+                    await eventRaised?.Invoke(new EligibleFarmerEvent(time,
                         client.Name,
                         int.Parse(m.Groups["plots"].Value),
                         int.Parse(m.Groups["proofs"].Value),
