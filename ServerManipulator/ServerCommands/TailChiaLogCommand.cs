@@ -25,7 +25,7 @@
             }
 
             client.Logger.LogInformation($"Connected to {client.Name}. Start tailing log.");
-            var cmd = client.CreateCommand("tail -n 10000 -F ~/.chia/mainnet/log/debug.log");
+            var cmd = client.CreateCommand("tail -n 10 -F ~/.chia/mainnet/log/debug.log");
             var result = cmd.BeginExecute();
 
             using var reader = new StreamReader(cmd.OutputStream, Encoding.UTF8, true, 1024, true);
