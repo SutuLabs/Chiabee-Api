@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using Renci.SshNet;
     using WebApi.Models;
     using WebApi.Services;
@@ -100,10 +101,11 @@ sdm                                             3.7T disk
                     .ToArray();
 
                 int? ParseInt(string str) => int.TryParse(str, out var ii) ? ii : null;
+                int? ParseIntWithoutParenthesis(string str) => ParseInt(Regex.Replace(str, @"\(.*\)", ""));
 
                 var dict = attributes.ToDictionary(_ => _.Id, _ => _);
                 string TryGetAttribute(int attribute) => dict.TryGetValue(attribute, out var att) ? att.RawValue : null;
-                int? ParseIntAttribute(int attribute) => ParseInt(TryGetAttribute(attribute));
+                int? ParseIntAttribute(int attribute) => ParseIntWithoutParenthesis(TryGetAttribute(attribute));
 
 
                 var powerCycleCount = ParseIntAttribute(DiskSmartAttribute.Power_Cycle_Count);
