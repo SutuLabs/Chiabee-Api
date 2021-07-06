@@ -6,7 +6,7 @@
     using System.Text.RegularExpressions;
     using WebApi.Models;
 
-    public static class PlotFarmInfoCommand
+    public static class PlotCommand
     {
         public static PlotInfo[] GetPlotFarmInfo(this TargetMachine client)
         {
