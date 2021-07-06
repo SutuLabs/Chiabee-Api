@@ -299,6 +299,17 @@
                 return BadRequest();
         }
 
+        [HttpDelete("plots")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> RemovePlots(string host, [FromBody] string[] names)
+        {
+            var result = await this.serverService.RemovePlots(host, names);
+            if (result)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
         [HttpPost("mount-farms")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> MountFarms(string host)

@@ -83,6 +83,14 @@
             return machine.StopPlot(plotId);
         }
 
+        public async Task<bool> RemovePlots(string machineName, string[] plots)
+        {
+            var machine = this.harvesterClients.FirstOrDefault(_ => _.Name == machineName);
+            if (machine == null) return false;
+
+            return machine.RemovePlots(plots);
+        }
+
         public async Task<bool> CleanLegacyTemporaryFile(string[] machineNames)
         {
             var machines = this.plotterClients;

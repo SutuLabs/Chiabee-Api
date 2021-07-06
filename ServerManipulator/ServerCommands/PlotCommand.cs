@@ -45,6 +45,16 @@
                 }
             }
         }
+
+        public static bool RemovePlots(this TargetMachine client, string[] plots)
+        {
+            // /farm/A238/plot-k32-2021-07-03-20-58-a4ebd38acd57bebd14c87b9737dc432ddac2dd37d643392c3f3138fc0563dc55.plot
+            var re = new Regex(@"/farm/A\d{1,4}/plot-k\d{2,3}-\d{4}(-\d{2}){4}-[0-9a-f]{64}.plot");
+            if (plots.Any(plot => !re.IsMatch(plot))) return false;
+            var cmds = string.Join("\n", plots.Select(_ => $"rm {_}"));
+            var (code, result) = client.ExecuteScript(cmds);
+            return code == 0;
+        }
     }
 
     public record PlotInfo(string Filename, long Size, string PlotId, string Directory, string Host);
