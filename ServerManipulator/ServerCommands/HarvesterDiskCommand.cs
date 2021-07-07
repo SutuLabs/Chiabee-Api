@@ -101,7 +101,7 @@ sdm                                             3.7T disk
                     .ToArray();
 
                 int? ParseInt(string str) => int.TryParse(str, out var ii) ? ii : null;
-                int? ParseIntWithoutParenthesis(string str) => ParseInt(Regex.Replace(str, @"\(.*\)", ""));
+                int? ParseIntWithoutParenthesis(string str) => ParseInt(Regex.Replace(str ?? "", @"\(.*\)", ""));
 
                 var dict = attributes.ToDictionary(_ => _.Id, _ => _);
                 string TryGetAttribute(int attribute) => dict.TryGetValue(attribute, out var att) ? att.RawValue : null;
