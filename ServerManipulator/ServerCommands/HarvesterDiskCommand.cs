@@ -111,7 +111,8 @@ sdm                                             3.7T disk
                 var powerCycleCount = ParseIntAttribute(DiskSmartAttribute.Power_Cycle_Count);
                 var powerOnHours = ParseIntAttribute(DiskSmartAttribute.Power_On_Hours);
                 // 36 (Min/Max 36/40)
-                var temperature = TryGetAttribute(DiskSmartAttribute.Airflow_Temperature_Cel) ?? TryGetAttribute(DiskSmartAttribute.Temperature_Celsius);
+                var temperature = ParseIntAttribute(DiskSmartAttribute.Airflow_Temperature_Cel)
+                    ?? ParseIntAttribute(DiskSmartAttribute.Temperature_Celsius);
 
                 return new HarvesterDiskInfo(
                     pairs.TryGetValue(nameof(HarvesterDiskInfo.Sn), out var sn) ? sn : null,
@@ -143,7 +144,7 @@ sdm                                             3.7T disk
     {
         public string BlockDevice { get; init; }
     }
-    public record DiskSmartInfo(int? PowerCycleCount, int? PowerOnHours, string Temperature, DiskSmartPair[] Values);
+    public record DiskSmartInfo(int? PowerCycleCount, int? PowerOnHours, int? Temperature, DiskSmartPair[] Values);
     public record DiskSmartPair(string Key, string Value);
     public record DiskSmartAttribute(int? Id, string AttributeName, string Flag, int? Value, int? Worst, int? Thresh, string Type, string Updated, string WhenFailed, string RawValue)
     {

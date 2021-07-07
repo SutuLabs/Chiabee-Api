@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Net;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using Humanizer;
     using Microsoft.Extensions.Logging;
@@ -140,7 +141,7 @@
                 if ((DateTime.UtcNow - lastSendHourReportTime).TotalMinutes > 55
                     && this.appSettings.HourlyReportMin == DateTime.UtcNow.Minute)
                 {
-                    await SendReport(thisState, "小时", persistState.LastHourJsonGzip.Decompress(), hourlyReportUrl);
+                    await SendReport(thisState, "小时", persistState.LastHourJsonGzip.Decompress(), hourlyReportUrl, true);
 
                     // update time
                     persistState.LastHour = DateTime.UtcNow;
@@ -169,7 +170,7 @@
                     await this.persistentService.LogEntityAsync(persistState);
             }
 
-            async Task SendReport(ReportState thisState, string reportTitle, string json, string reportUrl)
+            async Task SendReport(ReportState thisState, string reportTitle, string json, string reportUrl, bool isSummativeReportGenerated = false)
             {
                 if (!json.TryParseJson<ReportState>(out var lastReportState, out var error))
                 {
@@ -179,8 +180,48 @@
                 }
 
                 var msg = GenerateReport(lastReportState, thisState, reportTitle);
+                if (isSummativeReportGenerated) msg += await GenerateSummativeReport();
                 await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
             }
+        }
+
+        private record SummativeMachine(string Name, int Total, string[] Disks);
+        private async Task<string> GenerateSummativeReport()
+        {
+            var machines = await this.server.GetHarvesterDisksInfo();
+
+            var msg = "";
+
+            const string title = "\n---\n**硬盘情况**\n---\n";
+            var re = new Regex(@"(?<name>[a-z]\d)-");
+
+            var total = machines.Sum(m => m.Disks?.Length ?? 0);
+            var overall = string.Join(", ", machines.Select(m => $"{GetShortName(m.Name)}({m.Disks?.Length ?? 0})"));
+
+            string GetShortName(string name) => re.Match(name).Groups["name"].Value;
+            SummativeMachine[] GetByTemperature(int temperature) => machines
+                .Select(m => new SummativeMachine(GetShortName(m.Name), m.Disks?.Length ?? 0, m.Disks?
+                    .Where(d => d.Smart.Temperature > temperature)
+                    .Select(d => d.Parts?.FirstOrDefault()?.Label)
+                    .Where(_ => _ != null)
+                    .ToArray() ?? new string[] { }))
+                .Where(m => m.Disks.Length > 0)
+                .ToArray();
+            string GetText(SummativeMachine[] machines) =>
+                string.Join(", ", machines.Select(m => $"{m.Name}({string.Join(", ", m.Disks)})"));
+
+            var t55 = GetByTemperature(55);
+            var s55 = GetText(t55);
+            var t50 = GetByTemperature(50);
+            var s50 = string.Join(", ", t50.Select(m => $"{m.Name}({m.Disks.Length}/{m.Total})"));
+
+            msg += title
+                + "\n硬盘总数：" + total
+                + "\n分布情况：" + overall
+                + "\n超过55度：" + (string.IsNullOrEmpty(s55) ? "无" : s55)
+                + "\n超过50度：" + (string.IsNullOrEmpty(s50) ? "无" : s50);
+
+            return msg;
         }
 
         private string GenerateReport(ReportState prevState, ReportState nowState, string title)
