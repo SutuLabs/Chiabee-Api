@@ -31,6 +31,8 @@
             using var reader = new StreamReader(cmd.OutputStream, Encoding.UTF8, true, 1024, true);
             while (!result.IsCompleted || !reader.EndOfStream)
             {
+                await Task.Delay(10);
+
                 var line = await reader.ReadLineAsync();
                 if (line == null) continue;
 
@@ -107,8 +109,6 @@
                 {
                     //Debug.WriteLine($"{log}");
                 }
-
-                await Task.Delay(100);
             }
 
             cmd.EndExecute(result);
