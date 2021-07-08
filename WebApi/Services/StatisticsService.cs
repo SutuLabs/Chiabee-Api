@@ -199,21 +199,24 @@
             var overall = string.Join(", ", machines.Select(m => $"{GetShortName(m.Name)}({m.Disks?.Length ?? 0})"));
 
             string GetShortName(string name) => re.Match(name).Groups["name"].Value;
-            SummativeMachine[] GetByTemperature(int temperature) => machines
+            SummativeMachine[] GetByTemperature(int minTemp, int maxTemp = int.MaxValue) => machines
                 .Select(m => new SummativeMachine(GetShortName(m.Name), m.Disks?.Length ?? 0, m.Disks?
-                    .Where(d => d.Smart.Temperature > temperature)
+                    .Where(d => d.Smart.Temperature >= minTemp && d.Smart.Temperature < maxTemp)
                     .Select(d => d.Parts?.FirstOrDefault()?.Label)
                     .Where(_ => _ != null)
                     .ToArray() ?? new string[] { }))
                 .Where(m => m.Disks.Length > 0)
                 .ToArray();
-            string GetText(SummativeMachine[] machines) =>
+            string GetDiskLabel(SummativeMachine[] machines) =>
                 string.Join(", ", machines.Select(m => $"{m.Name}({string.Join(", ", m.Disks)})"));
+            string GetDiskCount(SummativeMachine[] machines) =>
+                string.Join(", ", machines.Select(m => $"{m.Name}({m.Disks.Length}/{m.Total})"));
 
             var t55 = GetByTemperature(55);
-            var s55 = GetText(t55);
-            var t50 = GetByTemperature(50);
-            var s50 = string.Join(", ", t50.Select(m => $"{m.Name}({m.Disks.Length}/{m.Total})"));
+            var s55 = GetDiskLabel(t55);
+            var t50 = GetByTemperature(50, 55);
+            var t50total = t50.Sum(m => m.Disks?.Length ?? 0);
+            var s50 = t50total <= 10 ? GetDiskLabel(t50) : GetDiskCount(t50);
 
             msg += title
                 + "\n硬盘总数：" + total
