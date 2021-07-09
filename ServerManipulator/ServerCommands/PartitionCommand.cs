@@ -112,7 +112,7 @@ sudo chown sutu /farm/$plabel/
         public static bool UnmountPartition(this TargetMachine m, string label)
         {
             var pass = "sutu";
-            using var cmd = m.RunCommand($"echo {pass} | sudo -S sudo umount /farm/{label};" +
+            using var cmd = m.RunCommand($"echo {pass} | sudo -S sudo umount -l /farm/{label};" +
                 $". ./chia-blockchain/activate && chia plots remove -d /farm/{label}");
             var result = cmd.Result;
             if (cmd.ExitStatus <= 1) return true;
