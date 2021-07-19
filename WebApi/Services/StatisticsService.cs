@@ -6,6 +6,7 @@
     using System.Net;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Threading.Tasks;
     using Humanizer;
     using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@
             PersistentService persistentService,
             ServerService server,
             IOptions<AppSettings> appSettings)
-            : base(logger, nameof(StatisticsService), 50, 20)
+            : base(logger, nameof(StatisticsService), 50, 20, 300)
         {
             this.persistentService = persistentService;
             this.server = server;
@@ -66,7 +67,7 @@
             public const string PlotHeap = nameof(PlotHeap);
         }
 
-        protected override async Task DoWorkAsync()
+        protected override async Task DoWorkAsync(CancellationToken token)
         {
             var alertUrl = this.appSettings.WeixinAlertUrl;
             var hourlyReportUrl = this.appSettings.WeixinHourlyReportUrl;
@@ -166,8 +167,14 @@
             }
             finally
             {
-                if (persistState != null)
+                if (token.IsCancellationRequested)
+                {
+                    this.logger.LogInformation($"Refresh work cancelled.");
+                }
+                else if (persistState != null)
+                {
                     await this.persistentService.LogEntityAsync(persistState);
+                }
             }
 
             async Task SendReport(ReportState thisState, string reportTitle, string json, string reportUrl, bool isSummativeReportGenerated = false)

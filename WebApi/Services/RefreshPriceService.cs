@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Net;
     using System.Text.Json;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -21,14 +22,14 @@
             PersistentService persistentService,
             ServerService server,
             IOptions<AppSettings> appSettings)
-            : base(logger, nameof(RefreshPriceService), 20, 30 * 60)
+            : base(logger, nameof(RefreshPriceService), 20, 30 * 60, 180)
         {
             this.persistentService = persistentService;
             this.server = server;
             this.appSettings = appSettings.Value;
         }
 
-        protected override async Task DoWorkAsync()
+        protected override async Task DoWorkAsync(CancellationToken token)
         {
             var urls = new[] {
                 "https://www.coinbase.com/api/v2/assets/prices/chia-network?base=USDT",
@@ -52,7 +53,14 @@
             }
 
             var pricesJson = JsonSerializer.Serialize(prices.ToArray());
-            await this.persistentService.LogEntityAsync(new PriceStateEntity { PricesJson = pricesJson });
+            if (token.IsCancellationRequested)
+            {
+                this.logger.LogInformation($"Refresh work cancelled.");
+            }
+            else
+            {
+                await this.persistentService.LogEntityAsync(new PriceStateEntity { PricesJson = pricesJson });
+            }
         }
     }
 

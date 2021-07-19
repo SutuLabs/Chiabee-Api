@@ -5,6 +5,7 @@
     using System.Diagnostics;
     using System.Linq;
     using System.Text.Json;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -29,7 +30,7 @@
             PersistentService persistentService,
             ServerService server,
             IOptions<AppSettings> appSettings)
-            : base(logger, nameof(RsyncScheduleService), 3, 30)
+            : base(logger, nameof(RsyncScheduleService), 3, 30, 30)
         {
             this.persistentService = persistentService;
             this.server = server;
@@ -42,7 +43,7 @@
             this.harvesterClients = harvester.ToMachineClients(this.logger).ToArray();
         }
 
-        protected override async Task DoWorkAsync()
+        protected override async Task DoWorkAsync(CancellationToken token)
         {
             var farm = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
             var plotters = JsonConvert.DeserializeObject<PlotterStatus[]>(farm.PlotterJsonGzip.Decompress());
@@ -84,6 +85,8 @@
 
             bool ExecutePlan(ExecutionRsyncPlan plan)
             {
+                if (token.IsCancellationRequested) return false;
+
                 var msg = $"Plan to transfer: {plan.FromHost} -> {plan.ToHost}@{plan.DiskName}";
                 try
                 {

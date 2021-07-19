@@ -13,17 +13,24 @@
         private bool isRunning;
         protected readonly ILogger logger;
 
-        public BaseRefreshService(ILogger<BaseRefreshService> logger, string serviceName, int delayStartSeconds, int intervalSeconds)
+        public BaseRefreshService(
+            ILogger<BaseRefreshService> logger,
+            string serviceName,
+            int delayStartSeconds,
+            int intervalSeconds,
+            int timeoutSeconds)
         {
             this.logger = logger;
             this.ServiceName = serviceName;
             this.DelayStartSeconds = delayStartSeconds;
             this.IntervalSeconds = intervalSeconds;
+            this.TimeoutSeconds = timeoutSeconds;
         }
 
         public string ServiceName { get; }
         public int DelayStartSeconds { get; }
         public int IntervalSeconds { get; }
+        public int TimeoutSeconds { get; }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -52,7 +59,7 @@
             timer?.Dispose();
         }
 
-        protected abstract Task DoWorkAsync();
+        protected abstract Task DoWorkAsync(CancellationToken token);
 
         private async void LoopDoWork(object state)
         {
@@ -62,9 +69,19 @@
                 this.isRunning = true;
                 var sw = new Stopwatch();
                 sw.Start();
-                await DoWorkAsync();
+                using var cts = new CancellationTokenSource();
+                var work = DoWorkAsync(cts.Token);
+                var finishWork = await Task.WhenAny(work, Task.Delay(this.TimeoutSeconds * 1000));
                 sw.Stop();
-                logger.LogInformation($"{ServiceName} refreshed, {sw.ElapsedMilliseconds}ms elapsed.");
+                if (finishWork == work)
+                {
+                    logger.LogInformation($"{ServiceName} refreshed, {sw.ElapsedMilliseconds}ms elapsed.");
+                }
+                else
+                {
+                    logger.LogInformation($"{ServiceName} failed to refresh due to timeout, {sw.ElapsedMilliseconds}ms elapsed.");
+                    cts.Cancel();
+                }
             }
             catch (Exception ex)
             {

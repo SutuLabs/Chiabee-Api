@@ -2,6 +2,7 @@
 {
     using System.Diagnostics;
     using System.Text.Json;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -20,14 +21,14 @@
             PersistentService persistentService,
             ServerService server,
             IOptions<AppSettings> appSettings)
-            : base(logger, nameof(RefreshFarmInfoService), 5, 20)
+            : base(logger, nameof(RefreshFarmInfoService), 5, 20, 180)
         {
             this.persistentService = persistentService;
             this.server = server;
             this.appSettings = appSettings.Value;
         }
 
-        protected override async Task DoWorkAsync()
+        protected override async Task DoWorkAsync(CancellationToken token)
         {
             var sw = new Stopwatch();
             sw.Start();
@@ -39,7 +40,15 @@
             var hms = sw.ElapsedMilliseconds - fms - pms;
 
             var entity = new FarmStateEntity { PlotterJsonGzip = pi.Compress(), FarmerJsonGzip = fi.Compress(), HarvesterJsonGzip = hi.Compress() };
-            await this.persistentService.LogEntityAsync(entity);
+            if (token.IsCancellationRequested)
+            {
+                this.logger.LogInformation($"Refresh work cancelled.");
+            }
+            else
+            {
+                await this.persistentService.LogEntityAsync(entity);
+            }
+
             sw.Stop();
             this.logger.LogInformation($"Work time: plotter info = {pms}ms, farmer info = {fms}ms, harvester info = {hms}ms, total = {sw.ElapsedMilliseconds}ms");
         }

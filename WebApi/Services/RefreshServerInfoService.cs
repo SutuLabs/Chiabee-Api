@@ -1,6 +1,7 @@
 ﻿namespace WebApi.Services
 {
     using System.Text.Json;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
@@ -19,17 +20,24 @@
             PersistentService persistentService,
             ServerService server,
             IOptions<AppSettings> appSettings)
-            : base(logger, nameof(RefreshServerInfoService), 3, 5)
+            : base(logger, nameof(RefreshServerInfoService), 3, 5, 45)
         {
             this.persistentService = persistentService;
             this.server = server;
             this.appSettings = appSettings.Value;
         }
 
-        protected override async Task DoWorkAsync()
+        protected override async Task DoWorkAsync(CancellationToken token)
         {
             var si = JsonSerializer.Serialize(await this.server.GetServersInfo());
-            await this.persistentService.LogEntityAsync(new MachineStateEntity { MachinesJsonGzip = si.Compress() });
+            if (token.IsCancellationRequested)
+            {
+                this.logger.LogInformation($"Refresh work cancelled.");
+            }
+            else
+            {
+                await this.persistentService.LogEntityAsync(new MachineStateEntity { MachinesJsonGzip = si.Compress() });
+            }
         }
     }
 }
