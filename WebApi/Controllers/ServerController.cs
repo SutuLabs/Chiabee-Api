@@ -89,7 +89,7 @@
         }
 
         [HttpDelete("plot")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> StopPlot(string name, string id)
         {
             var result = await this.serverService.StopPlot(name, id);
@@ -100,7 +100,7 @@
         }
 
         [HttpGet("plots")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> GetAllPlots(bool force = false)
         {
             if (force || !memoryCache.TryGetValue(nameof(GetAllPlots), out var plots))
@@ -113,7 +113,7 @@
         }
 
         [HttpGet("disks")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> GetAllHarvesterDisks(bool force = false)
         {
             if (force || !memoryCache.TryGetValue(nameof(GetAllHarvesterDisks), out var disks))
@@ -126,7 +126,7 @@
         }
 
         [HttpGet("disk/{name}")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> GetHarvesterDisk(string name)
         {
             var disk = await this.serverService.GetHarvesterDisksInfo(name);
@@ -135,7 +135,7 @@
         }
 
         [HttpGet("serial-number")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> GetSerialNumber()
         {
             if (!memoryCache.TryGetValue(nameof(GetSerialNumber), out var s))
@@ -148,7 +148,7 @@
         }
 
         [HttpPut("serial-number")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> UploadSerialNumberFile(IFormFile file)
         {
             using var ms = new MemoryStream();
@@ -201,7 +201,7 @@
         }
 
         [HttpPost("plotplan")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> SetPlotManPlan([FromBody] OptimizedPlotManPlan[] plans)
         {
             var result = serverService.SetOptimizePlotManPlan(plans);
@@ -212,7 +212,7 @@
         }
 
         [HttpPost("create-part")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> CreatePartition(string host, string block, string label)
         {
             var result = serverService.CreatePartition(host, block, label);
@@ -223,7 +223,7 @@
         }
 
         [HttpPost("rename-part")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> RenamePartition(string host, string block, string oldLabel, string newLabel)
         {
             var result = serverService.RenamePartition(host, block, oldLabel, newLabel);
@@ -234,7 +234,7 @@
         }
 
         [HttpPost("mount-part")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> MountPartition(string host, string block, string label)
         {
             var result = serverService.MountPartition(host, block, label);
@@ -245,7 +245,7 @@
         }
 
         [HttpPost("unmount-part")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> UnmountPartition(string host, string label)
         {
             var result = serverService.UnmountPartition(host, label);
@@ -256,7 +256,7 @@
         }
 
         [HttpPost("remove-ntfs-part")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> RemoveNtfsPartition(string host, string block)
         {
             var result = serverService.RemoveNtfsPartition(host, block);
@@ -267,7 +267,7 @@
         }
 
         [HttpPost("enable-smart")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> EnableSmart(string host, string block)
         {
             var result = serverService.EnableSmart(host, block);
@@ -278,7 +278,7 @@
         }
 
         [HttpDelete("plot-dir")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> RemovePlotDir(string host, string path)
         {
             var result = serverService.RemovePlotDir(host, path);
@@ -289,7 +289,7 @@
         }
 
         [HttpDelete("temporary")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> CleanTemporary([FromBody] string[] names)
         {
             var result = await this.serverService.CleanLegacyTemporaryFile(names);
@@ -300,7 +300,7 @@
         }
 
         [HttpDelete("plots")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> RemovePlots(string host, [FromBody] string[] names)
         {
             var result = await this.serverService.RemovePlots(host, names);
@@ -311,7 +311,7 @@
         }
 
         [HttpPost("mount-farms")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> MountFarms(string host)
         {
             var result = this.serverService.MountFarms(host);
@@ -336,7 +336,7 @@
         }
 
         [HttpPost("mount")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> MountAll([FromBody] string[] names)
         {
             var result = await this.serverService.MountAll(names);
@@ -347,7 +347,7 @@
         }
 
         [HttpPost("daemons/plotters")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> PlotterDaemons([FromBody] string[] names)
         {
             var result = await this.serverService.PlotterDaemons(names);
@@ -358,7 +358,7 @@
         }
 
         [HttpPost("daemons/harvesters")]
-        [Authorize(nameof(UserRole.Admin))]
+        [Authorize(nameof(UserRole.Operator))]
         public async Task<IActionResult> HarvesterDaemons([FromBody] string[] names)
         {
             var result = await this.serverService.HarvesterDaemons(names);

@@ -15,5 +15,7 @@ namespace WebApi.Entities
         Admin,
         Vip,
         Guest,
+        Operator,
+        Accountant,
     }
 }

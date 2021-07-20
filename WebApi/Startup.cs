@@ -34,8 +34,10 @@
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(nameof(UserRole.Admin), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Admin)));
-                options.AddPolicy(nameof(UserRole.Guest), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Guest)));
-                options.AddPolicy(nameof(UserRole.Vip), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Vip)));
+                options.AddPolicy(nameof(UserRole.Operator), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Operator), nameof(UserRole.Admin)));
+                options.AddPolicy(nameof(UserRole.Accountant), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Accountant), nameof(UserRole.Admin)));
+                options.AddPolicy(nameof(UserRole.Guest), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Guest), nameof(UserRole.Admin)));
+                options.AddPolicy(nameof(UserRole.Vip), policy => policy.RequireClaim(nameof(UserRole), nameof(UserRole.Vip), nameof(UserRole.Admin)));
             });
 
             services.AddScoped<IUserService, UserService>();
