@@ -5,7 +5,10 @@ namespace WebApi.Helpers
     using System.IO;
     using System.IO.Compression;
     using System.Linq;
+    using System.Security.Cryptography;
     using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Renci.SshNet;
     using WebApi.Entities;
@@ -21,8 +24,7 @@ namespace WebApi.Helpers
 
         public static User WithoutPassword(this User user)
         {
-            user.Password = null;
-            return user;
+            return user with { Password = null };
         }
 
         public static TargetMachine ToMachineClient(this SshEntity entity, ILogger logger)
@@ -71,6 +73,25 @@ namespace WebApi.Helpers
                     gs.CopyTo(mso);
                 }
                 return Encoding.Unicode.GetString(mso.ToArray());
+            }
+        }
+
+        public static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> items, CancellationToken cancellationToken = default)
+        {
+            var results = new List<T>();
+            await foreach (var item in items.WithCancellation(cancellationToken).ConfigureAwait(false))
+                results.Add(item);
+            return results;
+        }
+
+        public static string Sha256(this string inputString)
+        {
+            return Convert.ToHexString(Sha256ToBytes(inputString));
+
+            static byte[] Sha256ToBytes(string inputString)
+            {
+                using var algorithm = SHA256.Create();
+                return algorithm.ComputeHash(Encoding.UTF8.GetBytes(inputString));
             }
         }
     }

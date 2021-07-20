@@ -5,6 +5,7 @@
     using WebApi.Services;
     using System.Threading.Tasks;
     using WebApi.Models;
+    using WebApi.Entities;
 
     [Authorize]
     [ApiController]
@@ -20,7 +21,7 @@
 
         [AllowAnonymous]
         [HttpPost("authenticate")]
-        public async Task<IActionResult> Authenticate([FromBody]AuthenticateModel model)
+        public async Task<IActionResult> Authenticate([FromBody] AuthenticateModel model)
         {
             var user = await _userService.Authenticate(model.Username, model.Password);
 
@@ -30,7 +31,16 @@
             return Ok(user);
         }
 
+        [HttpPost("users")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> CreateUser(string username, string password, UserRole role, string firstName, string lastName)
+        {
+            await _userService.CreateUser(username, password, role, firstName, lastName);
+            return Ok();
+        }
+
         [HttpGet]
+        [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAll();

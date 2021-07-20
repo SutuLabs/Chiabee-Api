@@ -58,7 +58,7 @@ namespace WebApi.Helpers
                 return AuthenticateResult.Fail("Invalid Username or Password");
 
             var claims = new[] {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(nameof(UserRole), user.Role.ToString()),
             };

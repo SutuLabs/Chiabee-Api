@@ -1,8 +1,11 @@
 namespace WebApi.Services
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Caching.Memory;
+    using Microsoft.Extensions.Logging;
     using WebApi.Entities;
     using WebApi.Helpers;
 
@@ -10,29 +13,60 @@ namespace WebApi.Services
     {
         Task<User> Authenticate(string username, string password);
         Task<IEnumerable<User>> GetAll();
+        Task CreateUser(string username, string password, UserRole role, string firstName, string lastName);
     }
 
     public class UserService : IUserService
     {
-        private List<User> _users = new List<User>
+        private readonly PersistentService persistentService;
+        private readonly IMemoryCache memoryCache;
+        private readonly ILogger<UserService> logger;
+
+        public UserService(
+            PersistentService persistentService,
+            IMemoryCache memoryCache,
+            ILogger<UserService> logger)
         {
-            new User { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test", Role = UserRole.Admin, },
-            new User { Id = 2, FirstName = "Admin", LastName = "User", Username = "admin", Password = "admin", Role = UserRole.Admin, },
-        };
+            this.persistentService = persistentService;
+            this.memoryCache = memoryCache;
+            this.logger = logger;
+        }
 
         public async Task<User> Authenticate(string username, string password)
         {
-            var user = await Task.Run(() => _users.SingleOrDefault(x => x.Username == username && x.Password == password));
+            var users = await GetUsersAsync();
 
-            if (user == null)
-                return null;
+            var user = await Task.Run(() => users.SingleOrDefault(x => x.Username == username && x.Password == password.Sha256()));
+            if (user == null) return null;
 
             return user.WithoutPassword();
+
+        }
+
+        public async Task CreateUser(string username, string password, UserRole role, string firstName, string lastName)
+        {
+            var u = new UserEntity { Id = Guid.NewGuid().ToString(), Username = username, Password = password, Role = role, FirstName = firstName, LastName = lastName };
+            await persistentService.WriteEntityAsync(u);
         }
 
         public async Task<IEnumerable<User>> GetAll()
         {
-            return await Task.Run(() => _users.WithoutPasswords());
+            var users = await GetUsersAsync();
+            return await Task.Run(() => users.WithoutPasswords());
+        }
+
+        private async Task<List<User>> GetUsersAsync()
+        {
+            if (!memoryCache.TryGetValue(nameof(UserService), out List<User> users))
+            {
+                users = (await this.persistentService.RetrieveEntitiesAsync<UserEntity>()
+                    .ToListAsync())
+                    .Select(_ => _.ToUser())
+                    .ToList();
+                memoryCache.Set(nameof(UserService), users, TimeSpan.FromMinutes(1));
+            }
+
+            return users;
         }
     }
 }
