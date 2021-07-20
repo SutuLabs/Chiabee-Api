@@ -10,6 +10,9 @@
     using WebApi.Models;
     using WebApi.Entities;
     using WebApi.Controllers;
+    using System.Threading.Tasks;
+    using System.Collections.Generic;
+    using System;
 
     public class Startup
     {
@@ -52,7 +55,7 @@
             Services.ServerCommands.CommandHelper.SetSshNetConcurrency(100);
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, PersistentService persistentService)
         {
             app.UseRouting();
 
@@ -69,6 +72,26 @@
                 endpoints.MapControllers();
                 endpoints.MapHub<EventHub>("/hub/events");
             });
+
+            this.InitUsers(persistentService).Wait();
+        }
+
+        private async Task InitUsers(PersistentService persistentService)
+        {
+            var nus = await persistentService.RetrieveEntitiesAsync<UserEntity>()
+                .ToListAsync();
+            if (nus.Count > 0) return;
+
+            var users = new List<UserEntity>
+            {
+                new UserEntity { Id = Guid.NewGuid().ToString(), FirstName = "Test", LastName = "User", Username = "test", Password = "test@123".Sha256(), Role = UserRole.Operator, },
+                new UserEntity { Id = Guid.NewGuid().ToString(), FirstName = "Admin", LastName = "User", Username = "admin", Password = "admin@123".Sha256(), Role = UserRole.Admin, },
+            };
+
+            foreach (var u in users)
+            {
+                await persistentService.WriteEntityAsync(u);
+            }
         }
     }
 }
