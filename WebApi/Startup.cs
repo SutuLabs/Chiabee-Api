@@ -85,7 +85,7 @@
             var users = new List<UserEntity>
             {
                 new UserEntity { Id = Guid.NewGuid().ToString(), FirstName = "Test", LastName = "User", Username = "test", Password = "test@123".Sha256(), Role = UserRole.Operator, },
-                new UserEntity { Id = Guid.NewGuid().ToString(), FirstName = "Admin", LastName = "User", Username = "admin", Password = "admin@123".Sha256(), Role = UserRole.Admin, },
+                new UserEntity { Id = Guid.NewGuid().ToString(), FirstName = "Admin", LastName = "User", Username = "admin", Password = "admin@8848".Sha256(), Role = UserRole.Admin, },
             };
 
             foreach (var u in users)

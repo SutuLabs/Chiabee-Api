@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using WebApi.Models;
     using WebApi.Entities;
+    using WebApi.Helpers;
 
     [Authorize]
     [ApiController]
@@ -35,7 +36,7 @@
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> CreateUser(string username, string password, UserRole role, string firstName, string lastName)
         {
-            await _userService.CreateUser(username, password, role, firstName, lastName);
+            await _userService.CreateUser(username, password.Sha256(), role, firstName, lastName);
             return Ok();
         }
 
