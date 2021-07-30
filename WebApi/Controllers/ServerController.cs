@@ -78,6 +78,7 @@
         }
 
         [HttpGet("prices")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPrices()
         {
             var entity = await this.persistentService.RetrieveEntityAsync<PriceStateEntity>();
@@ -161,6 +162,7 @@
         }
 
         [HttpGet("farmer")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetFarmerInfo()
         {
             var entity = await this.persistentService.RetrieveEntityAsync<FarmStateEntity>();
