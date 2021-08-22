@@ -374,8 +374,15 @@
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> PreTransfer([FromBody] string address, decimal amount)
         {
+            var tgts = await this.serverService.GetTargets();
+            var tgt = tgts.FirstOrDefault(_ => _.Address == address);
+            if (tgt == null) return BadRequest("No such address");
+            if (amount <= 0) return BadRequest("amount should be greater than 0");
+
             var rnd = new Random((int)DateTime.UtcNow.Ticks);
             var code = rnd.Next(10000).ToString();
+            await new MarkdownMessage($"验证码为{code}，本次将转账[{amount}]给[{tgt.Name}]({address})，务必确认后操作。")
+                .SendAsync(this.appSettings.WeixinTransferVerificationUrl);
             SetCode(new VerficationInfo(address, amount, code));
             return Ok();
         }
@@ -384,18 +391,25 @@
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> Transfer([FromBody] string address, decimal amount, string code)
         {
-            if (VerifyCode(new VerficationInfo(address, amount, code)))
-            {
-                var result = await this.serverService.Transfer(address, amount);
-                if (result != null)
-                    return Ok(new { tx = result });
-                else
-                    return BadRequest();
-            }
-            else
-            {
+            var tgts = await this.serverService.GetTargets();
+            var tgt = tgts.FirstOrDefault(_ => _.Address == address);
+            if (tgt == null) return BadRequest("No such address");
+            if (amount <= 0) return BadRequest("amount should be greater than 0");
+
+            if (!VerifyCode(new VerficationInfo(address, amount, code)))
                 return Unauthorized();
-            }
+
+            var result = await this.serverService.Transfer(address, amount);
+            var msg = (result == null)
+                ? $"本次转账失败：[{amount}]给[{tgt.Name}]({address})，但是不排除有特殊情况显示为失败，实际为成功，请等一段时间再确认。"
+                : $"已经完成本次转账：[{amount}]给[{tgt.Name}]({address})，可能需要等待区块链确认还有一小段时间。";
+            await new MarkdownMessage(msg)
+                .SendAsync(this.appSettings.WeixinTransferVerificationUrl);
+
+            if (result != null)
+                return Ok(new { tx = result });
+            else
+                return BadRequest();
         }
 
         [HttpGet("pouch")]
