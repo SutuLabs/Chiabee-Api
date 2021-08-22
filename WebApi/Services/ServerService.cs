@@ -410,6 +410,12 @@
             var ts = (await this.GetTargets()).ToList();
             foreach (var target in targets)
             {
+                if (string.IsNullOrEmpty(target.Id))
+                {
+                    ts.Add(target with { Id = Guid.NewGuid().ToString() });
+                    continue;
+                }
+
                 var tpos = ts.FindIndex(_ => _.Id == target.Id);
                 if (tpos == -1)
                 {

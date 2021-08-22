@@ -370,10 +370,12 @@
                 return BadRequest();
         }
 
+        public record PreTransferRequest(string Address, decimal Amount);
         [HttpPost("pre-transfer")]
         [Authorize(nameof(UserRole.Admin))]
-        public async Task<IActionResult> PreTransfer([FromBody] string address, decimal amount)
+        public async Task<IActionResult> PreTransfer([FromBody] PreTransferRequest request)
         {
+            var (address, amount) = request;
             var tgts = await this.serverService.GetTargets();
             var tgt = tgts.FirstOrDefault(_ => _.Address == address);
             if (tgt == null) return BadRequest("No such address");
@@ -387,10 +389,12 @@
             return Ok();
         }
 
+        public record TransferRequest(string Address, decimal Amount, string Code);
         [HttpPost("transfer")]
         [Authorize(nameof(UserRole.Admin))]
-        public async Task<IActionResult> Transfer([FromBody] string address, decimal amount, string code)
+        public async Task<IActionResult> Transfer([FromBody] TransferRequest request)
         {
+            var (address, amount, code) = request;
             var tgts = await this.serverService.GetTargets();
             var tgt = tgts.FirstOrDefault(_ => _.Address == address);
             if (tgt == null) return BadRequest("No such address");
