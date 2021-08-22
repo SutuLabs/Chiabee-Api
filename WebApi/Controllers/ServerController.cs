@@ -369,5 +369,76 @@
             else
                 return BadRequest();
         }
+
+        [HttpPost("pre-transfer")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> PreTransfer([FromBody] string address, decimal amount)
+        {
+            var rnd = new Random((int)DateTime.UtcNow.Ticks);
+            var code = rnd.Next(10000).ToString();
+            SetCode(new VerficationInfo(address, amount, code));
+            return Ok();
+        }
+
+        [HttpPost("transfer")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> Transfer([FromBody] string address, decimal amount, string code)
+        {
+            if (VerifyCode(new VerficationInfo(address, amount, code)))
+            {
+                var result = await this.serverService.Transfer(address, amount);
+                if (result != null)
+                    return Ok(new { tx = result });
+                else
+                    return BadRequest();
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
+
+        [HttpGet("pouch")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> GetWalletBalance()
+        {
+            return BadRequest();
+        }
+        [HttpGet("pouch/txs")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> GetWalletTransactions(string tx = null)
+        {
+            return BadRequest();
+        }
+
+        [HttpGet("targets")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> GetTargetList()
+        {
+            return BadRequest();
+        }
+
+        public record CreateTargetRequest(string Name, string Address);
+
+        [HttpPost("targets")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> CreateTarget([FromBody] CreateTargetRequest request)
+        {
+            return BadRequest();
+        }
+
+        private record VerficationInfo(string Address, decimal Amount, string Code);
+        private bool VerifyCode(VerficationInfo info)
+        {
+            if (!memoryCache.TryGetValue(nameof(VerficationInfo), out VerficationInfo saved))
+                return false;
+
+            return saved == info;
+        }
+
+        private void SetCode(VerficationInfo info)
+        {
+            memoryCache.Set(nameof(VerficationInfo), info, TimeSpan.FromMinutes(5));
+        }
     }
 }

@@ -86,5 +86,15 @@ tmux send-keys 'watch -n 5 ""chia plots show | grep /farm |sort""' 'C-m'";
             client.Logger.LogInformation($"[{r}]Result[{cmd.ExitStatus}]: {cmd.Result}");
             return (cmd.ExitStatus, cmd.Result);
         }
+
+        public static (int exitStatus, string result) ExecuteCommand(this TargetMachine client, string command)
+        {
+            if (!client.EnsureConnected()) return default;
+            var r = new Random().Next(1000, 10000);
+            client.Logger.LogInformation($"[{r}]Executing command[{client.Name}]: {command}");
+            using var cmd = client.RunCommand(command);
+            client.Logger.LogInformation($"[{r}]Result[{cmd.ExitStatus}]: {cmd.Result}");
+            return (cmd.ExitStatus, cmd.Result);
+        }
     }
 }

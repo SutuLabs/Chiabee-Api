@@ -368,6 +368,14 @@
             return true;
         }
 
+        public async Task<string> Transfer(string address, decimal amount)
+        {
+            var m = this.farmerClients.FirstOrDefault();
+            if (m == null) return null;
+
+            return await m.Send(this.appSettings.WalletFingerPrint, address, amount);
+        }
+
         private static T[] GetRecords<T>(Stream input)
         {
             using var reader = new StreamReader(input);
