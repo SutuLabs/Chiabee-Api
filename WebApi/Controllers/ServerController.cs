@@ -402,29 +402,49 @@
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> GetWalletBalance()
         {
-            return BadRequest();
+            var b = await this.serverService.GetBalance();
+            return Ok(b);
         }
+
         [HttpGet("pouch/txs")]
         [Authorize(nameof(UserRole.Admin))]
-        public async Task<IActionResult> GetWalletTransactions(string tx = null)
+        public async Task<IActionResult> GetWalletTransactions(string[] tx = null)
         {
-            return BadRequest();
+            var txs = await this.serverService.GetTxs(tx);
+            return Ok(txs);
         }
 
         [HttpGet("targets")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> GetTargetList()
         {
-            return BadRequest();
+            var ret = await this.serverService.GetTargets();
+            return Ok(ret);
         }
 
-        public record CreateTargetRequest(string Name, string Address);
+        public record CreateTargetRequest(string? Id, string Name, string Address);
 
         [HttpPost("targets")]
         [Authorize(nameof(UserRole.Admin))]
         public async Task<IActionResult> CreateTarget([FromBody] CreateTargetRequest request)
         {
-            return BadRequest();
+            var ret = await this.serverService.CreateOrUpdateTarget(new Receiver(request.Id, request.Name, request.Address));
+            if (ret)
+                return Ok();
+            else
+                return BadRequest();
+        }
+
+        public record DeleteTargetsRequest(string[] ids);
+        [HttpDelete("targets")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> DeleteTargets([FromBody] DeleteTargetsRequest request)
+        {
+            var ret = await this.serverService.DeleteTargets(request.ids);
+            if (ret)
+                return Ok();
+            else
+                return BadRequest();
         }
 
         private record VerficationInfo(string Address, decimal Amount, string Code);

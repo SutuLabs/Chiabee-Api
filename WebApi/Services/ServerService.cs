@@ -376,6 +376,70 @@
             return await m.Send(this.appSettings.WalletFingerPrint, address, amount);
         }
 
+        public async Task<WalletBalance> GetBalance()
+        {
+            var m = this.farmerClients.FirstOrDefault();
+            if (m == null) return null;
+
+            return await m.GetBalance(this.appSettings.WalletFingerPrint);
+        }
+
+        public async Task<WalletTx[]> GetTxs(string[] ids = null)
+        {
+            var m = this.farmerClients.FirstOrDefault();
+            if (m == null) return null;
+
+            var fp = this.appSettings.WalletFingerPrint;
+            if (ids == null || ids.Length == 0)
+                return await m.GetTxs(fp);
+
+            if (ids.Length > 1) return null;
+            return new[] { await m.GetTx(fp, ids.First()) };
+        }
+
+        public async Task<Receiver[]> GetTargets()
+        {
+            var s = await this.persistentService.RetrieveEntityAsync<ReceiverInfoEntity>();
+            var json = s.ReceiverJson;
+            var sns = Newtonsoft.Json.JsonConvert.DeserializeObject<Receiver[]>(json);
+            return sns;
+        }
+
+        public async Task<bool> CreateOrUpdateTarget(params Receiver[] targets)
+        {
+            var ts = (await this.GetTargets()).ToList();
+            foreach (var target in targets)
+            {
+                var tpos = ts.FindIndex(_ => _.Id == target.Id);
+                if (tpos == -1)
+                {
+                    ts.Add(target);
+                }
+                else
+                {
+                    ts[tpos] = target;
+                }
+            }
+
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(ts.ToArray());
+            await this.persistentService.LogEntityAsync(new ReceiverInfoEntity { ReceiverJson = json });
+            return true;
+        }
+
+        public async Task<bool> DeleteTargets(params string[] ids)
+        {
+            var ts = (await this.GetTargets()).ToList();
+            foreach (var id in ids)
+            {
+                var tpos = ts.FindIndex(_ => _.Id == id);
+                if (tpos != -1) ts.RemoveAt(tpos);
+            }
+
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(ts.ToArray());
+            await this.persistentService.LogEntityAsync(new ReceiverInfoEntity { ReceiverJson = json });
+            return true;
+        }
+
         private static T[] GetRecords<T>(Stream input)
         {
             using var reader = new StreamReader(input);
@@ -420,4 +484,5 @@
 
     public record OptimizedPlotManPlan(string Name, PlotManConfiguration Plan);
     public record MachineWithDisks(string Name, HarvesterDiskInfo[] Disks);
+    public record Receiver(string Id, string Name, string Address);
 }
