@@ -82,7 +82,7 @@
                 var farmer = farmers.FirstOrDefault();
                 if (farmer == null)
                 {
-                    await SendMessageAsync(new MarkdownMessage("ERROR: farmer not exist"), alertUrl);
+                    await new MarkdownMessage("ERROR: farmer not exist").SendAsync(alertUrl);
                     return;
                 }
 
@@ -133,7 +133,7 @@
                 var alert = GenerateAlert(lastState, thisState);
                 if (!string.IsNullOrEmpty(alert.Trim()))
                 {
-                    await SendMessageAsync(new MarkdownMessage(alert), alertUrl);
+                    await new MarkdownMessage(alert).SendAsync(alertUrl);
                 }
                 persistState.LastCheckJsonGzip = JsonConvert.SerializeObject(thisState).Compress();
 
@@ -181,14 +181,14 @@
             {
                 if (!json.TryParseJson<ReportState>(out var lastReportState, out var error))
                 {
-                    await this.SendMessageAsync(new MarkdownMessage("前次存储信息有误，本次报告暂不提供，待管理员处理。"), reportUrl);
+                    await new MarkdownMessage("前次存储信息有误，本次报告暂不提供，待管理员处理。").SendAsync(reportUrl);
                     logger.LogWarning($"failed to parse last {reportTitle} report, json: {json}");
                     return;
                 }
 
                 var msg = GenerateReport(lastReportState, thisState, reportTitle);
                 if (isSummativeReportGenerated) msg += await GenerateSummativeReport();
-                await this.SendMessageAsync(new MarkdownMessage(msg), reportUrl);
+                await new MarkdownMessage(msg).SendAsync(reportUrl);
             }
         }
 
@@ -380,23 +380,6 @@
             info,
             warning,
         }
-
-        private async Task SendMessageAsync(Message message, string url)
-        {
-            using var wc = new WebClient();
-            wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
-            var json = JsonConvert.SerializeObject(message);
-            await wc.UploadStringTaskAsync(url, json);
-        }
-
-        public record Message(string msgtype);
-        public record MarkdownMessage(MarkdownMessageBody markdown) : Message("markdown")
-        {
-            public MarkdownMessage(string content) : this(new MarkdownMessageBody(content)) { }
-        }
-        public record MarkdownMessageBody(string content);
-        public record TextMessage(TextMessageBody text) : Message("text");
-        public record TextMessageBody(string content, string[] mentioned_list = null, string[] mentioned_mobile_list = null);
 
         public record ReportDiskState();
 
