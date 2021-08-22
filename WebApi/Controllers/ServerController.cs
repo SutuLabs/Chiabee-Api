@@ -383,7 +383,8 @@
 
             var rnd = new Random((int)DateTime.UtcNow.Ticks);
             var code = rnd.Next(10000).ToString();
-            await new MarkdownMessage($"验证码为{code}，本次将转账[{amount}]给[{tgt.Name}]({address})，务必确认后操作。")
+            var detail = $" `{amount}`给 {tgt.Name} ({address})";
+            await new MarkdownMessage($"验证码为{code}，本次将转账{detail}，务必确认后操作。")
                 .SendAsync(this.appSettings.WeixinTransferVerificationUrl);
             SetCode(new VerficationInfo(address, amount, code));
             return Ok();
@@ -404,9 +405,10 @@
                 return Unauthorized();
 
             var result = await this.serverService.Transfer(address, amount);
+            var detail = $" `{amount}`给 {tgt.Name} ({address}) ";
             var msg = (result == null)
-                ? $"本次转账失败：[{amount}]给[{tgt.Name}]({address})，但是不排除有特殊情况显示为失败，实际为成功，请等一段时间再确认。"
-                : $"已经完成本次转账：[{amount}]给[{tgt.Name}]({address})，可能需要等待区块链确认还有一小段时间。";
+                ? $"本次转账失败：{detail}，但是不排除有特殊情况显示为失败，实际为成功，请等一段时间再确认。"
+                : $"已经完成本次转账：{detail}，可能需要等待区块链确认还有一小段时间。";
             await new MarkdownMessage(msg)
                 .SendAsync(this.appSettings.WeixinTransferVerificationUrl);
 
@@ -426,7 +428,15 @@
 
         [HttpGet("pouch/txs")]
         [Authorize(nameof(UserRole.Admin))]
-        public async Task<IActionResult> GetWalletTransactions(string[] tx = null)
+        public async Task<IActionResult> GetAllWalletTransactions()
+        {
+            var txs = await this.serverService.GetTxs();
+            return Ok(txs);
+        }
+
+        [HttpPost("pouch/txs")]
+        [Authorize(nameof(UserRole.Admin))]
+        public async Task<IActionResult> GetWalletTransactions([FromBody] string[] tx)
         {
             var txs = await this.serverService.GetTxs(tx);
             return Ok(txs);
@@ -447,6 +457,9 @@
         public async Task<IActionResult> CreateTarget([FromBody] CreateTargetRequest request)
         {
             var ret = await this.serverService.CreateOrUpdateTarget(new Receiver(request.Id, request.Name, request.Address));
+            var msg = $"创建账号：{request.Name}\n{request.Address}";
+            await new MarkdownMessage(msg)
+                .SendAsync(this.appSettings.WeixinTransferVerificationUrl);
             if (ret)
                 return Ok();
             else

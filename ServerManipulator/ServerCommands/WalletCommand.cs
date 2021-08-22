@@ -133,6 +133,7 @@
             {
                 if (line.StartsWith("Transaction"))
                 {
+                    if (tx != null) yield return tx;
                     var id = "0x" + line[("Transaction".Length + 1)..];
                     tx = new WalletTx(id, null, 0, null, DateTime.MinValue);
                 }

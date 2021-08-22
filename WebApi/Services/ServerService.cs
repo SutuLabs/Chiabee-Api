@@ -400,7 +400,8 @@
         public async Task<Receiver[]> GetTargets()
         {
             var s = await this.persistentService.RetrieveEntityAsync<ReceiverInfoEntity>();
-            var json = s.ReceiverJson;
+            var json = s?.ReceiverJson;
+            if (json == null) return Array.Empty<Receiver>();
             var sns = Newtonsoft.Json.JsonConvert.DeserializeObject<Receiver[]>(json);
             return sns;
         }
