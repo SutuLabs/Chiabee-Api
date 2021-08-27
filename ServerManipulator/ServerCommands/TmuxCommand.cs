@@ -29,7 +29,7 @@ tmux split-window -v
 tmux split-window -h
 # tmux send-keys 'chia && pm archive' 'C-m'
 tmux select-pane -t 0";
-            var (exit, _) = client.ExecuteScript(script);
+            var (exit, _) = client.PerformScript(script);
             if (exit <= 1) return true;
             return false;
         }
@@ -59,12 +59,12 @@ tmux send-keys 'watch -n 5 ""tail -n 10000 {log} | grep -E -o \""Looking up qual
 tmux split-window -h
 tmux send-keys 'chia' 'C-m'
 tmux send-keys 'watch -n 5 ""chia plots show | grep /farm |sort""' 'C-m'";
-            var (exit, _) = client.ExecuteScript(script);
+            var (exit, _) = client.PerformScript(script);
             if (exit <= 1) return true;
             return false;
         }
 
-        public static (int exitStatus, string result) ExecuteScript(this TargetMachine client, string script, bool sudo = false)
+        public static (int exitStatus, string result) PerformScript(this TargetMachine client, string script, bool sudo = false, TimeSpan? timeout = null)
         {
             var tempfile = "tempremoteexecution.sh";
             if (!client.EnsureConnected()) return default;
@@ -82,17 +82,17 @@ tmux send-keys 'watch -n 5 ""chia plots show | grep /farm |sort""' 'C-m'";
             cmds = $"echo {pass} | sudo -S sudo chmod +x {tempfile};" +
                 (sudo ? $"echo {pass} | sudo -S bash ./{tempfile};" : $"./{tempfile};") +
                 $"rm {tempfile};";
-            using var cmd = client.RunCommand(cmds);
+            using var cmd = client.ExecuteCommand(cmds, timeout);
             client.Logger.LogInformation($"[{r}]Result[{cmd.ExitStatus}]: {cmd.Result}");
             return (cmd.ExitStatus, cmd.Result);
         }
 
-        public static (int exitStatus, string result) ExecuteCommand(this TargetMachine client, string command)
+        public static (int exitStatus, string result) PerformCommand(this TargetMachine client, string command, TimeSpan? timeout = null)
         {
             if (!client.EnsureConnected()) return default;
             var r = new Random().Next(1000, 10000);
             client.Logger.LogInformation($"[{r}]Executing command[{client.Name}]: {command}");
-            using var cmd = client.RunCommand(command);
+            using var cmd = client.ExecuteCommand(command, timeout);
             client.Logger.LogInformation($"[{r}]Result[{cmd.ExitStatus}]: {cmd.Result}");
             return (cmd.ExitStatus, cmd.Result);
         }

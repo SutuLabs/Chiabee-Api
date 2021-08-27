@@ -24,7 +24,7 @@
             if (amount <= 0) return null;
             if (!addressRegex.IsMatch(address)) return null;
 
-            var (exit, result) = client.ExecuteCommand(@$". ~/chia-blockchain/activate && chia wallet send -f {walletFinger} -a {amount} -m 0 -t {address}");
+            var (exit, result) = client.PerformCommand(@$". ~/chia-blockchain/activate && chia wallet send -f {walletFinger} -a {amount} -m 0 -t {address}");
             if (exit != 0) return null;
 
             var match = Regex.Match(result, @"-tx (?<tx>0x[0-9a-f]{64})");
@@ -46,7 +46,7 @@
 
             if (!fingerRegex.IsMatch(walletFinger)) return null;
 
-            var (exit, result) = client.ExecuteCommand(@$". ~/chia-blockchain/activate && chia wallet show -f {walletFinger}");
+            var (exit, result) = client.PerformCommand(@$". ~/chia-blockchain/activate && chia wallet show -f {walletFinger}");
             if (exit != 0) return null;
             /*
             (venv) sutu@chiafarm1:~$ chia wallet show -f 3091007504
@@ -90,7 +90,7 @@
 
             if (!fingerRegex.IsMatch(walletFinger)) return null;
 
-            var (exit, result) = client.ExecuteCommand(@$". ~/chia-blockchain/activate && yes c | chia wallet get_transactions -f {walletFinger}");
+            var (exit, result) = client.PerformCommand(@$". ~/chia-blockchain/activate && yes c | chia wallet get_transactions -f {walletFinger}");
             if (exit != 0)
                 return null;
             else
@@ -104,7 +104,7 @@
             if (!fingerRegex.IsMatch(walletFinger)) return null;
             if (!txRegex.IsMatch(txId)) return null;
 
-            var (exit, result) = client.ExecuteCommand(@$". ~/chia-blockchain/activate && chia wallet get_transaction -f {walletFinger} -tx {txId}");
+            var (exit, result) = client.PerformCommand(@$". ~/chia-blockchain/activate && chia wallet get_transaction -f {walletFinger} -tx {txId}");
             if (exit != 0)
                 return null;
             else

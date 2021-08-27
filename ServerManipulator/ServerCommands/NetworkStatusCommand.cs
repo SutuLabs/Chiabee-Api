@@ -13,7 +13,7 @@
             var sum = 0;
             for (int i = 0; i < client.Properties.Hosts.Length; i++)
             {
-                using var cmd = client.RunCommand(GetCmdText($"{ethBaseName}{i + 1}"));
+                using var cmd = client.ExecuteCommand(GetCmdText($"{ethBaseName}{i + 1}"));
                 var cur = int.TryParse(cmd.Result, out var b) ? (int?)(b / duration) : null;
                 sum += cur ?? 0;
             }

@@ -49,7 +49,7 @@ namespace WebApi.Services.ServerCommands
         {
             if (!client.EnsureConnected()) return default;
 
-            using var timeCmd = client.RunCommand(@"grep -o '^Total .* sec' ~/plotter/plot.log | sed -e 's/^Total .* \([.0-9]\+\) sec$/\1/'");
+            using var timeCmd = client.ExecuteCommand(@"grep -o '^Total .* sec' ~/plotter/plot.log | sed -e 's/^Total .* \([.0-9]\+\) sec$/\1/'");
             decimal[] times = timeCmd.Result.CleanSplit()
                 .Select(_ => decimal.TryParse(_, out var number) ? (decimal?)number : null)
                 .Where(_ => _ != null)
@@ -62,10 +62,10 @@ namespace WebApi.Services.ServerCommands
                 (int)times.Min(),
                 -1);
 
-            using var logCmd = client.RunCommand(@"tail -n 100 ~/plotter/plot.log");
+            using var logCmd = client.ExecuteCommand(@"tail -n 100 ~/plotter/plot.log");
             var phase = ParseMadmaxOutput(logCmd.Result);
 
-            using var lastTimeCmd = client.RunCommand(@"stat -c '%y' ~/plotter/plot.log");
+            using var lastTimeCmd = client.ExecuteCommand(@"stat -c '%y' ~/plotter/plot.log");
             var lastTime = DateTime.TryParse(lastTimeCmd.Result, out var lt) ? (DateTime?)lt : null;
 
             var (percent, speed) = GetRsyncInfo(client);
@@ -74,11 +74,11 @@ namespace WebApi.Services.ServerCommands
             {
                 const int MaxRsyncFileAgeSeconds = 60;
 
-                using var rsyncLastTimeCmd = client.RunCommand(@"stat -c '%y' ~/plotter/rsync.log");
+                using var rsyncLastTimeCmd = client.ExecuteCommand(@"stat -c '%y' ~/plotter/rsync.log");
                 if (!DateTime.TryParse(rsyncLastTimeCmd.Result, out var rlt)) return (null, null);
                 if ((DateTime.UtcNow - rlt).TotalSeconds >= MaxRsyncFileAgeSeconds) return (null, null);
 
-                using var rsyncCmd = client.RunCommand(@"tail -c 100 ~/plotter/rsync.log");
+                using var rsyncCmd = client.ExecuteCommand(@"tail -c 100 ~/plotter/rsync.log");
                 return ParseRsync(rsyncCmd.Result);
             }
 
@@ -119,7 +119,7 @@ namespace WebApi.Services.ServerCommands
                 return true;
             }
 
-            using var copyCmd = client.RunCommand(@"ps -eo cmd | grep '^rsync'");
+            using var copyCmd = client.ExecuteCommand(@"ps -eo cmd | grep '^rsync'");
             //rsync --bwlimit=3000000 --compress-level=0 --remove-source-files -P /data/final/plot-k32-2021-06-19-06-49-15bd2a88dbe669123ee8eb2515463c460f35e2c76eaa902876aa1abcfd9322fa.plot rsync://sutu@10.179.0.234:12000/plots/A118
             var re = new Regex(@"^rsync .*/data/final/(?<filename>plot-k[-0-9a-f]{84}.plot) rsync://.*?@(?<host>[.0-9]*):[0-9]{1,5}/plots/(?<disk>\w?\d{1,4})");
             var match = re.Match(copyCmd.Result);
@@ -171,7 +171,7 @@ namespace WebApi.Services.ServerCommands
         {
             if (!client.EnsureConnected()) return Array.Empty<PlotmanJob>();
 
-            using var pmCmd = client.RunCommand(@". ~/chia-blockchain/activate && plotman status");
+            using var pmCmd = client.ExecuteCommand(@". ~/chia-blockchain/activate && plotman status");
 
             return ParsePlotStatusOutput(pmCmd.Result).ToArray();
 
@@ -200,7 +200,7 @@ namespace WebApi.Services.ServerCommands
         {
             if (!client.EnsureConnected()) return Array.Empty<string>();
 
-            using var cmd = client.RunCommand(@$"ps -e | egrep ""({string.Join("|", processes)})""");
+            using var cmd = client.ExecuteCommand(@$"ps -e | egrep ""({string.Join("|", processes)})""");
             return cmd.Result
                 .CleanSplit()
                 .Select(line => processes.FirstOrDefault(_ => line.Contains(_)))
@@ -219,7 +219,7 @@ namespace WebApi.Services.ServerCommands
         public static DirectoryFiles? GetDirectoryFileCountCommand(this TargetMachine client, string path)
         {
             if (!client.EnsureConnected()) return null;
-            using var cmd = client.RunCommand(@$"ls {path}/*.plot | sort");
+            using var cmd = client.ExecuteCommand(@$"ls {path}/*.plot | sort");
             var files = cmd.Result
                 .CleanSplit()
                 .Select(_ => _.Replace($"{path}/", ""))

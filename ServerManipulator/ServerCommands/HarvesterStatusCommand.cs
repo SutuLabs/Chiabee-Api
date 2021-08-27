@@ -15,10 +15,10 @@
 
             var el = GetEligibleInfo(client);
 
-            using var chiacmd = client.RunCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
+            using var chiacmd = client.ExecuteCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
             var chiaFarms = chiacmd.Result
                 .CleanSplit();
-            using var dfcmd = client.RunCommand(@"df | grep -o ""/farm/.*""");
+            using var dfcmd = client.ExecuteCommand(@"df | grep -o ""/farm/.*""");
             var dfFarms = dfcmd.Result
                 .CleanSplit();
 
@@ -63,7 +63,7 @@
             {
                 foreach (var dir in lines)
                 {
-                    using var trycmd = client.RunCommand($"touch {dir}/{tempfile} && rm {dir}/{tempfile}");
+                    using var trycmd = client.ExecuteCommand($"touch {dir}/{tempfile} && rm {dir}/{tempfile}");
                     if (trycmd.ExitStatus != 0) yield return dir;
                 }
             }
@@ -71,7 +71,7 @@
 
         private static EligibleFarmerEvent GetEligibleInfo(TargetMachine client)
         {
-            using var cmd = client.RunCommand("tac ~/.chia/mainnet/log/debug.log | grep -m1 'plots were eligible for farming'");
+            using var cmd = client.ExecuteCommand("tac ~/.chia/mainnet/log/debug.log | grep -m1 'plots were eligible for farming'");
             return cmd.Result
                 .CleanSplit()
                 .Reverse()

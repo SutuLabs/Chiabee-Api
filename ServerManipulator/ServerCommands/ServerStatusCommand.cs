@@ -17,7 +17,7 @@
             sw.Start();
 
             if (!client.EnsureConnected()) return StopAndLog("disconnected", default(ServerStatus));
-            using var topCmd = client.RunCommand(@"top -b1n1 -E G |grep ""Cpu\|Mem \|Tasks""");
+            using var topCmd = client.ExecuteCommand(@"top -b1n1 -E G |grep ""Cpu\|Mem \|Tasks""");
             var output = topCmd.Result;
             if (string.IsNullOrEmpty(output)) return StopAndLog("empty", default(ServerStatus));
 

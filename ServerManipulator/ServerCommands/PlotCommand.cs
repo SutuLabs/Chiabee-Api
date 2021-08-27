@@ -15,7 +15,7 @@
             if (!client.EnsureConnected()) return null;
 
             var host = client.ConnectionInfo.Host;
-            using var cmd = client.RunCommand(@$". ~/chia-blockchain/activate && chia plots show | grep ^/");
+            using var cmd = client.ExecuteCommand(@$". ~/chia-blockchain/activate && chia plots show | grep ^/");
 
             return ParseListFile(cmd.Result).ToArray();
 
@@ -24,7 +24,7 @@
                 var dirs = filelist.CleanSplit();
                 foreach (var dir in dirs)
                 {
-                    using var dircmd = client.RunCommand($@"ls -al {dir}");
+                    using var dircmd = client.ExecuteCommand($@"ls -al {dir}");
                     var list = dircmd.Result.CleanSplit();
 
                     for (int i = 0; i < list.Length; i++)
@@ -52,7 +52,7 @@
             var re = new Regex(@"/farm/A\d{1,4}/plot-k\d{2,3}-\d{4}(-\d{2}){4}-[0-9a-f]{64}.plot");
             if (plots.Any(plot => !re.IsMatch(plot))) return false;
             var cmds = string.Join("\n", plots.Select(_ => $"rm {_}"));
-            var (code, result) = client.ExecuteScript(cmds);
+            var (code, result) = client.PerformScript(cmds);
             return code == 0;
         }
     }

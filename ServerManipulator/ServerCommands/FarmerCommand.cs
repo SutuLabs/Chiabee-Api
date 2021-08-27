@@ -12,7 +12,7 @@
         public static NodeStatus GetNodeStatus(this TargetMachine client)
         {
             if (!client.EnsureConnected()) return null;
-            using var nodeCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia show -s");
+            using var nodeCmd = client.ExecuteCommand(@". ~/chia-blockchain/activate && chia show -s");
             return ParseNodeStatus(nodeCmd.Result);
 
             static NodeStatus ParseNodeStatus(string output)
@@ -61,7 +61,7 @@
         public static FarmerStatus GetFarmerStatus(this TargetMachine client)
         {
             if (!client.EnsureConnected()) return null;
-            using var farmCmd = client.RunCommand(@". ~/chia-blockchain/activate && chia farm summary");
+            using var farmCmd = client.ExecuteCommand(@". ~/chia-blockchain/activate && chia farm summary");
             return ParseFarmStatus(farmCmd.Result);
 
             static FarmerStatus ParseFarmStatus(string output)
@@ -106,7 +106,7 @@
         public static ExtendedFarmerStatus GetExtentedFarmerStatus(this TargetMachine client)
         {
             if (!client.EnsureConnected()) return null;
-            using var farmCmd = client.RunCommand(@"egrep '^  xch_target_address: ' ~/.chia/mainnet/config/config.yaml");
+            using var farmCmd = client.ExecuteCommand(@"egrep '^  xch_target_address: ' ~/.chia/mainnet/config/config.yaml");
             //xch_target_address: xch1ca2yhwkzdgfpww3289h6uxvsv562u69tuk0npzt0473ytn6naukqjhu922
             var re = new Regex(@"xch_target_address: (?<address>[\d\w]{56,70})");
             var matches = re.Matches(farmCmd.Result);
@@ -131,13 +131,13 @@
             if (!client.EnsureConnected()) return false;
 
             // refresh cross mount
-            using var refreshCmd = client.RunCommand($"du /farm --max-depth=2 2>/dev/null");
+            using var refreshCmd = client.ExecuteCommand($"du /farm --max-depth=2 2>/dev/null");
 
-            using var chiacmd = client.RunCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
+            using var chiacmd = client.ExecuteCommand($". ~/chia-blockchain/activate && chia plots show | grep ^/");
             var chiaFarms = chiacmd.Result
                 .CleanSplit();
 
-            using var dfcmd = client.RunCommand(@"df | grep -o '/farm/s[0-9]\+/.*$'");
+            using var dfcmd = client.ExecuteCommand(@"df | grep -o '/farm/s[0-9]\+/.*$'");
             var dfFarms = dfcmd.Result
                 .CleanSplit();
 
@@ -150,7 +150,7 @@
 {PrefixAndCombine("chia plots remove -d ", missings)}
 {PrefixAndCombine("chia plots add -d ", uninhabiteds)}
 ";
-            client.ExecuteScript(cmds);
+            client.PerformScript(cmds);
             return true;
 
             static string PrefixAndCombine(string prefix, IEnumerable<string> lines)

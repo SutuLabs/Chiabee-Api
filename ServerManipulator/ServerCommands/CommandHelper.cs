@@ -7,6 +7,7 @@
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using Microsoft.Extensions.Logging;
+    using Renci.SshNet;
     using Renci.SshNet.Common;
     using WebApi.Models;
 
@@ -80,6 +81,15 @@
         }
 
 #nullable enable
+
+        public static SshCommand ExecuteCommand(this SshClient client, string commandText, TimeSpan? timeout = null)
+        {
+            var sshcmd = client.CreateCommand(commandText);
+            sshcmd.CommandTimeout = timeout ?? new TimeSpan(0, 1, 0);
+            sshcmd.Execute();
+            return sshcmd;
+        }
+
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> enumerable) where T : class
         {
             return enumerable.Where(e => e != null).Select(e => e!);

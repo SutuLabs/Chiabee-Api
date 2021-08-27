@@ -14,7 +14,7 @@
         public static BlockTuple GetHarvesterBlockInfo(this TargetMachine client)
         {
             if (!client.EnsureConnected()) return null;
-            using var cmd = client.RunCommand(@"lsblk -r -e7 -no name,mountpoint,label,size,type,uuid");
+            using var cmd = client.ExecuteCommand(@"lsblk -r -e7 -no name,mountpoint,label,size,type,uuid");
             /*
 sda                                             3.7T disk
 └─sda1                    /farm/8      wy006    3.7T part 10f015c0-4b7d-4a47-850a-c75bfc441ea9
@@ -69,7 +69,7 @@ sdm                                             3.7T disk
 
             HarvesterDiskInfo ParseDiskSmart(string disk, DevicePartInfo device)
             {
-                using var cmd = client.RunCommand(@$"echo sutu | sudo -S sudo smartctl -d sat -a /dev/{disk}");
+                using var cmd = client.ExecuteCommand(@$"echo sutu | sudo -S sudo smartctl -d sat -a /dev/{disk}");
                 var smart = cmd.Result;
                 var pairs = CommandHelper.ParsePairs(smart,
                     new StatusDefinition(nameof(HarvesterDiskInfo.Sn), "Serial Number"),
@@ -126,14 +126,14 @@ sdm                                             3.7T disk
 
         public static int MountAll(this TargetMachine m)
         {
-            using var cmd = m.RunCommand($"echo sutu | sudo -S sudo mount -a");
+            using var cmd = m.ExecuteCommand($"echo sutu | sudo -S sudo mount -a");
             return cmd.ExitStatus;
         }
 
         public static bool EnableSmart(this TargetMachine m, string dname)
         {
             if (!dname.StartsWith("sd")) return false;
-            using var cmd = m.RunCommand($"echo sutu | sudo -S sudo smartctl -d sat -a /dev/{dname} -s on");
+            using var cmd = m.ExecuteCommand($"echo sutu | sudo -S sudo smartctl -d sat -a /dev/{dname} -s on");
             if (cmd.ExitStatus > 0) return false;
             return true;
         }
