@@ -92,7 +92,7 @@
                 {
                     var p = this.plotterClients.FirstOrDefault(_ => _.Name == plan.FromHost);
                     p.EnsureConnected();
-                    var chkCmd = p.RunCommand("ps -eo cmd | grep '^rsync'");
+                    using var chkCmd = p.RunCommand("ps -eo cmd | grep '^rsync'");
                     var rsyncExist = chkCmd.Result.StartsWith("rsync");
                     if (rsyncExist)
                     {
@@ -103,7 +103,7 @@
                         var cmd = $"rsync --compress-level=0 --remove-source-files -P {plan.PlotFilePath}" +
                             $" rsync://sutu@{plan.ToHost}:12000/plots/{plan.DiskName}" +
                             $" | tee ~/plotter/rsync.log &";
-                        var rsyncCmd = p.CreateCommand(cmd);
+                        using var rsyncCmd = p.CreateCommand(cmd);
                         rsyncCmd.BeginExecute();
                         msg += $", rsync started." + $"[{plan.PlotFilePath}]";
                     }

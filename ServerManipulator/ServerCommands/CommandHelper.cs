@@ -84,7 +84,7 @@
 
         public static SshCommand ExecuteCommand(this SshClient client, string commandText, TimeSpan? timeout = null)
         {
-            var sshcmd = client.CreateCommand(commandText);
+            using var sshcmd = client.CreateCommand(commandText);
             sshcmd.CommandTimeout = timeout ?? new TimeSpan(0, 1, 0);
             sshcmd.Execute();
             return sshcmd;
