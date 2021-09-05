@@ -25,6 +25,7 @@
         private readonly AppSettings appSettings;
 
         private Dictionary<string, string> texts;
+        private DateTime lastFarmerNull = DateTime.MinValue;
 
         public StatisticsService(
             ILogger<StatisticsService> logger,
@@ -82,8 +83,21 @@
                 var farmer = farmers.FirstOrDefault();
                 if (farmer == null)
                 {
-                    await new MarkdownMessage("ERROR: farmer not exist").SendAsync(alertUrl);
+                    if ((DateTime.UtcNow - this.lastFarmerNull) > TimeSpan.FromHours(12))
+                    {
+                        await new MarkdownMessage("ERROR: farmer not exist").SendAsync(alertUrl);
+                        this.lastFarmerNull = DateTime.UtcNow;
+                    }
+
                     return;
+                }
+                else
+                {
+                    if (this.lastFarmerNull > DateTime.MinValue)
+                    {
+                        await new MarkdownMessage("farmer come back").SendAsync(alertUrl);
+                        this.lastFarmerNull = DateTime.MinValue;
+                    }
                 }
 
                 var plotters = JsonConvert.DeserializeObject<PlotterStatus[]>(farm.PlotterJsonGzip.Decompress());
