@@ -6,6 +6,7 @@
     using System.Net.Sockets;
     using System.Reflection;
     using System.Runtime.CompilerServices;
+    using System.Threading;
     using Microsoft.Extensions.Logging;
     using Renci.SshNet;
     using Renci.SshNet.Common;
@@ -82,12 +83,24 @@
 
 #nullable enable
 
-        public static SshCommand ExecuteCommand(this SshClient client, string commandText, TimeSpan? timeout = null)
+        public static SshCommand ExecuteCommand(this TargetMachine client, string commandText, TimeSpan? timeout = null)
         {
-            using var sshcmd = client.CreateCommand(commandText);
-            sshcmd.CommandTimeout = timeout ?? new TimeSpan(0, 1, 0);
-            sshcmd.Execute();
-            return sshcmd;
+            try
+            {
+                using var sshcmd = client.CreateCommand(commandText);
+                sshcmd.CommandTimeout = timeout ?? new TimeSpan(0, 1, 0);
+                var extendTimeout = sshcmd.CommandTimeout.Add(new TimeSpan(0, 0, 5));
+                using (sshcmd.CreateTimeoutScope(extendTimeout))
+                {
+                    sshcmd.Execute();
+                    return sshcmd;
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                client.Logger.LogWarning($"timeout executing command[{timeout}]: {commandText}");
+                throw new TimeoutException();
+            }
         }
 
         public static IEnumerable<T> NotNull<T>(this IEnumerable<T?> enumerable) where T : class
@@ -104,6 +117,31 @@
             {
                 field.SetValue(null, new SemaphoreLight(concurrency));
             }
+        }
+
+        public static IDisposable CreateTimeoutScope(this IDisposable disposable, TimeSpan timeSpan)
+        {
+            var cancellationTokenSource = new CancellationTokenSource(timeSpan);
+            var cancellationTokenRegistration = cancellationTokenSource.Token.Register(disposable.Dispose);
+            return new DisposableScope(
+                () =>
+                {
+                    cancellationTokenRegistration.Dispose();
+                    cancellationTokenSource.Dispose();
+                    disposable.Dispose();
+                });
+        }
+    }
+    public sealed class DisposableScope : IDisposable
+    {
+        private readonly Action _closeScopeAction;
+        public DisposableScope(Action closeScopeAction)
+        {
+            _closeScopeAction = closeScopeAction;
+        }
+        public void Dispose()
+        {
+            _closeScopeAction();
         }
     }
 
