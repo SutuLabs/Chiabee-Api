@@ -92,7 +92,21 @@
                 var extendTimeout = sshcmd.CommandTimeout.Add(new TimeSpan(0, 0, 5));
                 using (sshcmd.CreateTimeoutScope(extendTimeout))
                 {
-                    sshcmd.Execute();
+                    try
+                    {
+                        sshcmd.Execute();
+                    }
+                    catch (NullReferenceException nex)
+                    {
+                        if (nex.TargetSite?.Name == "SendMessage")
+                        {
+                            client.Logger.LogWarning($"failed to execute due to NullReference in SendMessage(due to null Session): {commandText}");
+                            client.Disconnect();
+                            client.Connect();
+                            sshcmd.Execute();
+                        }
+                    }
+
                     return sshcmd;
                 }
             }
