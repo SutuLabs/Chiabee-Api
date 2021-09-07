@@ -96,15 +96,12 @@
                     {
                         sshcmd.Execute();
                     }
-                    catch (NullReferenceException nex)
+                    catch (NullReferenceException nex) when (nex.TargetSite?.Name == "SendMessage")
                     {
-                        if (nex.TargetSite?.Name == "SendMessage")
-                        {
-                            client.Logger.LogWarning($"failed to execute due to NullReference in SendMessage(due to null Session): {commandText}");
-                            client.Disconnect();
-                            client.Connect();
-                            sshcmd.Execute();
-                        }
+                        client.Logger.LogWarning($"failed to execute due to NullReference in SendMessage(due to null Session), reconnect and execute again.");
+                        client.Disconnect();
+                        client.Connect();
+                        sshcmd.Execute();
                     }
 
                     return sshcmd;
